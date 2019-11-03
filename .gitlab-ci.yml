@@ -1,0 +1,20 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build-image:
+  stage: build
+  script:
+    - echo "this is the build stage"
+
+test:
+  stage: test
+  script:
+    - echo "this is the test stage"
+
+deploy-image:
+  stage: deploy
+  when: manual
+  script:
+    - echo "this is the deploy stage"
