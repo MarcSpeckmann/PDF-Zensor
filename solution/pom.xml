@@ -27,7 +27,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>de.uni_hannover.pdfzensor.App</mainClass>
+							<mainClass>de.uni_hannover.swt.pdfzensor.App</mainClass>
 						</manifest>
 					</archive>
 					<finalName>pdfzensor</finalName>
@@ -55,8 +55,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.main.class>de.uni_hannover.pdfzensor.App</java.main.class>
-        <exec.mainClass>de.uni_hannover.pdfzensor.App</exec.mainClass>
+        <java.main.class>de.uni_hannover.swt.pdfzensor.App</java.main.class>
+        <exec.mainClass>de.uni_hannover.swt.pdfzensor.App</exec.mainClass>
     </properties>
 
 	<dependencies>
@@ -104,6 +104,20 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.10.0</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>18.0.0</version>
 		</dependency>
 	</dependencies>
 

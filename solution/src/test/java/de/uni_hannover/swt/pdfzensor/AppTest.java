@@ -1,4 +1,4 @@
-package de.uni_hannover.pdfzensor;
+package de.uni_hannover.swt.pdfzensor;
 
 import org.junit.jupiter.api.Test;
 
