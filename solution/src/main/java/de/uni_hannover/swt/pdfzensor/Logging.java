@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Filter.Result;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender.Target;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
@@ -16,18 +17,18 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Logging is a simple utility-class that provides only the {@link #getLogger()} and {@link #init(Level)} method to the
  * outside. Internally it is responsible for initializing and setting up the underlying logging system. If the Log-Level
  * of the Root-Logger should be set, {@link #init(Level)} has to be called with the appropriate level <b>before</b> any
  * call to {@link #getLogger()} is made.
+ * <b>Not thread-safe</b>
  */
 public final class Logging {
-	/**
-	 * Remember if logging got initialized already to only initialize it once.
-	 */
-	private static boolean isInitialized = false;
+	/** Stores the context that is currently initialized. */
+	private static LoggerContext context = null;
 	
 	/**
 	 * This constructor should not be called as no instance of {@link Logging} shall be created.
@@ -54,11 +55,10 @@ public final class Logging {
 	}
 	
 	/**
-	 * Responsible for initializing the logging and configuring it. Does nothing if it was called before.
+	 * Responsible for initializing the logging and configuring it. Does nothing if a context is initialize already.
 	 */
-	public static void init(@NotNull Level rootLevel) {
-		if (isInitialized) return;
-		isInitialized = true;
+	public static void init(@NotNull(exception = NullPointerException.class) final Level rootLevel) {
+		if (context != null) return;
 		Objects.requireNonNull(rootLevel);
 		var builder = ConfigurationBuilderFactory.newConfigurationBuilder();
 		builder.setStatusLevel(Level.ERROR)
@@ -68,7 +68,13 @@ public final class Logging {
 		
 		var consoleAppender = createConsoleAppender(builder, "ConsoleAppender");
 		setRootLogger(builder, rootLevel, consoleAppender);
-		Configurator.initialize(builder.build());
+		context = Configurator.initialize(builder.build());
+	}
+	
+	/** Deinitializes the current logging-context. Does nothing if none is initialized. */
+	public static void deinit() {
+		Configurator.shutdown(context);
+		context = null;
 	}
 	
 	/**
@@ -82,7 +88,7 @@ public final class Logging {
 	 */
 	@NotNull
 	private static AppenderComponentBuilder createConsoleAppender(
-			@NotNull ConfigurationBuilder<BuiltConfiguration> builder, @NotNull String name) {
+			@NotNull final ConfigurationBuilder<BuiltConfiguration> builder, @NotNull final String name) {
 		Objects.requireNonNull(builder);
 		Objects.requireNonNull(name);
 		var appender = builder.newAppender(name, "CONSOLE")
@@ -104,9 +110,10 @@ public final class Logging {
 	 * @return the created root logger
 	 */
 	@NotNull
-	private static RootLoggerComponentBuilder setRootLogger(@NotNull ConfigurationBuilder<BuiltConfiguration> builder,
-															@NotNull Level logLevel,
-															@NotNull AppenderComponentBuilder... appenderComponentBuilders) {
+	private static RootLoggerComponentBuilder setRootLogger(
+			@NotNull final ConfigurationBuilder<BuiltConfiguration> builder,
+			@NotNull final Level logLevel,
+			@NotNull final AppenderComponentBuilder... appenderComponentBuilders) {
 		Objects.requireNonNull(builder);
 		Objects.requireNonNull(logLevel);
 		Objects.requireNonNull(appenderComponentBuilders);
@@ -115,5 +122,17 @@ public final class Logging {
 			root.add(builder.newAppenderRef(appender.getName()));
 		builder.add(root);
 		return root;
+	}
+	
+	/**
+	 * <b><i>For Testing-Purposes only!</i></b><br/>
+	 * Retrieves the root-logger that is currently initialized.
+	 *
+	 * @return and optional containing the root-logger of the current context. Returns an empty Optional when no context
+	 * was initialized
+	 */
+	static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
+		return Optional.ofNullable(context)
+					   .map(LoggerContext::getRootLogger);
 	}
 }
