@@ -1,4 +1,4 @@
-package de.uni_hannover.swt.pdfzensor;
+package de.uni_hannover.se.pdfzensor;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -54,9 +54,7 @@ public final class Logging {
 		return LogManager.getLogger(StackLocatorUtil.getCallerClass(2));
 	}
 	
-	/**
-	 * Responsible for initializing the logging and configuring it. Does nothing if a context is initialize already.
-	 */
+	/** Responsible for initializing the logging and configuring it. Does nothing if a context is initialize already. */
 	public static void init(@NotNull(exception = NullPointerException.class) final Level rootLevel) {
 		if (context != null) return;
 		Objects.requireNonNull(rootLevel);
@@ -128,7 +126,7 @@ public final class Logging {
 	 * <b><i>For Testing-Purposes only!</i></b><br/>
 	 * Retrieves the root-logger that is currently initialized.
 	 *
-	 * @return and optional containing the root-logger of the current context. Returns an empty Optional when no context
+	 * @return an optional containing the root-logger of the current context. Returns an empty Optional when no context
 	 * was initialized
 	 */
 	static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
