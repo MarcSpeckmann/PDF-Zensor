@@ -1,0 +1,80 @@
+package de.uni_hannover.se.pdfzensor.config;
+
+import org.junit.jupiter.api.Test;
+
+import java.awt.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+/** SettingsTest should contain all unit-tests related to {@link Settings}. */
+class SettingsTest {
+	
+	/** Unit-tests for {@link Settings} function getColorOrNull */
+	@Test
+	void getColorOrNull() {
+		// if the parameter is null
+		assertEquals(null,Settings.getColorOrNull(null));
+		
+		//if the parameter is a valid hexadecimal color code with 6 letters beginning with '#'
+		assertEquals(Color.BLACK, Settings.getColorOrNull("#000000"));
+		assertEquals(Color.RED, Settings.getColorOrNull("#ff0000"));
+		assertEquals(Color.GREEN, Settings.getColorOrNull("#00ff00"));
+		assertEquals(Color.BLUE, Settings.getColorOrNull("#0000ff"));
+		assertEquals(Color.YELLOW, Settings.getColorOrNull("#ffff00"));
+		assertEquals(Color.CYAN, Settings.getColorOrNull("#00ffff"));
+		assertEquals(Color.WHITE, Settings.getColorOrNull("#ffffff"));
+		
+		//if the parameter is a valid hexadecimal color code with 3 letters beginning with '#'
+		assertEquals(Color.BLACK, Settings.getColorOrNull("#000"));
+		assertEquals(Color.RED, Settings.getColorOrNull("#f00"));
+		assertEquals(Color.GREEN, Settings.getColorOrNull("#0f0"));
+		assertEquals(Color.BLUE, Settings.getColorOrNull("#00f"));
+		assertEquals(Color.YELLOW, Settings.getColorOrNull("#ff0"));
+		assertEquals(Color.CYAN, Settings.getColorOrNull("#0ff"));
+		assertEquals(Color.WHITE, Settings.getColorOrNull("#fff"));
+		
+		// if the parameter is a valid hexadecimal color with 6 letters beginning with '0x'
+		assertEquals(Color.BLACK, Settings.getColorOrNull("0x000000"));
+		assertEquals(Color.RED, Settings.getColorOrNull("0xff0000"));
+		assertEquals(Color.GREEN, Settings.getColorOrNull("0x00ff00"));
+		assertEquals(Color.BLUE, Settings.getColorOrNull("0x0000ff"));
+		assertEquals(Color.YELLOW, Settings.getColorOrNull("0xffff00"));
+		assertEquals(Color.CYAN, Settings.getColorOrNull("0x00ffff"));
+		assertEquals(Color.WHITE, Settings.getColorOrNull("0xffffff"));
+		
+		//if the parameter is a valid hexadecimal color code with 3 letters beginning with '0x'
+		assertEquals(Color.BLACK, Settings.getColorOrNull("0x000"));
+		assertEquals(Color.RED, Settings.getColorOrNull("0xf00"));
+		assertEquals(Color.GREEN, Settings.getColorOrNull("0x0f0"));
+		assertEquals(Color.BLUE, Settings.getColorOrNull("0x00f"));
+		assertEquals(Color.YELLOW, Settings.getColorOrNull("0xff0"));
+		assertEquals(Color.CYAN, Settings.getColorOrNull("0x0ff"));
+		assertEquals(Color.WHITE, Settings.getColorOrNull("0xfff"));
+		
+		// if the parameter is no valid hexadecimal color code
+		// TODO
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("BLACK"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#f"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#ff"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#ffff"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#fffff"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#ffffgg"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("0xffffgg"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#fffffff"));
+	}
+	
+	@Test
+	/** Unit-tests for {@link colorToString} */
+	void colorToString() {
+		
+		// if the parameter is a Color class
+		assertEquals("#000000", Settings.colorToString(Color.BLACK));
+		assertEquals("#FF0000", Settings.colorToString(Color.RED));
+		assertEquals("#00FF00", Settings.colorToString(Color.GREEN));
+		assertEquals("#0000FF", Settings.colorToString(Color.BLUE));
+		assertEquals("#FFFF00", Settings.colorToString(Color.YELLOW));
+		assertEquals("#00FFFF", Settings.colorToString(Color.CYAN));
+		assertEquals("#FFFFFF", Settings.colorToString(Color.WHITE));
+	}
+}
