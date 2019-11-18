@@ -20,14 +20,23 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Logging is a simple utility-class that provides only the {@link #getLogger()} and {@link #init(Level)} method to the
- * outside. Internally it is responsible for initializing and setting up the underlying logging system. If the Log-Level
- * of the Root-Logger should be set, {@link #init(Level)} has to be called with the appropriate level <b>before</b> any
- * call to {@link #getLogger()} is made.
+ * Logging is a simple utility-class that provides only the {@link #getLogger()}, {@link #init(Level)} and {@link
+ * #deinit()} method to the outside. Internally it is responsible for initializing and setting up the underlying logging
+ * system. If the Log-Level of the Root-Logger should be set, {@link #init(Level)} has to be called with the appropriate
+ * level <b>before</b> any call to {@link #getLogger()} is made.
  * <b>Not thread-safe</b>
  */
 public final class Logging {
-	/** Stores the context that is currently initialized. */
+	
+	/**
+	 * The available logging levels ordered by their detail (ascending).
+	 */
+	@NotNull
+	public static final Level[] VERBOSITY_LEVELS = {Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL};
+	
+	/**
+	 * Stores the context that is currently initialized.
+	 */
 	private static LoggerContext context = null;
 	
 	/**
@@ -54,7 +63,9 @@ public final class Logging {
 		return LogManager.getLogger(StackLocatorUtil.getCallerClass(2));
 	}
 	
-	/** Responsible for initializing the logging and configuring it. Does nothing if a context is initialize already. */
+	/**
+	 * Responsible for initializing the logging and configuring it. Does nothing if a context is initialize already.
+	 */
 	public static void init(@NotNull(exception = NullPointerException.class) final Level rootLevel) {
 		if (context != null) return;
 		Objects.requireNonNull(rootLevel);
@@ -69,7 +80,9 @@ public final class Logging {
 		context = Configurator.initialize(builder.build());
 	}
 	
-	/** Deinitializes the current logging-context. Does nothing if none is initialized. */
+	/**
+	 * Deinitializes the current logging-context. Does nothing if none is initialized.
+	 */
 	public static void deinit() {
 		Configurator.shutdown(context);
 		context = null;
