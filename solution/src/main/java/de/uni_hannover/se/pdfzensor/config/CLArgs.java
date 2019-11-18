@@ -10,6 +10,9 @@ import picocli.CommandLine.Option;
 
 import java.util.Objects;
 
+import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
+import static de.uni_hannover.se.pdfzensor.utils.PDFUtils.fitToArray;
+
 /**
  * The class is responsible for parsing the given commando line
  *
@@ -17,7 +20,7 @@ import java.util.Objects;
  * @author Lennart Bohlin
  */
 @Command(name = "pdf-zensor", version = "0.1", description = {"--Here could be your description--"})
-final public class CLArgs {
+public final class CLArgs {
 	
 	@Option(names = {"-v", "--verbose"}, description = {"Specify multiple -v options to increase verbosity."}, arity = "0")
 	@Nullable
@@ -43,7 +46,7 @@ final public class CLArgs {
 	@Contract(pure = true)
 	@Nullable
 	final Level getVerbosity() {
-		return Level.OFF;
+		return verbose == null ? null : VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, verbose.length)];
 	}
 	
 }
