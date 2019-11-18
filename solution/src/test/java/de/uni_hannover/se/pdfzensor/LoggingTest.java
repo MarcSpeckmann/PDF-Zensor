@@ -73,6 +73,7 @@ class LoggingTest {
 		assertNotNull(Logging.getLogger());
 		assertTrue(Logging.getRootLogger()
 						  .isPresent());
+		assertEquals(Level.OFF, Logging.getRootLogger().orElseThrow().getLevel());
 		Logging.deinit();
 		assertTrue(Logging.getRootLogger()
 						  .isEmpty());
