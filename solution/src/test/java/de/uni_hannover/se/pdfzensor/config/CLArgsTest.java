@@ -6,21 +6,36 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 
+/**
+ * CLArgsTest should contain all unit-tests related to {@link CLArgs}.
+ */
 class CLArgsTest {
 	
+	/**
+	 * Multiple tests related of using fromStringArray
+	 */
 	@Test
 	void fromStringArray() {
 		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(null));
+		assertNotNull(CLArgs.fromStringArray(new String[0]));
 		assertNotNull(CLArgs.fromStringArray());
 		assertEquals(CLArgs.class, CLArgs.fromStringArray().getClass());
-		//Todo: add more tests
+		assertEquals(CLArgs.class, CLArgs.fromStringArray(new String[0]).getClass());
+		
+		//Müssen wir das behandeln ? Kann args einen leeren String enthalten ?
+		//assertEquals(CLArgs.class, CLArgs.fromStringArray(new String()).getClass());
+		//assertNotNull(CLArgs.fromStringArray(new String()));
 	}
 	
+	/**
+	 * Multiple tests related of using getVerbosity
+	 */
 	@Test
 	void getVerbosity() {
-		//TODO: add tests
+		//return null because of priotity problem with config
 		var cla = CLArgs.fromStringArray();
-		//assertEquals(Level.OFF, cla.getVerbosity());
+		assertEquals(null, cla.getVerbosity());
+		
 		String input = "-v";
 		for (int i = 1; i < VERBOSITY_LEVELS.length; i++) {
 			cla = CLArgs.fromStringArray("-v");
