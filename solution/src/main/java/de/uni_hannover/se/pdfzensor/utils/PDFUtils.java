@@ -34,7 +34,7 @@ public final class PDFUtils {
 		//TODO: Handle a empty array
 		Objects.requireNonNull(array);
 		Validate.notEmpty(array);
-		return clamp(index, 0, array.length);
+		return clamp(index, 0, array.length-1);
 	}
 	
 	/**
