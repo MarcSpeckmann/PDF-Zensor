@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -7,8 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
