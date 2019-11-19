@@ -32,9 +32,7 @@ public final class PDFUtils {
 	public static <T> int fitToArray(@NotNull T[] array, int index) {
 		//TODO: Handle a empty array
 		Objects.requireNonNull(array);
-		if (array.length == 0){
-			throw new IllegalArgumentException("Cannot fit an index to an empty array");
-		}
+		Validate.notEmpty(array);
 		return clamp(index, 0, array.length);
 	}
 	
