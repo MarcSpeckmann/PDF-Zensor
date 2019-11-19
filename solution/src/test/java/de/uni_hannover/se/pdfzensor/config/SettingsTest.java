@@ -14,7 +14,13 @@ class SettingsTest {
 	/** Unit-tests for {@link Settings} constructor Settings */
 	@Test
 	void Settings(){
+        // if the command line argument is not given or has a faulty structure
 		assertThrows(IOException.class, new Settings(null));
+        assertThrows(IOException.class, new Settings(new String[2]));
+        // if the command line argument is given but not valid
+        // split uses whitespace as delimiter and splits the single string into an array of multiple strings for using it as an argument
+        assertThrows(IOException.class, new Settings("pdf-zensor \"NichtExistenteDatei.pdf\"".split(" ")));
+        assertThrows(IOException.class, new Settings("pdf-zensor \"zensieren.pdf\" -c \"config.json\"".split(" ")));
 	}
 
 	/** Unit-tests for {@link Settings} function getColorOrNull */
