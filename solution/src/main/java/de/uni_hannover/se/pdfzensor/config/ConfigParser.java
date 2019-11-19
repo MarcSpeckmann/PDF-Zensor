@@ -13,34 +13,35 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Stores all the necessary properties for censoring a pdf-file
+ * @author Maksim Gluzman
+ * @author Mike Grätz
+ */
 public class ConfigParser {
     @Nullable
-    private final File outPut;
+    private final File output;
     @Nullable
     private final Level verbose;
-    //@Nullable
-    //private final Color linkColor;
-    //@Nullable
-    //private final Color regExColor;
-    //@Nullable
-    //private final Color textColor;
-    //@Nullable
-    //private final String defaultImagePath;
-    //@Nullable
-    //private final Color[] defaultColors;
+
     /**
      * An empty parser Object. Is used if the configuration file could not found.
      */
     private ConfigParser() {
-        this.outPut = null;
+        this.output = null;
         this.verbose = null;
     }
 
+    /**
+     * Takes properties from a Json-String and sets the variables accordingly
+     * @param output Output-File where the censored File will be stored in
+     * @param verbose Level of verbosity
+     */
     @JsonCreator()
-    private ConfigParser(@Nullable @JsonProperty("outPut") final File outPut,
-                        @Nullable @JsonProperty("verbose") final Level verbose){
-        this.outPut = outPut;
-        this.verbose = verbose;
+    private ConfigParser(@Nullable @JsonProperty("output") final File output,
+                        @Nullable @JsonProperty("verbose") final Object verbose){
+        this.output = output;
+        this.verbose = verboseToLevel(verbose);
     }
 
     /**
@@ -55,7 +56,7 @@ public class ConfigParser {
             // return empty config parser
             return new ConfigParser();
         }
-        Validate.isTrue(config.isFile() && "json".equals(FileUtils.getFileExtension(config)), "Bullshit file");
+        Validate.isTrue(config.isFile() && "json".equals(FileUtils.getFileExtension(config)), "config-file in ConfigParser.fromFile() is not a valid config-file!");
         return new ObjectMapper().readValue(config, ConfigParser.class);
     }
     @Nullable
@@ -63,18 +64,25 @@ public class ConfigParser {
         if(verbose instanceof String) // verbose as String
             return Level.getLevel(((String) verbose).toUpperCase()); // LEVEL in Uppercase
         else if(verbose instanceof Integer) { // verbose as Integer
-            final Level[] LOG_LEVELS = new Level[]{Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL}; // Create Array with all Levels
-            return LOG_LEVELS[smallerOrBigger((Integer)verbose, LOG_LEVELS.length)];
+            final Level[] logLevels = new Level[]{Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL}; // Create Array with all Levels
+            return logLevels[setVerboseToBoundaries((Integer)verbose, logLevels.length)];
         }
         return null;
     }
+
+    /**
+     * @param verbose The level of verbosity as an Integer
+     * @param arrayLength The length of the array of verbosity-levels
+     * @return An Integer which is inside the range of [0, arrayLength - 1]
+     */
     @NotNull
-    private Integer smallerOrBigger(int verbose, int arrayLength) {
+    private Integer setVerboseToBoundaries(int verbose, int arrayLength) {
         return Math.min(Math.max(verbose, 0), arrayLength - 1);
     }
+    @Contract(pure = true)
     @Nullable
     public File getOutput() {
-        return this.outPut;
+        return this.output;
     }
     @Nullable
     public Level getVerbosity() {
