@@ -27,6 +27,7 @@ class PDFUtilsTest {
 		assertEquals(VERBOSITY_LEVELS.length, PDFUtils.fitToArray(VERBOSITY_LEVELS, VERBOSITY_LEVELS.length));
 		assertEquals(3, PDFUtils.fitToArray(VERBOSITY_LEVELS, 3));
 		//TODO: Add tests for empty array
+		//TODO: assert max >= min
 		assertThrows(IllegalArgumentException.class, () -> PDFUtils.fitToArray(null, 1));
 		assertThrows(IllegalArgumentException.class, () -> PDFUtils.fitToArray(null, -1));
 		assertThrows(IllegalArgumentException.class, () -> PDFUtils.fitToArray(null, 0));

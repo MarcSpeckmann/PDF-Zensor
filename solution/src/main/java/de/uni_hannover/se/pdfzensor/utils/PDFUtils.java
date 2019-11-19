@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.utils;
 
+import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
