@@ -46,7 +46,7 @@ public final class Utils {
 	 * @return The value fitted to the given bounds.
 	 */
 	@NotNull
-	private static <T extends Comparable<T>> T clamp(@NotNull T value, @NotNull T min, @NotNull T max) {
+	static <T extends Comparable<T>> T clamp(@NotNull T value, @NotNull T min, @NotNull T max) {
 		Objects.requireNonNull(value);
 		Objects.requireNonNull(min);
 		Objects.requireNonNull(max);

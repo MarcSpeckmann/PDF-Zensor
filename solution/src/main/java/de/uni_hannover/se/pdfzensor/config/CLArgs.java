@@ -33,7 +33,7 @@ public final class CLArgs {
 	 * @return an CLArgs object which contains all information about the parsed arguments
 	 */
 	@NotNull
-	public static CLArgs fromStringArray(@NotNull final String[] args) {
+	public static CLArgs fromStringArray(@NotNull final String... args) {
 		final CLArgs clArgs = new CLArgs();
 		final CommandLine cmd = new CommandLine(clArgs);
 		cmd.parseArgs(Objects.requireNonNull(args));

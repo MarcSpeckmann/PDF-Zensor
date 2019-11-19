@@ -30,7 +30,7 @@ class UtilsTest {
 	}
 	
 	/**
-	 * Multiple tests related to method call with an empty array
+	 * Multiple tests related to method call fitToArray with an empty array
 	 */
 	@Test
 	void fitToArrayEmptyArray() {
@@ -42,7 +42,7 @@ class UtilsTest {
 	}
 	
 	/**
-	 * Multiple tests related to method call with null instead an array
+	 * Multiple tests related to method call fitToArray with null instead an array
 	 */
 	@Test
 	void fitToArrayNullArray() {
@@ -50,5 +50,30 @@ class UtilsTest {
 		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(null, 1));
 		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(null, -1));
 		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(null, 0));
+	}
+	
+	/**
+	 * Multiple tests related to method call clamp with null
+	 */
+	@Test
+	void clampNull(){
+		//test null
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, null, null));
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, 0, 0));
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 0, null));
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, null, 0));
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, 0, 0));
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 0, null));
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, null, 0));
+	}
+	
+	/**
+	 * Multiple tests related of using fitToArray
+	 */
+	@Test
+	void clamp(){
+		assertEquals(0,0,0);
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 1, 0));
+		//:TODO Add more tests
 	}
 }
