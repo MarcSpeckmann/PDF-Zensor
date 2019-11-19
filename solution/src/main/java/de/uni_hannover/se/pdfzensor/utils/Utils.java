@@ -7,17 +7,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
- * PDFUtils is a simple utility-class that provides only the {@link #fitToArray(Object[], int)} method to the outside.
+ * Utils is a simple utility-class that provides only the {@link #fitToArray(Object[], int)} method to the outside.
  * This class contains utility methods which can be useful for other classes.
  */
-public final class PDFUtils {
+public final class Utils {
 	/**
-	 * This constructor should not be called as no instance of {@link PDFUtils} shall be created.
+	 * This constructor should not be called as no instance of {@link Utils} shall be created.
 	 *
 	 * @throws UnsupportedOperationException when being called
 	 */
 	@Contract(value = " -> fail", pure = true)
-	private PDFUtils() {
+	private Utils() {
 		throw new UnsupportedOperationException();
 	}
 	

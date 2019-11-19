@@ -11,7 +11,7 @@ import picocli.CommandLine.Option;
 import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.utils.PDFUtils.fitToArray;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
 /**
  * The class is responsible for parsing the given command-line arguments
