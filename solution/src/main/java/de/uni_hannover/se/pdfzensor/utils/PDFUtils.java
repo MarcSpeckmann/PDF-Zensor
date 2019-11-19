@@ -31,7 +31,6 @@ public final class PDFUtils {
 	 * @return An index which is in the given array's bounds.
 	 */
 	public static <T> int fitToArray(@NotNull T[] array, int index) {
-		//TODO: Handle a empty array
 		Objects.requireNonNull(array);
 		Validate.notEmpty(array);
 		return clamp(index, 0, array.length-1);
@@ -39,8 +38,8 @@ public final class PDFUtils {
 	
 	/**
 	 * @param value The desired value.
-	 * @param min   The smallest allowed value.
-	 * @param max   The largest allowed value.
+	 * @param min   The lower bound of the result (inclusive).
+	 * @param max   The upper bound of the result (inclusive)
 	 * @param <T>   The type of the value.
 	 * @return The value fitted to the given bounds.
 	 */
