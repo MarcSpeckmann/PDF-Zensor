@@ -3,5 +3,8 @@ package de.uni_hannover.se.pdfzensor.config;
 // information is created
 
 public final class DummySettings {
-    final static String version = "0.1";
+	private DummySettings() {
+	}
+	
+	static final String VERSION = "0.1";
 }
