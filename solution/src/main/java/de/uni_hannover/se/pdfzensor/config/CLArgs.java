@@ -36,7 +36,7 @@ public final class CLArgs {
 	public static CLArgs fromStringArray(@NotNull final String... args) {
 		final CLArgs clArgs = new CLArgs();
 		final CommandLine cmd = new CommandLine(clArgs);
-		cmd.parseArgs(Objects.requireNonNull(args));
+		cmd.parseArgs(Validate.noNullElements(args));
 		return clArgs;
 	}
 	
