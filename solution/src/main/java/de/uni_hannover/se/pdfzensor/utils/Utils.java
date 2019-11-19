@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
- * Utils is a simple utility-class that provides only the {@link #fitToArray(Object[], int)} method to the outside.
- * This class contains utility methods which can be useful for other classes.
+ * Utils is a simple utility-class that provides only the {@link #fitToArray(Object[], int)} method to the outside. This
+ * class contains utility methods which can be useful for other classes.
  */
 public final class Utils {
 	/**
@@ -22,8 +22,8 @@ public final class Utils {
 	}
 	
 	/**
-	 * Make an index which may lead to an ArrayIndexOutOfBoundsException fit the bounds of the given array. Should the
-	 * given index not fit then either an index to the first or the last element of the array will be returned.
+	 * Clamps an index to the array bounds if possible (length of the array is greater than zero). Should the given
+	 * index not fit then either an index to the first or the last element of the array will be returned.
 	 *
 	 * @param array The array to which the index should be fitted.
 	 * @param index The index which may not fit the bounds of the array.
@@ -33,11 +33,13 @@ public final class Utils {
 	public static <T> int fitToArray(@NotNull T[] array, int index) {
 		Objects.requireNonNull(array);
 		Validate.notEmpty(array);
-		return clamp(index, 0, array.length-1);
+		return clamp(index, 0, array.length - 1);
 	}
 	
 	/**
-	 * @param value The desired value.
+	 * Clamps the value between min and max
+	 *
+	 * @param value The value to be clammed
 	 * @param min   The lower bound of the result (inclusive).
 	 * @param max   The upper bound of the result (inclusive)
 	 * @param <T>   The type of the value.
