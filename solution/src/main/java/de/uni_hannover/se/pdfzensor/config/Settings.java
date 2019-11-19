@@ -73,11 +73,8 @@ public final class Settings {
 	 */
 	@NotNull
 	private static String transformToSixDigit(@NotNull final String hexCode) {
-		char[] charArray = hexCode.toCharArray();
-		int length = charArray.length;
-		return "#" + charArray[length - 3] + charArray[length - 3]
-				+ charArray[length - 2] + charArray[length - 2]
-				+ charArray[length - 1] + charArray[length - 1];
+		return hexCode.replaceFirst("(?i)0x", "#")
+				.replaceAll("(?i)[0-9A-F]", "$0$0");
 	}
 	
 	/**
@@ -89,8 +86,9 @@ public final class Settings {
 	static Color getColorOrNull(@Nullable final String hexCode) {
 		if (hexCode == null) return null;
 		Validate.matchesPattern(hexCode, HEX_PATTERN, "Must be a valid hex color code.");
-		if (hexCode.length() < 6) {return Color.decode(transformToSixDigit(hexCode));}
-		return Color.decode(hexCode);
+		var copy = hexCode;
+		if (hexCode.length() < 6) copy = transformToSixDigit(hexCode);
+		return Color.decode(copy);
 	}
 	
 	@NotNull
@@ -140,8 +138,7 @@ public final class Settings {
 	@NotNull
 	private File getDefaultOutput(@NotNull final String path) {
 		final var in = input.getName();
-		final var inName = FilenameUtils.removeExtension(path);
-		// final var inName = in.substring(0, in.lastIndexOf('.'));
+		final var inName = FilenameUtils.removeExtension(in);
 		return new File(Objects.requireNonNull(path) + File.separatorChar + inName + "_cens.pdf").getAbsoluteFile();
 	}
 	

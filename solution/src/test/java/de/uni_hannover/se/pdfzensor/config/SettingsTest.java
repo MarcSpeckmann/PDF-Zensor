@@ -14,7 +14,7 @@ class SettingsTest {
 	@Test
 	void getColorOrNull() {
 		// if the parameter is null
-		assertEquals(null,Settings.getColorOrNull(null));
+		assertNull(Settings.getColorOrNull(null));
 		
 		//if the parameter is a valid hexadecimal color code with 6 letters beginning with '#'
 		assertEquals(Color.BLACK, Settings.getColorOrNull("#000000"));
@@ -42,6 +42,14 @@ class SettingsTest {
 		assertEquals(Color.YELLOW, Settings.getColorOrNull("0xffff00"));
 		assertEquals(Color.CYAN, Settings.getColorOrNull("0x00ffff"));
 		assertEquals(Color.WHITE, Settings.getColorOrNull("0xffffff"));
+		// the same with 'OX'
+		assertEquals(Color.BLACK, Settings.getColorOrNull("0X000000"));
+		assertEquals(Color.RED, Settings.getColorOrNull("0Xff0000"));
+		assertEquals(Color.GREEN, Settings.getColorOrNull("0X00ff00"));
+		assertEquals(Color.BLUE, Settings.getColorOrNull("0X0000ff"));
+		assertEquals(Color.YELLOW, Settings.getColorOrNull("0Xffff00"));
+		assertEquals(Color.CYAN, Settings.getColorOrNull("0X00ffff"));
+		assertEquals(Color.WHITE, Settings.getColorOrNull("0Xffffff"));
 		
 		//if the parameter is a valid hexadecimal color code with 3 letters beginning with '0x'
 		assertEquals(Color.BLACK, Settings.getColorOrNull("0x000"));
@@ -51,7 +59,17 @@ class SettingsTest {
 		assertEquals(Color.YELLOW, Settings.getColorOrNull("0xff0"));
 		assertEquals(Color.CYAN, Settings.getColorOrNull("0x0ff"));
 		assertEquals(Color.WHITE, Settings.getColorOrNull("0xfff"));
-		
+		assertEquals(Color.DARK_GRAY, Settings.getColorOrNull("#404040"));
+
+		// some random colors
+		assertEquals(new Color(130,150,161), Settings.getColorOrNull("#8296A1"));
+		assertEquals(new Color(77,52,67), Settings.getColorOrNull("0x4D3443"));
+		assertEquals(new Color(18, 10, 77), Settings.getColorOrNull("0x120A4D"));
+		assertEquals(new Color(18, 52, 86), Settings.getColorOrNull("0x123456"));
+		assertEquals(new Color(3, 77, 31), Settings.getColorOrNull("0x034D1F"));
+		assertEquals(new Color(77, 76, 27), Settings.getColorOrNull("0x4D4C1B"));
+		assertEquals(new Color(86, 42, 86), Settings.getColorOrNull("0x562A56"));
+		assertEquals(new Color(250, 204, 204), Settings.getColorOrNull("#FACCCC"));
 		// if the parameter is no valid hexadecimal color code
 		// TODO
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("BLACK"));
@@ -63,9 +81,11 @@ class SettingsTest {
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("0xffffgg"));
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#fffffff"));
 	}
-	
+
+	/*
+	* Unit-tests for {@link colorToString}
+	*  */
 	@Test
-	/** Unit-tests for {@link colorToString} */
 	void colorToString() {
 		
 		// if the parameter is a Color class
