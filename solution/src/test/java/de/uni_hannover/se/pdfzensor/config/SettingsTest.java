@@ -9,7 +9,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /** SettingsTest should contain all unit-tests related to {@link Settings}. */
 class SettingsTest {
-	
+
+	/** Unit-tests for {@link Settings} constructor Settings */
+	@Test
+	void Settings(){
+
+	}
+
 	/** Unit-tests for {@link Settings} function getColorOrNull */
 	@Test
 	void getColorOrNull() {
