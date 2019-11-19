@@ -14,7 +14,7 @@ import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static de.uni_hannover.se.pdfzensor.utils.PDFUtils.fitToArray;
 
 /**
- * The class is responsible for parsing the given commando line
+ * The class is responsible for parsing the given command-line arguments
  *
  * @author Marc Speckmann
  * @author Lennart Bohlin
@@ -27,9 +27,9 @@ public final class CLArgs {
 	private boolean[] verbose = null;
 	
 	/**
-	 * This mathod is parsing the commando line.
+	 * This method is parsing the command-line arguments.
 	 *
-	 * @param args the commando line which is going to be parsed
+	 * @param args the command-line arguments which will be parsed
 	 * @return an CLArgs object which contains all information about the parsed arguments
 	 */
 	@NotNull
@@ -41,7 +41,9 @@ public final class CLArgs {
 	}
 	
 	/**
-	 * @return null or the level of logging verbostity if verbose was given
+	 * Returns verbosity level given bei the user
+	 *
+	 * @return null or the level of logging verbosity if verbose was given
 	 */
 	@Contract(pure = true)
 	@Nullable

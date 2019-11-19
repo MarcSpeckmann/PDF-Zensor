@@ -29,9 +29,12 @@ public final class PDFUtils {
 	 * @param <T>   The type of the array.
 	 * @return An index which is in the given array's bounds.
 	 */
-	@NotNull
-	public static <T> int fitToArray(@NotNull T[] array, @NotNull int index) {
+	public static <T> int fitToArray(@NotNull T[] array, int index) {
+		//TODO: Handle a empty array
 		Objects.requireNonNull(array);
+		if (array.length == 0){
+			throw new IllegalArgumentException("Cannot fit an index to an empty array");
+		}
 		return clamp(index, 0, array.length);
 	}
 	
