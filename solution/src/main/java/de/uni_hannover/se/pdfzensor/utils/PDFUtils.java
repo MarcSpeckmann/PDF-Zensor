@@ -49,6 +49,7 @@ public final class PDFUtils {
 		Objects.requireNonNull(value);
 		Objects.requireNonNull(min);
 		Objects.requireNonNull(max);
+		Validate.isTrue(min.compareTo(max) <= 0);
 		if (value.compareTo(min) < 0) return min;
 		if (value.compareTo(max) > 0) return max;
 		return value;
