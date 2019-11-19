@@ -56,7 +56,7 @@ class UtilsTest {
 	 * Multiple tests related to method call clamp with null
 	 */
 	@Test
-	void clampNull(){
+	void clampNull() {
 		//test null
 		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, null, null));
 		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, 0, 0));
@@ -71,9 +71,11 @@ class UtilsTest {
 	 * Multiple tests related of using fitToArray
 	 */
 	@Test
-	void clamp(){
-		assertEquals(0,0,0);
+	void clamp() {
 		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 1, 0));
-		//:TODO Add more tests
+		
+		assertEquals(1, Utils.clamp(0, 1, 6));
+		assertEquals(4, Utils.clamp(6, 2, 4));
+		assertEquals(2, Utils.clamp(2, 1, 3));
 	}
 }
