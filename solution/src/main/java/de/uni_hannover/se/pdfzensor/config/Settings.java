@@ -73,10 +73,9 @@ public final class Settings {
 	 */
 	@NotNull
 	private static String transformToSixDigit(@NotNull final String hexCode) {
-		char[] charArray = hexCode.toCharArray();
-		int length = charArray.length;
-		return "#" + charArray[length - 3] + charArray[length - 3]
-				+ charArray[length - 2] + charArray[length - 2]
+		return hexCode.replaceFirst("(?i)0x", "#")
+					  .replaceAll("(?i)[0-9A-F]", "$0$0");
+	}
 				+ charArray[length - 1] + charArray[length - 1];
 	}
 	
