@@ -3,6 +3,7 @@ package de.uni_hannover.se.pdfzensor.config;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,7 +14,7 @@ class SettingsTest {
 	/** Unit-tests for {@link Settings} constructor Settings */
 	@Test
 	void Settings(){
-
+		assertThrows(IOException.class, new Settings(null));
 	}
 
 	/** Unit-tests for {@link Settings} function getColorOrNull */
