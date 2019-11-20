@@ -12,7 +12,7 @@ import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 class CLArgsTest {
 	
 	/**
-	 * Multiple tests related of using fromStringArray
+	 * Multiple tests related to using fromStringArray
 	 */
 	@Test
 	void fromStringArray() {
