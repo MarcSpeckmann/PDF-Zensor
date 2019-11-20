@@ -7,7 +7,7 @@ stages:
 
 variables:
   MAVEN_CLI_OPTS: "-s settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dmaven.repo.local=solution/"
+  MAVEN_OPTS: "-Dmaven.repo.local=solution/pom.xml"
 
 cache:
   paths:
