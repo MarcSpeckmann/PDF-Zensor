@@ -34,7 +34,7 @@ class CLArgsTest {
 	void getVerbosity() {
 		//return null because of priotity problem with config
 		var cla = CLArgs.fromStringArray();
-		assertEquals(null, cla.getVerbosity());
+		assertNull(cla.getVerbosity());
 		
 		String input = "-v";
 		for (int i = 1; i < VERBOSITY_LEVELS.length; i++) {
