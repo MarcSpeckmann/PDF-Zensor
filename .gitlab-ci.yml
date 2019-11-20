@@ -26,5 +26,5 @@ test:
   stage: test
   script:
     - echo "Testing"
-    - mvn test
+    - mvn test -f solution/pom.xml
 
