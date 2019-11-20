@@ -1,20 +1,23 @@
+image: maven:3.6.2-jdk-11
+
 stages:
   - build
-  - test
-  - deploy
+#  - test
+#  - deploy
 
 build-image:
   stage: build
   script:
     - echo "this is the build stage"
+    - "mvn install -B"
 
-test:
-  stage: test
-  script:
-    - echo "this is the test stage"
+#test:
+#  stage: test
+#  script:
+#    - echo "this is the test stage"
 
-deploy-image:
-  stage: deploy
-  when: manual
-  script:
-    - echo "this is the deploy stage"
+#deploy-image:
+#  stage: deploy
+#  when: manual
+#  script:
+#    - echo "this is the deploy stage"
