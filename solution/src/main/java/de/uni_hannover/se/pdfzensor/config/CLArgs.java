@@ -18,7 +18,7 @@ final class CLArgs {
 		return null;
 	}
 	
-	final Level getVerbosity() {
+	Level getVerbosity() {
 		return null;
 	}
 }
