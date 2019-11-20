@@ -43,7 +43,7 @@ class CLArgsTest {
 			input = input.concat("v");
 		}
 		
-		cla = CLArgs.fromStringArray("-vvvvvvv");
+		cla = CLArgs.fromStringArray("-"+"v".repeat(VERBOSITY_LEVELS.length-1));
 		assertEquals(Level.ALL, cla.getVerbosity());
 		
 		cla = CLArgs.fromStringArray("-"+"v".repeat(VERBOSITY_LEVELS.length));
