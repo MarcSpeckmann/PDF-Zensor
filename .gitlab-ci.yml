@@ -4,8 +4,6 @@ stages:
   - build
   - test
 
-
-
 cache:
   paths:
     - .m2/repository/
@@ -18,7 +16,7 @@ build:
     - echo "Building"
     - mkdir build
     - touch build/info.txt
-    - mvn clean compile -V -e -f pomMain/pom.xml
+    - mvn clean compile -V -e -f solution/pom.xml
   artifacts:
     paths:
       - build/
