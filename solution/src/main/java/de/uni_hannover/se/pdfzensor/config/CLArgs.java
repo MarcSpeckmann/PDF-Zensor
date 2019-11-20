@@ -9,6 +9,10 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.io.File;
+import java.util.Objects;
+import java.util.Optional;
+
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
@@ -50,5 +54,14 @@ final class CLArgs {
 	Level getVerbosity() {
 		return verbose == null ? null : VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, verbose.length)];
 	}
-	
+
+	File getInput() {
+		return null;
+	}
+
+	File getOutput() {
+		return null;
+	}
+
+
 }

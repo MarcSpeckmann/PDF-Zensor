@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * The class which holds all the settings from the parsed configuration file and commandline arguments, validated and
@@ -73,6 +74,7 @@ public final class Settings {
 	 */
 	@NotNull
 	private static String transformToSixDigit(@NotNull final String hexCode) {
+		assert (hexCode != null && Pattern.matches(HEX_PATTERN, hexCode)): "Must be a valid hex color code.";
 		return hexCode.replaceFirst("(?i)0x", "#")
 				.replaceAll("(?i)[0-9A-F]", "$0$0");
 	}
