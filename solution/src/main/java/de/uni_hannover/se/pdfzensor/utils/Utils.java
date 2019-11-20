@@ -36,11 +36,11 @@ public final class Utils {
 	}
 	
 	/**
-	 * Clamps the value between min and max
+	 * Clamps the value between min and max.
 	 *
-	 * @param value The value to be clammed
+	 * @param value The value to be clammed.
 	 * @param min   The lower bound of the result (inclusive).
-	 * @param max   The upper bound of the result (inclusive)
+	 * @param max   The upper bound of the result (inclusive).
 	 * @param <T>   The type of the value.
 	 * @return The value fitted to the given bounds.
 	 */
