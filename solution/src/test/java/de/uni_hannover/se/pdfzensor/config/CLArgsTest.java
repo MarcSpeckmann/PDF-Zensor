@@ -2,6 +2,7 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;
+import picocli.CommandLine;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
@@ -17,14 +18,9 @@ class CLArgsTest {
 	@Test
 	void fromStringArray() {
 		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(null));
-		assertNotNull(CLArgs.fromStringArray(new String[0]));
-		assertNotNull(CLArgs.fromStringArray());
-		assertEquals(CLArgs.class, CLArgs.fromStringArray().getClass());
-		assertEquals(CLArgs.class, CLArgs.fromStringArray(new String[0]).getClass());
-		
-		//Müssen wir das behandeln ? Kann args einen leeren String enthalten ?
-		//assertEquals(CLArgs.class, CLArgs.fromStringArray(new String()).getClass());
-		//assertNotNull(CLArgs.fromStringArray(new String()));
+		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(new String[0]));
+		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray());
+		assertThrows(CommandLine.UnmatchedArgumentException.class, () -> CLArgs.fromStringArray(""));
 	}
 	
 	/**
