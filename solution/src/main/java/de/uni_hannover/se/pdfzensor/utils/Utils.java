@@ -31,7 +31,6 @@ public final class Utils {
 	 * @return An index which is in the given array's bounds.
 	 */
 	public static <T> int fitToArray(@NotNull T[] array, int index) {
-		Objects.requireNonNull(array);
 		Validate.notEmpty(array);
 		return clamp(index, 0, array.length - 1);
 	}
