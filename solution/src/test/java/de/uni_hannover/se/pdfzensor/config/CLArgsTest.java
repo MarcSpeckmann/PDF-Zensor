@@ -32,7 +32,7 @@ class CLArgsTest {
 	 */
 	@Test
 	void getVerbosity() {
-		//return null because of priotity problem with config
+		//return null because of priority problem with config
 		var cla = CLArgs.fromStringArray();
 		assertNull(cla.getVerbosity());
 		
