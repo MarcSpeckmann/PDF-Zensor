@@ -20,6 +20,10 @@ cache:
     - 'mvn $MAVEN_CLI_OPTS verify'
   except:
     - master
+    
+verify:jdk11:
+  <<: *verify
+
 
 
 #stages:
