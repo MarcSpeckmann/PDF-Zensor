@@ -36,11 +36,9 @@ class CLArgsTest {
 		var cla = CLArgs.fromStringArray();
 		assertNull(cla.getVerbosity());
 		
-		String input = "-v";
 		for (int i = 1; i < VERBOSITY_LEVELS.length; i++) {
-			cla = CLArgs.fromStringArray("-v");
-			assertEquals(Level.FATAL, cla.getVerbosity());
-			input = input.concat("v");
+			cla = CLArgs.fromStringArray("-"+"v".repeat(i));
+			assertEquals(VERBOSITY_LEVELS[i], cla.getVerbosity());
 		}
 		
 		cla = CLArgs.fromStringArray("-"+"v".repeat(VERBOSITY_LEVELS.length-1));
