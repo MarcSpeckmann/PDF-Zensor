@@ -28,9 +28,7 @@ class CLArgsTest {
 	 */
 	@Test
 	void getVerbosity() {
-		//return null because of priority problem with config
-		var cla = CLArgs.fromStringArray();
-		assertNull(cla.getVerbosity());
+		CLArgs cla;
 		
 		for (int i = 1; i < VERBOSITY_LEVELS.length; i++) {
 			cla = CLArgs.fromStringArray("-"+"v".repeat(i));
