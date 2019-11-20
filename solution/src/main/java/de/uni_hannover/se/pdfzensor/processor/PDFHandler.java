@@ -5,7 +5,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
 
 /**
- * An extension of the {@code PDFTextStripper} to add another level of abstraction.
+ * An abstraction of the {@code PDFTextStripper} to simplify and hide information by the API.
  */
 public interface PDFHandler {
 	/**
