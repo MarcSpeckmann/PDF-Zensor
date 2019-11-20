@@ -17,12 +17,21 @@ build:
     - mkdir build
     - touch build/info.txt
     - mvn clean compile -V -e -f solution/pom.xml
+  artifacts:
+    paths:
+      - build/
 
 
 test:
   stage: test
   script:
     - echo "report will be below here"
-    - mvn verify --f solution/pom.xml
-
+    - mvn verify -e -f solution/pom.xml
+  artifacts:
+    when: always
+    paths:
+      - /target/surefire-reports/TEST-*.xml
+      - pomMain/target/failsafe-reports/TEST-*.xml
+      - pomMain/target/surefire-reports/*.txt
+      - pomMain/target/failsafe-reports/*.txt
 
