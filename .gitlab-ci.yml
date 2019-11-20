@@ -14,13 +14,7 @@ build:
   script:
     - mvn -verify
     - echo "Building"
-    - mkdir build
-    - touch build/info.txt
-    - mvn clean compile -V -e -f solution/pom.xml
-  artifacts:
-    paths:
-      - build/
-
+    - mvn clean compile -f solution/pom.xml
 
 test:
   stage: test
