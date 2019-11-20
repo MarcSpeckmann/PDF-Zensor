@@ -46,7 +46,7 @@ class CLArgsTest {
 		cla = CLArgs.fromStringArray("-vvvvvvv");
 		assertEquals(Level.ALL, cla.getVerbosity());
 		
-		cla = CLArgs.fromStringArray("-vvvvvvvv");
+		cla = CLArgs.fromStringArray("-"+"v".repeat(VERBOSITY_LEVELS.length));
 		assertEquals(Level.ALL, cla.getVerbosity());
 	}
 }
