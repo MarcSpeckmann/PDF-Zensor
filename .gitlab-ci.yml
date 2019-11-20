@@ -17,12 +17,12 @@ build:
     - mkdir build
     - touch build/info.txt
     - mvn clean compile -V -e -f solution/pom.xml
-  artifacts:
-    paths:
-      - build/
 
 
-#test:
-#  stage: test
-#  script:
-#    - mvn $MAVEN_CLI_OPTS test
+test:
+  stage: test
+  script:
+    - echo "report will be below here"
+    - mvn verify --f solution/pom.xml
+
+
