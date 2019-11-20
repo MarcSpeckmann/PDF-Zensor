@@ -3,11 +3,7 @@ image: maven:latest
 stages:
   - build
   - test
-  - run
 
-variables:
-  MAVEN_CLI_OPTS: "-s settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dmaven.repo.local=solution/pom.xml"
 
 cache:
   paths:
@@ -17,15 +13,17 @@ cache:
 build:
   stage: build
   script:
-    - mvn $MAVEN_CLI_OPTS compile
+    - mvn -verify
+    - echo "Building"
+    - mkdir build
+    - touch build/info.txt
+    - mvn clean compile -V -e -f pomMain/pom.xml
+  artifacts:
+    paths:
+      - build/
 
-test:
-  stage: test
-  script:
-    - mvn $MAVEN_CLI_OPTS test
 
-run:
-  stage: run
-  script:
-    - mvn $MAVEN_CLI_OPTS package
-    - mvn $MAVEN_CLI_OPTS exec:java -Dexec.mainClass="de.uni_hannover.se.pdfzensor.App"
+#test:
+#  stage: test
+#  script:
+#    - mvn $MAVEN_CLI_OPTS test
