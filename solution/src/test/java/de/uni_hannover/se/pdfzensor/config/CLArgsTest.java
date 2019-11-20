@@ -17,7 +17,7 @@ class CLArgsTest {
 	 */
 	@Test
 	void fromStringArray() {
-		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(null));
+		assertThrows(NullPointerException.class, () -> CLArgs.fromStringArray(null));
 		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(new String[0]));
 		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray());
 		assertThrows(CommandLine.UnmatchedArgumentException.class, () -> CLArgs.fromStringArray(""));

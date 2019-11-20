@@ -47,9 +47,9 @@ class UtilsTest {
 	@Test
 	void fitToArrayNullArray() {
 		//test null array
-		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(null, 1));
-		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(null, -1));
-		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(null, 0));
+		assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, 1));
+		assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, -1));
+		assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, 0));
 	}
 	
 	/**
@@ -58,13 +58,13 @@ class UtilsTest {
 	@Test
 	void clampNull() {
 		//test null
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, null, null));
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, 0, 0));
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 0, null));
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, null, 0));
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(null, 0, 0));
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 0, null));
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, null, 0));
+		assertThrows(NullPointerException.class, () -> Utils.clamp(null, null, null));
+		assertThrows(NullPointerException.class, () -> Utils.clamp(null, 0, 0));
+		assertThrows(NullPointerException.class, () -> Utils.clamp(0, 0, null));
+		assertThrows(NullPointerException.class, () -> Utils.clamp(0, null, 0));
+		assertThrows(NullPointerException.class, () -> Utils.clamp(null, 0, 0));
+		assertThrows(NullPointerException.class, () -> Utils.clamp(0, 0, null));
+		assertThrows(NullPointerException.class, () -> Utils.clamp(0, null, 0));
 	}
 	
 	/**
