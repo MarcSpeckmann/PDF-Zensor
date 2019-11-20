@@ -18,7 +18,7 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
  * @author Marc Speckmann
  * @author Lennart Bohlin
  */
-@Command(name = "pdf-zensor", version = DummySettings.VERSION, description = {"--Here could be your description--"})
+@Command(name = "pdf-zensor", version = DummyVersionProvider.VERSION, description = {"--Here could be your description--"})
 public final class CLArgs {
 	
 	@Option(names = {"-v", "--verbose"}, description = {"Specify multiple -v options to increase verbosity."}, arity = "0")
