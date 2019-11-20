@@ -28,15 +28,11 @@ import java.util.Optional;
  */
 public final class Logging {
 	
-	/**
-	 * The available logging levels ordered by their detail (ascending).
-	 */
+	/** The available logging levels ordered by their detail (ascending). */
 	@NotNull
 	public static final Level[] VERBOSITY_LEVELS = {Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL};
 	
-	/**
-	 * Stores the context that is currently initialized.
-	 */
+	/** Stores the context that is currently initialized. */
 	private static LoggerContext context = null;
 	
 	/**
@@ -65,6 +61,8 @@ public final class Logging {
 	
 	/**
 	 * Responsible for initializing the logging and configuring it. Does nothing if a context is initialize already.
+	 *
+	 * @param rootLevel Levels less specific than {@code rootLevel} will be filtered.
 	 */
 	public static void init(@NotNull(exception = NullPointerException.class) final Level rootLevel) {
 		if (context != null) return;
@@ -90,7 +88,7 @@ public final class Logging {
 	
 	/**
 	 * Creates a new console appender of the specified name using the provided configuration builder. The console
-	 * appender is created with a PatternLayout set to the pattern {@code %d [%t] %-5level: %msg%n%throwable}.<br/> The
+	 * appender is created with a PatternLayout set to the pattern {@code %d [%t] %-5level: %msg%n%throwable}.<br> The
 	 * appender is automatically added to the build-configuration.
 	 *
 	 * @param builder the builder that should be used to create the appender
@@ -136,7 +134,7 @@ public final class Logging {
 	}
 	
 	/**
-	 * <b><i>For Testing-Purposes only!</i></b><br/>
+	 * <b><i>For Testing-Purposes only!</i></b><br>
 	 * Retrieves the root-logger that is currently initialized.
 	 *
 	 * @return an optional containing the root-logger of the current context. Returns an empty Optional when no context
