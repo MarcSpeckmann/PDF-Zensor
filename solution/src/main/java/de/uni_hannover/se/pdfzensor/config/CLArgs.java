@@ -47,7 +47,7 @@ final class CLArgs {
 	 */
 	@Contract(pure = true)
 	@Nullable
-	final Level getVerbosity() {
+	Level getVerbosity() {
 		return verbose == null ? null : VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, verbose.length)];
 	}
 	
