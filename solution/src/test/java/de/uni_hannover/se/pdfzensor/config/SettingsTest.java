@@ -20,6 +20,7 @@ class SettingsTest {
         // if the command line argument is given but not valid
         // split uses whitespace as delimiter and splits the single string into an array of multiple strings for using it as an argument
         assertThrows(IOException.class, new Settings("pdf-zensor \"NichtExistenteDatei.pdf\"".split(" ")));
+		// for this test there has to be a zensieren.pdf file in the same directory but no config.json
         assertThrows(IOException.class, new Settings("pdf-zensor \"zensieren.pdf\" -c \"config.json\"".split(" ")));
 	}
 
