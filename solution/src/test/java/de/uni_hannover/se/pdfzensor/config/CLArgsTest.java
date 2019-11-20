@@ -24,7 +24,7 @@ class CLArgsTest {
 	}
 	
 	/**
-	 * Multiple tests related of using getVerbosity
+	 * Multiple tests related to using getVerbosity
 	 */
 	@Test
 	void getVerbosity() {
