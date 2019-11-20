@@ -25,6 +25,6 @@ build:
 test:
   stage: test
   script:
-    - echo "report will be below here"
-    - mvn verify -f solution/pom.xml
+    - echo "Testing"
+    - mvn test
 
