@@ -13,8 +13,7 @@ import java.util.Objects;
 /**
  * DoubleBufferedStream manages an {@link InputStream} and {@link OutputStream} to support concurrent reading and
  * writing. Data will be read from the InputStream and written to a buffer within the OutputStream. Once The
- * DoubleBufferedStream is closed, the OutputStream's contents will be fed into the provided {@link PDStream}
- * instance.
+ * DoubleBufferedStream is closed, the OutputStream's contents will be fed into the provided {@link PDStream} instance.
  */
 public class DoubleBufferedStream implements AutoCloseable {
 	/** The pdf-stream to which the data will be written upon closing. */
@@ -60,7 +59,8 @@ public class DoubleBufferedStream implements AutoCloseable {
 	}
 	
 	/**
-	 * @return The OutputStream into which the data which eventually replaces the current stream's content should be written.
+	 * @return The OutputStream into which the data which eventually replaces the current stream's content should be
+	 * written.
 	 */
 	@Contract(pure = true)
 	public OutputStream getOutputStream() {
