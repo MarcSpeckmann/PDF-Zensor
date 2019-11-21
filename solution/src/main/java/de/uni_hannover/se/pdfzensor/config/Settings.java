@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
  * prioritized correctly.
  */
 public final class Settings {
-
-	private static final String HEX_PATTERN = "^(?i)((0x)|#)(?:[0-9a-f]{3}){1,2}$";
+	
+	private static final String SIX_DIGIT_HEX_PATTERN = "^(?i)((0x)|#)(?:[0-9a-f]{6})$";
 	private static final String THREE_DIGIT_HEX_PATTERN = "^(?i)((0x)|#)(?:[0-9a-f]{3})$";
 	private static final String DEFAULT_CENSOR_COLOR = "#000000";
 	
@@ -88,9 +88,9 @@ public final class Settings {
 	@Nullable
 	static Color getColorOrNull(@Nullable final String hexCode) {
 		if (hexCode == null) return null;
-		Validate.matchesPattern(hexCode, HEX_PATTERN, "Must be a valid hex color code.");
 		var copy = hexCode;
 		if (hexCode.matches(THREE_DIGIT_HEX_PATTERN)) copy = transformToSixDigit(hexCode);
+		Validate.matchesPattern(copy, SIX_DIGIT_HEX_PATTERN, "Must be a valid hex color code.");
 		return Color.decode(copy);
 	}
 	
