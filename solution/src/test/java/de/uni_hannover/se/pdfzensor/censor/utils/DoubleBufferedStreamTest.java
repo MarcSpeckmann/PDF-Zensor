@@ -16,8 +16,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** This class should contain all the tests related only to the {@link DoubleBufferedStream}. */
 class DoubleBufferedStreamTest {
 	
+	/** Provides test-data for the {@link #testDataBuffering(byte[])} parameterized test. */
 	static Stream<Arguments> testDataProvider() throws Throwable {
 		final byte[] emptyDataset = {};
 		final byte[] simpleDataset = {0x00};
@@ -29,6 +31,7 @@ class DoubleBufferedStreamTest {
 					 .map(Arguments::of);
 	}
 	
+	/** Checks if an illegal null-argument is correctly identified and signaled. */
 	@Test
 	void testNullValues() {
 		assertThrows(NullPointerException.class, () -> new DoubleBufferedStream(null, null));
