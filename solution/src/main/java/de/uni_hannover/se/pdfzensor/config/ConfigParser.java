@@ -28,8 +28,7 @@ public class ConfigParser {
      * An empty parser Object. Is used if the configuration file could not found.
      */
     private ConfigParser() {
-        this.output = null;
-        this.verbose = null;
+        this(null, null);
     }
 
     /**
