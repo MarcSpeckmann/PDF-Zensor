@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public final class Settings {
 	
-	private static final String SIX_DIGIT_HEX_PATTERN = "^(?i)((0x)|#)(?:[0-9a-f]{6})$";
+	private static final String SIX_DIGIT_HEX_PATTERN = "(?i)^(0x|#)[0-9a-f]{6}$";
 	private static final String THREE_DIGIT_HEX_PATTERN = "^(?i)((0x)|#)(?:[0-9a-f]{3})$";
 	private static final String DEFAULT_CENSOR_COLOR = "#000000";
 	
