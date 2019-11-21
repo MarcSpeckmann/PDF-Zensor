@@ -19,7 +19,8 @@ class CLArgsTest {
 	 */
 	@Test
 	void fromStringArray() {
-		assertThrows(NullPointerException.class, () -> CLArgs.fromStringArray(null));
+		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray((String) null));
+		assertThrows(NullPointerException.class, () -> CLArgs.fromStringArray((String[]) null));
 		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(new String[0]));
 		assertThrows(IllegalArgumentException.class, CLArgs::fromStringArray);
 		assertThrows(NoSuchElementException.class, () -> CLArgs.fromStringArray("")
@@ -57,7 +58,13 @@ class CLArgsTest {
 		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf");
 		assertEquals(new File("src/test/resources/sample.pdf").getAbsoluteFile(), cla.getInput());
 		
-		cla = CLArgs.fromStringArray("wrongTyp.txt");
+		cla = CLArgs.fromStringArray("wrongType.txt");
+		assertThrows(NoSuchElementException.class, cla::getInput);
+		
+		cla = CLArgs.fromStringArray("src/test/resources/sample.bla.pdf");
+		assertEquals(new File("src/test/resources/sample.bla.pdf").getAbsoluteFile(), cla.getInput());
+		
+		cla = CLArgs.fromStringArray("wrongType");
 		assertThrows(NoSuchElementException.class, cla::getInput);
 	}
 	
@@ -82,7 +89,13 @@ class CLArgsTest {
 		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf");
 		assertNull(cla.getOutput());
 		
-		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "src/test/resources/sample.txt");
+		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "wrongType.txt");
+		assertNull(cla.getOutput());
+		
+		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "wrongType.bla.pdf");
+		assertEquals(new File("wrongType.bla.pdf").getAbsoluteFile(), cla.getOutput());
+		
+		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "wrongType");
 		assertNull(cla.getOutput());
 	}
 }
