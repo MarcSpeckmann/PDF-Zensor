@@ -51,7 +51,7 @@ public class ConfigParser {
      */
     @Contract("null -> new")
     @NotNull
-    public ConfigParser fromFile(@Nullable final File config) throws IOException {
+    public static ConfigParser fromFile(@Nullable final File config) throws IOException {
         if(config == null) {
             // return empty config parser
             return new ConfigParser();
