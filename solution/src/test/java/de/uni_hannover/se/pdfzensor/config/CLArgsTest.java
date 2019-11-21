@@ -46,6 +46,9 @@ class CLArgsTest {
 		assertEquals(Level.ALL, cla.getVerbosity());
 	}
 	
+	/**
+	 * Multiple tests related to using getInput
+	 */
 	@Test
 	void getInput() {
 		var cla = CLArgs.fromStringArray("notExist.pdf");
@@ -58,6 +61,9 @@ class CLArgsTest {
 		assertThrows(NoSuchElementException.class, cla::getInput);
 	}
 	
+	/**
+	 * Multiple tests related to using getOutput
+	 */
 	@Test
 	void getOutput() {
 		

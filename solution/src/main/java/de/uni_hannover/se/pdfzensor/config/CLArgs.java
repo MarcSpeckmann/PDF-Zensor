@@ -51,6 +51,8 @@ final class CLArgs {
 	}
 	
 	/**
+	 * Returns input file given by the user
+	 *
 	 * @return The absolute input file which was specified.
 	 */
 	@NotNull
@@ -64,6 +66,8 @@ final class CLArgs {
 	}
 	
 	/**
+	 * Returns output fil given by the user
+	 *
 	 * @return null or the absolute output file if one was specified.
 	 */
 	@Nullable
@@ -75,7 +79,7 @@ final class CLArgs {
 	}
 	
 	/**
-	 * Returns verbosity level given bei the user
+	 * Returns verbosity level given by the user
 	 *
 	 * @return null or the level of logging verbosity if verbose was given
 	 */
