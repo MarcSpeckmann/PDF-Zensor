@@ -22,8 +22,9 @@ import java.util.regex.Pattern;
  * prioritized correctly.
  */
 public final class Settings {
-	
+
 	private static final String HEX_PATTERN = "^(?i)((0x)|#)(?:[0-9a-f]{3}){1,2}$";
+	private static final String THREE_DIGIT_HEX_PATTERN = "^(?i)((0x)|#)(?:[0-9a-f]{3})$";
 	private static final String DEFAULT_CENSOR_COLOR = "#000000";
 	
 	@NotNull
@@ -74,7 +75,7 @@ public final class Settings {
 	 */
 	@NotNull
 	private static String transformToSixDigit(@NotNull final String hexCode) {
-		assert (hexCode != null && Pattern.matches(HEX_PATTERN, hexCode)): "Must be a valid hex color code.";
+		Validate.matchesPattern(Objects.requireNonNull(hexCode), THREE_DIGIT_HEX_PATTERN,"Must be a valid hex color code.");
 		return hexCode.replaceFirst("(?i)0x", "#")
 				.replaceAll("(?i)[0-9A-F]", "$0$0");
 	}
@@ -89,7 +90,7 @@ public final class Settings {
 		if (hexCode == null) return null;
 		Validate.matchesPattern(hexCode, HEX_PATTERN, "Must be a valid hex color code.");
 		var copy = hexCode;
-		if (hexCode.length() < 6) copy = transformToSixDigit(hexCode);
+		if (hexCode.matches(THREE_DIGIT_HEX_PATTERN)) copy = transformToSixDigit(hexCode);
 		return Color.decode(copy);
 	}
 	
