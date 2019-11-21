@@ -3,6 +3,7 @@ package de.uni_hannover.se.pdfzensor.config;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.util.FileUtils;
@@ -15,10 +16,8 @@ import java.io.IOException;
 
 /**
  * Stores all the necessary properties for censoring a pdf-file
- * @author Maksim Gluzman
- * @author Mike Grätz
  */
-public class ConfigParser {
+final class ConfigParser {
     @Nullable
     private final File output;
     @Nullable
@@ -50,7 +49,7 @@ public class ConfigParser {
      */
     @Contract("null -> new")
     @NotNull
-    public static ConfigParser fromFile(@Nullable final File config) throws IOException {
+    static ConfigParser fromFile(@Nullable final File config) throws IOException {
         if(config == null) {
             // return empty config parser
             return new ConfigParser();
@@ -63,8 +62,8 @@ public class ConfigParser {
         if(verbose instanceof String) // verbose as String
             return Level.getLevel(((String) verbose).toUpperCase()); // LEVEL in Uppercase
         else if(verbose instanceof Integer) { // verbose as Integer
-            final Level[] logLevels = new Level[]{Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL}; // Create Array with all Levels
-            return logLevels[setVerboseToBoundaries((Integer)verbose, logLevels.length)];
+            final Level[] logLevels = Logging.VERBOSITY_LEVELS;
+            return logLevels[setVerboseToBoundaries((int)verbose, logLevels.length)];
         }
         return null;
     }
@@ -80,11 +79,11 @@ public class ConfigParser {
     }
     @Contract(pure = true)
     @Nullable
-    public File getOutput() {
+    File getOutput() {
         return this.output;
     }
     @Nullable
-    public Level getVerbosity() {
+    Level getVerbosity() {
         return ObjectUtils.cloneIfPossible(this.verbose);
     }
 
