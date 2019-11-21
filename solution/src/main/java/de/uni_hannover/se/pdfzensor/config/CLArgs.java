@@ -71,6 +71,7 @@ final class CLArgs {
 	 */
 	@Nullable
 	final File getOutput() {
+		//TODO: prevent to save into other file types then .pdf or directories
 		return Optional.ofNullable(output)
 					   .map(File::getAbsoluteFile)
 					   .orElse(null);
