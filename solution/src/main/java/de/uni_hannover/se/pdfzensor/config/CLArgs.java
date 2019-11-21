@@ -20,8 +20,6 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 /**
  * The class is responsible for parsing the given command-line arguments
  *
- * @author Marc Speckmann
- * @author Lennart Bohlin
  */
 @Command(name = "pdf-zensor", version = DummyVersionProvider.VERSION, description = {"--Here could be your description--"})
 final class CLArgs {
