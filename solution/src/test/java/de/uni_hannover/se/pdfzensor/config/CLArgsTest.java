@@ -56,25 +56,27 @@ class CLArgsTest {
 		
 		cla = CLArgs.fromStringArray("wrongTyp.txt");
 		assertThrows(NoSuchElementException.class, cla::getInput);
-		//TODO: test for multiple types not for .txt
 	}
 	
 	@Test
 	void getOutput() {
-		//save in directory
+		
 		var cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "../");
 		assertEquals(new File("../").getAbsoluteFile(), cla.getOutput());
-		//test different order
+		
 		cla = CLArgs.fromStringArray("-o", "../", "src/test/resources/sample.pdf");
 		assertEquals(new File("../").getAbsoluteFile(), cla.getOutput());
-		//save in file
+		
 		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "file.pdf");
 		assertEquals(new File("file.pdf").getAbsoluteFile(), cla.getOutput());
-		//safe in same file
+		
 		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "src/test/resources/sample.pdf");
-		assertEquals(new File("sample.pdf").getAbsoluteFile(), cla.getOutput());
-		//safe in different format then .pdf
-		final var cla2 = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "src/test/resources/sample.txt");
-		assertThrows(Exception.class, () -> cla2.getOutput());
+		assertEquals(new File("src/test/resources/sample.pdf").getAbsoluteFile(), cla.getOutput());
+		
+		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf");
+		assertNull(cla.getOutput());
+		
+		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "src/test/resources/sample.txt");
+		assertNull(cla.getOutput());
 	}
 }

@@ -19,7 +19,6 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
 /**
  * The class is responsible for parsing the given command-line arguments
- *
  */
 @Command(name = "pdf-zensor", version = DummyVersionProvider.VERSION, description = {"--Here could be your description--"})
 final class CLArgs {
@@ -69,8 +68,8 @@ final class CLArgs {
 	 */
 	@Nullable
 	final File getOutput() {
-		//TODO: prevent to save into other file types then .pdf or directories
 		return Optional.ofNullable(output)
+					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)) || f.isDirectory())
 					   .map(File::getAbsoluteFile)
 					   .orElse(null);
 	}
