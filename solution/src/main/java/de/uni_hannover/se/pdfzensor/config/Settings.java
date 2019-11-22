@@ -86,12 +86,14 @@ public final class Settings {
 	 */
 	@Contract("null -> null")
 	@Nullable
-	static Color getColorOrNull(@Nullable final String hexCode) {
+	static Color getColorOrNull(@Nullable String hexCode) {
 		if (hexCode == null) return null;
-		var copy = hexCode;
-		if (hexCode.matches(THREE_DIGIT_HEX_PATTERN)) copy = transformToSixDigit(hexCode);
-		Validate.matchesPattern(copy, SIX_DIGIT_HEX_PATTERN, "Must be a valid hex color code.");
-		return Color.decode(copy);
+		if (hexCode.matches(THREE_DIGIT_HEX_PATTERN)) {//replace 0X and 0x by # and than double each hex-digit
+			hexCode = hexCode.replaceFirst("(?i)0x", "#")
+							 .replaceAll("(?i)[0-9A-F]", "$0$0");
+		}
+		Validate.matchesPattern(hexCode, SIX_DIGIT_HEX_PATTERN, "Must be a valid hex color code.");
+		return Color.decode(hexCode);
 	}
 	
 	@NotNull
