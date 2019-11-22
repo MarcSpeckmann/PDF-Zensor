@@ -63,7 +63,7 @@ public final class Settings {
 		logger.log(Level.DEBUG, "\tConfig-file: {}", config);
 		logger.log(Level.DEBUG, "\tOutput-file: {}", output);
 		logger.log(Level.DEBUG, "\tLogger verbosity: {}", verbose);
-		logger.log(Level.DEBUG, "\tLink-Color: {}", colorToString(linkColor));
+		logger.log(Level.DEBUG, "\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.log(Level.DEBUG, "\tDefined-Expressions");
 		for (var exp : expressions)
 			logger.log(Level.DEBUG, "\t\t{}", exp);
