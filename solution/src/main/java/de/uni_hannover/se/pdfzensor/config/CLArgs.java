@@ -62,7 +62,8 @@ final class CLArgs {
 					   .filter(File::isFile)
 					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)))
 					   .map(File::getAbsoluteFile)
-					   .orElseThrow();
+					   .orElseThrow(() -> new IllegalArgumentException(
+							   "The provided input does not have the pdf suffix or is no file."));
 	}
 	
 	/**

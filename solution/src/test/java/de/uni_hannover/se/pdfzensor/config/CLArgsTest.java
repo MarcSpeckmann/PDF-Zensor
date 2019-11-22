@@ -53,19 +53,22 @@ class CLArgsTest {
 	@Test
 	void getInput() {
 		var cla = CLArgs.fromStringArray("notExist.pdf");
-		assertThrows(NoSuchElementException.class, cla::getInput);
+		assertThrows(IllegalArgumentException.class, cla::getInput);
 		
 		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf");
 		assertEquals(new File("src/test/resources/sample.pdf").getAbsoluteFile(), cla.getInput());
 		
 		cla = CLArgs.fromStringArray("wrongType.txt");
-		assertThrows(NoSuchElementException.class, cla::getInput);
+		assertThrows(IllegalArgumentException.class, cla::getInput);
+		
+		cla = CLArgs.fromStringArray("pom.xml");
+		assertThrows(IllegalArgumentException.class, cla::getInput);
 		
 		cla = CLArgs.fromStringArray("src/test/resources/sample.bla.pdf");
 		assertEquals(new File("src/test/resources/sample.bla.pdf").getAbsoluteFile(), cla.getInput());
 		
 		cla = CLArgs.fromStringArray("wrongType");
-		assertThrows(NoSuchElementException.class, cla::getInput);
+		assertThrows(IllegalArgumentException.class, cla::getInput);
 	}
 	
 	/**
