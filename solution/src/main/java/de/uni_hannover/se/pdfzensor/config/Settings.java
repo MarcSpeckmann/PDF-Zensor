@@ -43,7 +43,7 @@ public final class Settings {
 	 * @param args The commandline arguments.
 	 * @throws IOException If the configuration file could not be parsed.
 	 */
-	public Settings(@NotNull final String[] args) throws IOException {
+	public Settings(@NotNull final String... args) throws IOException {
 		final var cla = CLArgs.fromStringArray(args);
 		final var config = getDefaultConfig();
 		final var cp = ConfigParser.fromFile(config);
