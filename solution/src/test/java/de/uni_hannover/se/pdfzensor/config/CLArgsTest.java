@@ -49,7 +49,7 @@ class CLArgsTest {
 	 * Provides a stream with the arguments for thorough testing of {@link #testArgsParser(String[], File, File,
 	 * Level)}.
 	 */
-	private static Stream<Arguments> testArguments() throws Throwable {
+	private static Stream<Arguments> testArguments() {
 		String[] inputFiles = {"src/test/resources/sample.pdf", "src/test/resources/sample.bla.pdf"};
 		String[] outputFiles = {null, "../", "file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
 		int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1)
