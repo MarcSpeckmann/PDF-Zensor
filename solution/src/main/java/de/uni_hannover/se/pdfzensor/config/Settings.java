@@ -70,17 +70,6 @@ public final class Settings {
 	}
 	
 	/**
-	 * @param hexCode A string containing a hexadecimal color code with 3 digits
-	 * @return A string containing a hexadecimal color code with 6 digits
-	 */
-	@NotNull
-	private static String transformToSixDigit(@NotNull final String hexCode) {
-		Validate.matchesPattern(Objects.requireNonNull(hexCode), THREE_DIGIT_HEX_PATTERN,"Must be a valid hex color code.");
-		return hexCode.replaceFirst("(?i)0x", "#")
-				.replaceAll("(?i)[0-9A-F]", "$0$0");
-	}
-	
-	/**
 	 * @param hexCode A string containing a hexadecimal color code.
 	 * @return The awt.Color of the hexadecimal color code or null, if the given string was null.
 	 */
