@@ -23,7 +23,7 @@ class CLArgsTest {
 		assertThrows(NullPointerException.class, () -> CLArgs.fromStringArray((String[]) null));
 		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(new String[0]));
 		assertThrows(IllegalArgumentException.class, CLArgs::fromStringArray);
-		assertThrows(NoSuchElementException.class, () -> CLArgs.fromStringArray("")
+		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray("")
 															   .getInput());
 		
 	}
