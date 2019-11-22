@@ -3,7 +3,6 @@ package de.uni_hannover.se.pdfzensor.config;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,9 +19,10 @@ class SettingsTest {
         assertThrows(IllegalArgumentException.class, () -> new Settings(new String[2]));
         // if the command line argument is given but not valid
         // split uses whitespace as delimiter and splits the single string into an array of multiple strings for using it as an argument
-        assertThrows(picocli.CommandLine.UnmatchedArgumentException.class, () -> new Settings("pdf-zensor \"NichtExistenteDatei.pdf\"".split(" ")));
+		//
+		assertThrows(picocli.CommandLine.UnmatchedArgumentException.class, () -> new Settings("pdf-zensor", "\"NichtExistenteDatei.pdf\""));
         // for this test there has to be a zensieren.pdf file in the same directory but no config.json
-        assertThrows(picocli.CommandLine.UnmatchedArgumentException.class, () -> new Settings("pdf-zensor \"zensieren.pdf\" -c \"config.json\"".split(" ")));
+        assertThrows(picocli.CommandLine.UnmatchedArgumentException.class, () -> new Settings("pdf-zensor", "\"zensieren.pdf\"", "-c", "\"config.json\""));
 	}
 
 	/** Unit-tests for {@link Settings} function getColorOrNull */
@@ -86,7 +86,6 @@ class SettingsTest {
 		assertEquals(new Color(86, 42, 86), Settings.getColorOrNull("0x562A56"));
 		assertEquals(new Color(250, 204, 204), Settings.getColorOrNull("#FACCCC"));
 		// if the parameter is no valid hexadecimal color code
-		// TODO
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("BLACK"));
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#f"));
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#ff"));
@@ -94,7 +93,12 @@ class SettingsTest {
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#fffff"));
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#ffffgg"));
 		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("0xffffgg"));
-		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#fffffff"));
+		assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#f3875323"));
+        assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("foo"));
+        assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("0Xkkkkk"));
+        assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("1Xffffff"));
+        assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#varargs"));
+        assertThrows(IllegalArgumentException.class, () -> Settings.getColorOrNull("#a color"));
 	}
 
 	/*
