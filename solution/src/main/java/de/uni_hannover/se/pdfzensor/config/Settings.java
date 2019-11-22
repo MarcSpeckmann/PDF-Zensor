@@ -142,8 +142,7 @@ public final class Settings {
 	 */
 	@NotNull
 	private File getDefaultOutput(@NotNull final String path) {
-		final var in = input.getName();
-		final var inName = FilenameUtils.removeExtension(in);
+		final var inName = FilenameUtils.removeExtension(input.getName());
 		return new File(Objects.requireNonNull(path) + File.separatorChar + inName + "_cens.pdf").getAbsoluteFile();
 	}
 	
