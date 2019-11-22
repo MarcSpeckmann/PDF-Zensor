@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CLArgsTest {
 	
 	/**
-	 * Crates arguments for a function call of {@link #testArgsParser(String[], File, File, Level)} from the provided
+	 * Creates arguments for a function call of {@link #testArgsParser(String[], File, File, Level)} from the provided
 	 * data.
 	 */
 	private static Arguments createArgument(@NotNull String in, @Nullable String out, int lvl) {
