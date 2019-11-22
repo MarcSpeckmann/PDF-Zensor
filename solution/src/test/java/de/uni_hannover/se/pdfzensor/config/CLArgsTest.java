@@ -39,7 +39,9 @@ class CLArgsTest {
 							  .map(File::new)
 							  .map(File::getAbsoluteFile)
 							  .orElse(null);
-		var verbosity = lvl == 0 ? null : VERBOSITY_LEVELS[lvl];
+		Level verbosity = null;
+		if (lvl > 0 && lvl < VERBOSITY_LEVELS.length) verbosity = VERBOSITY_LEVELS[lvl];
+		else if (lvl >= VERBOSITY_LEVELS.length) verbosity = Level.ALL;
 		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile, verbosity);
 	}
 	
@@ -47,19 +49,16 @@ class CLArgsTest {
 	 * Provides a stream with the arguments for thorough testing of {@link #testArgsParser(String[], File, File,
 	 * Level)}.
 	 */
-	static Stream<Arguments> testArguments() throws Throwable {
+	private static Stream<Arguments> testArguments() throws Throwable {
 		String[] inputFiles = {"src/test/resources/sample.pdf", "src/test/resources/sample.bla.pdf"};
 		String[] outputFiles = {null, "../", "file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
-		int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length)
+		int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1)
 										 .toArray();
 		var list = new ArrayList<Arguments>();
-		for (String in : inputFiles) {
-			for (String out : outputFiles) {
-				for (int lvl : verbosityLevels) {
+		for (String in : inputFiles)
+			for (String out : outputFiles)
+				for (int lvl : verbosityLevels)
 					list.add(createArgument(in, out, lvl));
-				}
-			}
-		}
 		return list.stream();
 	}
 	
@@ -83,23 +82,6 @@ class CLArgsTest {
 		assertEquals(input, clargs.getInput());
 		assertEquals(output, clargs.getOutput());
 		assertEquals(verbosity, clargs.getVerbosity());
-	}
-	
-	/** Multiple tests related to using getVerbosity. */
-	@Test
-	void testVerbosity() {
-		CLArgs cla;
-		
-		for (int i = 1; i < VERBOSITY_LEVELS.length; i++) {
-			cla = CLArgs.fromStringArray("sample.pdf", "-" + "v".repeat(i));
-			assertEquals(VERBOSITY_LEVELS[i], cla.getVerbosity());
-		}
-		
-		cla = CLArgs.fromStringArray("sample.pdf", "-" + "v".repeat(VERBOSITY_LEVELS.length - 1));
-		assertEquals(Level.ALL, cla.getVerbosity());
-		
-		cla = CLArgs.fromStringArray("sample.pdf", "-" + "v".repeat(VERBOSITY_LEVELS.length));
-		assertEquals(Level.ALL, cla.getVerbosity());
 	}
 	
 	/** Multiple tests related to using getInput. */
