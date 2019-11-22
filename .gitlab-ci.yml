@@ -1,0 +1,19 @@
+image: maven:latest
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - mvn -verify
+    - echo "Building"
+    - mvn clean compile -f solution/pom.xml
+
+test:
+  stage: test
+  script:
+    - echo "Testing"
+    - mvn test -f solution/pom.xml
+
