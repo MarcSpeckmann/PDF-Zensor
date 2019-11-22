@@ -75,6 +75,7 @@ public final class Settings {
 	 */
 	@Contract("null -> null")
 	@Nullable
+	// TODO: move to utils
 	static Color getColorOrNull(@Nullable String hexCode) {
 		if (hexCode == null) return null;
 		if (hexCode.matches(THREE_DIGIT_HEX_PATTERN)) {//replace 0X and 0x by # and than double each hex-digit
@@ -155,6 +156,7 @@ public final class Settings {
 	 */
 	@NotNull
 	@Contract("_ -> !null")
+	// TODO: move to utils
 	public static String colorToString(@Nullable Color color) {
 		return Optional.ofNullable(color)
 				.map(c -> String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue()))
