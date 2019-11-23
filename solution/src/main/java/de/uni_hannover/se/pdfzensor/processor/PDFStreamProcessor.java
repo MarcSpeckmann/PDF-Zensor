@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 /**
@@ -33,7 +34,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	/**
 	 * @throws IOException If there is an error loading the properties.
 	 */
-	public PDFStreamProcessor() throws IOException {
+	PDFStreamProcessor() throws IOException {
 		super();
 		LOGGER.log(Level.DEBUG, "Initialized a new PDFStreamProcessor-instance");
 	}
@@ -81,6 +82,21 @@ class PDFStreamProcessor extends PDFTextStripper {
 			LOGGER.log(Level.ERROR, "Failed to close the current output stream.", e);
 		}
 		return ret;
+	}
+	
+	/**
+	 * Appends PDFTextStripper's {@link PDFTextStripper#writeText(PDDocument, Writer)} by additionally checking for
+	 * invalid parameters.
+	 *
+	 * @param doc          The document to get the data from. Not null.
+	 * @param outputStream The location to put the text. Not null.
+	 * @throws IOException          If the doc is in an invalid state.
+	 * @throws NullPointerException If doc or outputStream are null.
+	 */
+	@Override
+	public void writeText(@NotNull final PDDocument doc, @NotNull final Writer outputStream) throws IOException {
+		// This is not necessary but cleaner as PDFStripper does not check its arguments
+		super.writeText(Objects.requireNonNull(doc), Objects.requireNonNull(outputStream));
 	}
 	
 	/**
@@ -151,5 +167,4 @@ class PDFStreamProcessor extends PDFTextStripper {
 		super.endPage(page);
 		page.setContents(popStream().getStream());
 	}
-	
 }
