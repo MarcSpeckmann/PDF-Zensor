@@ -13,9 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * PDFStreamProcessor builds on the {@link org.apache.pdfbox.contentstream.PDFStreamEngine} via the {@link
@@ -23,7 +21,8 @@ import java.util.Objects;
  * PDFStreamEngine to read from the PDFStreamProcessor will open a corresponding output stream. After the input stream
  * got closed the corresponding output stream will swap buffers. Thus the original content of the stream is replaced by
  * what the output stream currently holds. That means that, to leave the content of the PDF-file untouched the user of
- * this API has to copy any data from the input stream into the corresponding output stream.
+ * this API has to copy any data from the input stream into the corresponding output stream.<br> Use {@link
+ * #getText(PDDocument)} to process the given document.
  */
 class PDFStreamProcessor extends PDFTextStripper {
 	private static final Logger LOGGER = Logging.getLogger();
@@ -39,15 +38,24 @@ class PDFStreamProcessor extends PDFTextStripper {
 		LOGGER.log(Level.DEBUG, "Initialized a new PDFStreamProcessor-instance");
 	}
 	
+	/**
+	 * Gets a {@link ContentStreamWriter} that writes to the stream on top of the stream-stack.
+	 *
+	 * @return a {@link ContentStreamWriter} that writes to the stream on top of the stream-stack.
+	 */
 	@Nullable
 	protected ContentStreamWriter getCurrentContentStream() {
 		if (currentStream == null)
 			return null;
-		var currentOS = Objects.requireNonNull(currentStream.peek())
-							   .getOutputStream();
+		var currentOS = Objects.requireNonNull(currentStream.peek()).getOutputStream();
 		return new ContentStreamWriter(currentOS);
 	}
 	
+	/**
+	 * Pushes a stream to the top of the stream-stack. Does nothing if no stack is currently initialized.
+	 *
+	 * @param bs the stream that should be pushed to the top of the stack.
+	 */
 	private void pushStream(@NotNull final DoubleBufferedStream bs) {
 		if (currentStream == null) {
 			LOGGER.log(Level.WARN, "It was tried to push a stream when the stack is not initialized.");
@@ -63,7 +71,10 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 */
 	@NotNull
 	private DoubleBufferedStream popStream() {
-		var ret = Objects.requireNonNull(currentStream.pop());
+		var ret = Optional.ofNullable(currentStream)
+						  .orElseThrow(NoSuchElementException::new)
+						  .pop();
+		Objects.requireNonNull(ret);
 		try {
 			ret.close();
 		} catch (Exception e) {
@@ -73,6 +84,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	}
 	
 	/**
+	 * <i><b>Do not call this method directly</b></i><br>
 	 * Appends PDFTextStripper's {@link PDFTextStripper#startDocument(PDDocument)} by initializing a new empty
 	 * DoubleBufferedStream-Stack.
 	 *
@@ -81,8 +93,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 */
 	@Override
 	protected void startDocument(@NotNull final PDDocument document) throws IOException {
-		var information = Objects.requireNonNull(document)
-								 .getDocumentInformation();
+		var information = Objects.requireNonNull(document).getDocumentInformation();
 		LOGGER.log(Level.DEBUG, "Starting to process a new document: {} by {}",
 				   information::getTitle, information::getAuthor);
 		currentStream = new ArrayDeque<>();
@@ -90,6 +101,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	}
 	
 	/**
+	 * <i><b>Do not call this method directly</b></i><br>
 	 * Appends PDFTextStripper's {@link PDFTextStripper#endDocument(PDDocument)} by deinitializing the stream stack.
 	 *
 	 * @param document The PDF document that has been processed.
@@ -110,6 +122,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	}
 	
 	/**
+	 * <i><b>Do not call this method directly</b></i><br>
 	 * Appends PDFTextStripper's {@link PDFTextStripper#startPage(PDPage)} by creating a new PDStream for the page about
 	 * to be processed and adding it to the top of the stack.
 	 *
@@ -126,6 +139,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	}
 	
 	/**
+	 * <i><b>Do not call this method directly</b></i><br>
 	 * Appends PDFTextStripper's {@link PDFTextStripper#endPage(PDPage)} by removing the top stream from the stack and
 	 * replacing the data of the page that was read by the contents of the popped stream.
 	 *
