@@ -11,8 +11,10 @@ import org.apache.logging.log4j.core.util.FileUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
+import javax.json.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
@@ -56,9 +58,25 @@ final class ConfigParser {
 		}
 		Validate.isTrue(config.isFile() && "json".equals(FileUtils.getFileExtension(config)),
 						"config-file in ConfigParser.fromFile() is not a valid config-file!");
-		return new ObjectMapper().readValue(config, ConfigParser.class);
+		if(isJsonStructure(config)) {
+			return new ObjectMapper().readValue(config, ConfigParser.class);
+		} else  { return new ConfigParser();}
 	}
-	
+
+	/**
+	 * Checks if file contains valid json-structure
+	 * @param file file that is checked for valid json-structure
+	 * @return returns true if file has valid json-structure, otherwise false
+	 */
+	private static boolean isJsonStructure(File file) {
+		try(JsonReader reader = Json.createReader(new FileReader(file))) {
+		    reader.read().getValueType();
+		}catch (FileNotFoundException | JsonException e) {
+			return false;
+		}
+		return true;
+	}
+
 	@Nullable
 	private Level verboseToLevel(@Nullable final Object verbose) {
 		if (verbose instanceof String) // verbose as String
