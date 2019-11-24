@@ -71,7 +71,7 @@ final class ConfigParser {
 	}
 	
 	@Nullable
-	private Level verboseToLevel(@Nullable final Object verbose) {
+	private static Level verboseToLevel(@Nullable final Object verbose) {
 		if (verbose instanceof String) // verbose as String
 			return Level.getLevel(((String) verbose).toUpperCase()); // LEVEL in Uppercase
 		else if (verbose instanceof Integer) { // verbose as Integer
