@@ -51,7 +51,8 @@ class CLArgsTest {
 	 * Level)}.
 	 */
 	private static Stream<Arguments> testArguments() {
-		String[] inputFiles = {getResource("/pdf-files/sample.pdf").getAbsolutePath(), getResource("/pdf-files/sample.bla.pdf").getAbsolutePath()};
+		String[] inputFiles = {getResource("/pdf-files/sample.pdf").getAbsolutePath(), getResource(
+				"/pdf-files/sample.bla.pdf").getAbsolutePath()};
 		String[] outputFiles = {null, "../", "file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
 		int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1)
 										 .toArray();
