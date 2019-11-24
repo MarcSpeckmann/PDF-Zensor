@@ -8,6 +8,8 @@ import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import org.apache.pdfbox.pdmodel.graphics.form.PDTransparencyGroup;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +17,13 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//           PLEASE NOTE: during prototyping this class did not copy all data correctly for FormXObjects.             //
+//           Thus there might be some functions missing that should further push and pop the stream-stack.            //
+//           This should be elicited further during development. Since FormXObjects will be censored like             //
+//           images it is not a huge issue but one that should be considered.                                         //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * PDFStreamProcessor builds on the {@link org.apache.pdfbox.contentstream.PDFStreamEngine} via the {@link
@@ -166,5 +175,41 @@ class PDFStreamProcessor extends PDFTextStripper {
 	protected void endPage(PDPage page) throws IOException {
 		super.endPage(page);
 		page.setContents(popStream().getStream());
+	}
+	
+	/**
+	 * <i><b>Do not call this method directly</b></i><br>
+	 * Appends PDFTextStripper's {@link PDFTextStripper#showTransparencyGroup(PDTransparencyGroup)} by pushing and
+	 * popping the stream-stack accordingly.
+	 *
+	 * @param form transparency group (form) XObject
+	 * @throws IOException if the transparency group cannot be processed
+	 */
+	@Override
+	public void showTransparencyGroup(@NotNull final PDTransparencyGroup form) throws IOException {
+		Objects.requireNonNull(form);
+		LOGGER.log(Level.DEBUG, "Entering transparency group");
+		pushStream(new DoubleBufferedStream(form.getContentStream(), form.getContents()));
+		super.showTransparencyGroup(form);
+		popStream();
+		LOGGER.log(Level.DEBUG, "Exiting transparency group");
+	}
+	
+	/**
+	 * <i><b>Do not call this method directly</b></i><br>
+	 * Appends PDFTextStripper's {@link PDFTextStripper#showForm(PDFormXObject)} by pushing and popping the stream-stack
+	 * accordingly.
+	 *
+	 * @param form form XObject
+	 * @throws IOException if the form cannot be processed
+	 */
+	@Override
+	public void showForm(@NotNull final PDFormXObject form) throws IOException {
+		Objects.requireNonNull(form);
+		LOGGER.log(Level.DEBUG, "Entering formxobject");
+		pushStream(new DoubleBufferedStream(form.getContentStream(), form.getContents()));
+		super.showForm(form);
+		popStream();
+		LOGGER.log(Level.DEBUG, "Exiting formxobject");
 	}
 }
