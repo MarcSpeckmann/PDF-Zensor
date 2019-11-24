@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
+import static de.uni_hannover.se.pdfzensor.TestUtility.getResource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** CLArgsTest should contain all unit-tests related to {@link CLArgs}. */
@@ -50,7 +51,7 @@ class CLArgsTest {
 	 * Level)}.
 	 */
 	private static Stream<Arguments> testArguments() {
-		String[] inputFiles = {"src/test/resources/sample.pdf", "src/test/resources/sample.bla.pdf"};
+		String[] inputFiles = {getResource("/pdf-files/sample.pdf").getAbsolutePath(), getResource("/pdf-files/sample.bla.pdf").getAbsolutePath()};
 		String[] outputFiles = {null, "../", "file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
 		int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1)
 										 .toArray();
@@ -103,9 +104,9 @@ class CLArgsTest {
 	/** Multiple tests related to using getOutput. */
 	@Test
 	void getOutput() {
-		var cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "wrongType.txt");
+		var cla = CLArgs.fromStringArray(getResource("/pdf-files/sample.pdf").getAbsolutePath(), "-o", "wrongType.txt");
 		assertNull(cla.getOutput());
-		cla = CLArgs.fromStringArray("src/test/resources/sample.pdf", "-o", "wrongType");
+		cla = CLArgs.fromStringArray(getResource("/pdf-files/sample.pdf").getAbsolutePath(), "-o", "wrongType");
 		assertNull(cla.getOutput());
 	}
 }

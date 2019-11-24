@@ -2,25 +2,27 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.util.FileUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import javax.json.*;
+
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
 /** Stores all the necessary properties for censoring a pdf-file. */
 final class ConfigParser {
+	private static final Logger LOGGER = Logging.getLogger();
 	@Nullable
 	private final File output;
 	@Nullable
@@ -47,7 +49,9 @@ final class ConfigParser {
 	/**
 	 * @param config The configuration file that wants to be parsed.
 	 * @return An object which contains information about the parsed configuration file.
-	 * @throws IOException If the configuration file couldn't be parsed.
+	 * @throws IOException              If the configuration file couldn't be parsed.
+	 * @throws IllegalArgumentException If the passed config is not a file or does not have the suffix .json or does not
+	 *                                  contain a valid JSON string.
 	 */
 	@Contract("null -> new")
 	@NotNull
@@ -57,26 +61,15 @@ final class ConfigParser {
 			return new ConfigParser();
 		}
 		Validate.isTrue(config.isFile() && "json".equals(FileUtils.getFileExtension(config)),
-						"config-file in ConfigParser.fromFile() is not a valid config-file!");
-		if(isJsonStructure(config)) {
+						"config is not a valid config-file!");
+		try {
 			return new ObjectMapper().readValue(config, ConfigParser.class);
-		} else  { return new ConfigParser();}
-	}
-
-	/**
-	 * Checks if file contains valid json-structure
-	 * @param file file that is checked for valid json-structure
-	 * @return returns true if file has valid json-structure, otherwise false
-	 */
-	private static boolean isJsonStructure(File file) {
-		try(JsonReader reader = Json.createReader(new FileReader(file))) {
-		    reader.read().getValueType();
-		}catch (FileNotFoundException | JsonException e) {
-			return false;
+		} catch (JsonParseException | JsonMappingException e) {
+			LOGGER.warn("An invalid config was passed");
+			throw new IllegalArgumentException("config does not contain a valid JSON-string");
 		}
-		return true;
 	}
-
+	
 	@Nullable
 	private Level verboseToLevel(@Nullable final Object verbose) {
 		if (verbose instanceof String) // verbose as String
