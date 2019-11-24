@@ -20,8 +20,17 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 /**
  * The class is responsible for parsing the given command-line arguments
  */
-@Command(name = "pdf-zensor", version = DummyVersionProvider.VERSION, description = {"--Here could be your description--"})
-final class CLArgs {
+@Command(name = "pdf-zensor", version = DummyVersionProvider.VERSION, separator = " ", mixinStandardHelpOptions = true,
+		headerHeading = "%n@|bold,underline HEADER|@%n",
+		header = "--header--",
+		synopsisHeading = "%n@|bold,underline SYNOPSIS|@%n%n",
+		descriptionHeading = "%n@|bold,underline DESCRIPTION|@%n",
+		description = {"--description--"},
+		parameterListHeading = "%n@|bold,underline PARAMETERS|@%n%n",
+		optionListHeading = "%n@|bold,underline OPTIONS|@%n%n",
+		footerHeading = "%n@|bold,underline FOOTER|@%n",
+		footer = "--footer--")
+public final class CLArgs {
 	
 	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", description = {"Set the input file to censor. Required."}, arity = "1")
 	@Nullable
@@ -42,12 +51,32 @@ final class CLArgs {
 	 * @return an CLArgs object which contains all information about the parsed arguments
 	 */
 	@NotNull
-	static CLArgs fromStringArray(@NotNull final String... args) {
+	public static CLArgs fromStringArray(@NotNull final String... args) {
 		Validate.notEmpty(args);
 		final CLArgs clArgs = new CLArgs();
 		final CommandLine cmd = new CommandLine(clArgs);
 		cmd.parseArgs(Validate.noNullElements(args));
+		if (cmd.isUsageHelpRequested()) {
+			cmd.usage(System.out, createColorScheme());
+			System.exit(cmd.getCommandSpec()
+						   .exitCodeOnUsageHelp());
+		}
 		return clArgs;
+	}
+	
+	/**
+	 * The color scheme is only enabled on ANSI-compatible consoles.
+	 *
+	 * @return The Ansi color scheme for coloring the help dialog in compatible command lines.
+	 */
+	@NotNull
+	private static CommandLine.Help.ColorScheme createColorScheme() {
+		return new CommandLine.Help.ColorScheme.Builder()
+				.commands(CommandLine.Help.Ansi.Style.fg("0x0C"))
+				.options(CommandLine.Help.Ansi.Style.fg("0xD6"))
+				.optionParams(CommandLine.Help.Ansi.Style.fg("0xE2"))
+				.parameters(CommandLine.Help.Ansi.Style.fg("0x09"))
+				.build();
 	}
 	
 	/**
