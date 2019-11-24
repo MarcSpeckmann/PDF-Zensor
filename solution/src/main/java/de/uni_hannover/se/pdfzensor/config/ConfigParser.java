@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.uni_hannover.se.pdfzensor.Logging;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.util.FileUtils;
@@ -45,13 +44,16 @@ final class ConfigParser {
 	}
 	
 	/**
-	 * @param config The configuration file that wants to be parsed.
+	 * Loads the configuration from the provided file and stores it in a new instance of ConfigParser.
+	 *
+	 * @param config The configuration file that should be parsed. If null the default configuration (everything null)
+	 *               will be returned.
 	 * @return An object which contains information about the parsed configuration file.
 	 * @throws IOException              If the configuration file couldn't be found.
 	 * @throws IllegalArgumentException If the passed config is not a file or does not have the suffix .json or does not
 	 *                                  contain a valid JSON string.
 	 */
-	@Contract("null -> new")
+	@Contract("_ -> new")
 	@NotNull
 	static ConfigParser fromFile(@Nullable final File config) throws IOException {
 		if (config == null)
@@ -65,6 +67,14 @@ final class ConfigParser {
 		}
 	}
 	
+	/**
+	 * Translates the given object into a {@link Level} or null if it was not possible. {@code verbosity} may be a
+	 * string or an int. If it is an int it indexes into {@link Logging#VERBOSITY_LEVELS}. If it is too small OFF is
+	 * returned, if it is too long ALL is returned.
+	 *
+	 * @param verbose the string or integer that should be translated into a level.
+	 * @return the level corresponding to the provided verbosity.
+	 */
 	@Nullable
 	private static Level verboseToLevel(@Nullable final Object verbose) {
 		if (verbose instanceof String)
@@ -74,14 +84,26 @@ final class ConfigParser {
 		return null;
 	}
 	
+	/**
+	 * Returns the output-path as it was specified in the loaded config.
+	 *
+	 * @return The output-path as it was specified in the loaded config. Or null if none was specified.
+	 */
 	@Contract(pure = true)
 	@Nullable
 	File getOutput() {
 		return this.output;
 	}
 	
+	/**
+	 * Returns the verbosity as it was specified in the loaded config.
+	 *
+	 * @return The verbosity as it was specified in the loaded config. Or null if none was specified.
+	 */
+	@Contract(pure = true)
 	@Nullable
 	Level getVerbosity() {
-		return ObjectUtils.cloneIfPossible(this.verbose);
+		//noinspection ReturnPrivateMutableField - may be suppresed as the Level can not be overwritten.
+		return this.verbose;
 	}
 }
