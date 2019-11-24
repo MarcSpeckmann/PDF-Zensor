@@ -13,43 +13,53 @@ import static org.junit.jupiter.api.Assertions.*;
 class ConfigParserTest {
 	private static final String CONFIG_PATH = "/configparser-test/configs/";
 	
+	/**
+	 * Tests if trying to parse invalid configuration files (not a file, not a ".json" file, invalid syntax) throws the
+	 * correct exception.
+	 */
 	@Test
 	void testIllegalArguments() {
-		// If file not found throw IllegalArgumentException
+		// file not found / not a file: throw IllegalArgumentException
 		assertThrows(IllegalArgumentException.class, () -> ConfigParser.fromFile(new File("/no/path")));
-		// If path points to a directory throw IllegalArgumentException
-		assertThrows(IllegalArgumentException.class, () -> ConfigParser.fromFile(getResource("/configparser-test/")));
+		// file not a ".json": throw IllegalArgumentException
+		assertThrows(IllegalArgumentException.class,
+					 () -> ConfigParser.fromFile(getResource(CONFIG_PATH + "invalid/not_a_json.txt")));
 		
-		// invalid content of file
+		// file has JSON-String with invalid syntax
 		assertThrows(IllegalArgumentException.class, () -> ConfigParser.fromFile(getResource(
 				CONFIG_PATH + "invalid/invalid_json.json")));
-		// empty file
+		// file has no JSON-String
 		assertThrows(IllegalArgumentException.class, () -> ConfigParser.fromFile(getResource(
 				CONFIG_PATH + "invalid/empty_config.json")));
 	}
 	
+	/**
+	 * Tests if the values given in the configuration file are parsed correctly.
+	 *
+	 * @throws IOException If the configuration file couldn't be found.
+	 */
 	@Test
 	void testValidConfigurations() throws IOException {
-		// File correct
-		// Configuration file with verbosity Level.DEBUG
+		// Configuration file with verbosity specified as a string ("DEBUG") and output specified as "censoredFile.pdf"
 		var file = getResource(CONFIG_PATH + "testVerbosityAsStringValidConfig.json");
-		// Verbosity level as string
 		assertSame(Level.DEBUG, ConfigParser.fromFile(file).getVerbosity());
-		// Check output not null
-		assertNotNull(Objects.requireNonNull(ConfigParser.fromFile(file).getOutput()).toString());
-		// Check output file name == "censoredFile.pdf"
-		assertEquals("censoredFile.pdf", Objects.requireNonNull(ConfigParser.fromFile(file).getOutput()).toString());
+		assertEquals("censoredFile.pdf", Objects.requireNonNull(ConfigParser.fromFile(file).getOutput()).getName());
 		
-		// Verbosity level as integer
+		// Configuration file with verbosity specified as an integer (5) and output specified as "censoredFile.pdf"
 		file = getResource(CONFIG_PATH + "testVerbosityAsIntegerValidConfig.json");
-		// Level Debug as integer in json file
 		assertSame(Level.DEBUG, ConfigParser.fromFile(file).getVerbosity());
+		assertEquals("censoredFile.pdf", Objects.requireNonNull(ConfigParser.fromFile(file).getOutput()).getName());
 		
-		// null as file to retrieve the default config (everything set null)
+		// null as file to retrieve the default config (everything set to null)
 		assertSame(null, ConfigParser.fromFile(null).getVerbosity());
 		assertSame(null, ConfigParser.fromFile(null).getOutput());
 	}
 	
+	/**
+	 * Tests if theoretically invalid values for verbosity are either clamped correctly or discarded.
+	 *
+	 * @throws IOException If the configuration file couldn't be found.
+	 */
 	@Test
 	void testInvalidValueFallbacks() throws IOException {
 		// Verbosity level as integer higher than the highest possible value (> 7)
@@ -63,6 +73,5 @@ class ConfigParserTest {
 		// False verbosity string in configurations json file
 		file = getResource(CONFIG_PATH + "testConfigFalseVerbosityString.json");
 		assertNull(ConfigParser.fromFile(file).getVerbosity());
-		
 	}
 }
