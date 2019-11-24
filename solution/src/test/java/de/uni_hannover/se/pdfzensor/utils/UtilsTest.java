@@ -6,14 +6,10 @@ import org.junit.jupiter.api.Test;
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * UtilsTest should contain all unit-tests related to {@link Utils}.
- */
+/** UtilsTest should contain all unit-tests related to {@link Utils}. */
 class UtilsTest {
 	
-	/**
-	 * Multiple tests related of using fitToArray
-	 */
+	/** Multiple tests related of using fitToArray. */
 	@Test
 	void fitToArray() {
 		TestUtility.assertIsUtilityClass(Utils.class);
@@ -29,9 +25,7 @@ class UtilsTest {
 		
 	}
 	
-	/**
-	 * Multiple tests related to method call fitToArray with an empty array
-	 */
+	/** Multiple tests related to method call fitToArray with an empty array. */
 	@Test
 	void fitToArrayEmptyArray() {
 		//test empty array
@@ -41,9 +35,7 @@ class UtilsTest {
 		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyarray, 0));
 	}
 	
-	/**
-	 * Multiple tests related to method call fitToArray with null instead an array
-	 */
+	/** Multiple tests related to method call fitToArray with null instead an array. */
 	@Test
 	void fitToArrayNullArray() {
 		//test null array
@@ -52,9 +44,7 @@ class UtilsTest {
 		assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, 0));
 	}
 	
-	/**
-	 * Multiple tests related to method call clamp with null
-	 */
+	/** Multiple tests related to method call clamp with null. */
 	@Test
 	void clampNull() {
 		//test null
@@ -67,9 +57,7 @@ class UtilsTest {
 		assertThrows(NullPointerException.class, () -> Utils.clamp(0, null, 0));
 	}
 	
-	/**
-	 * Multiple tests related of using fitToArray
-	 */
+	/** Multiple tests related to using fitToArray. */
 	@Test
 	void clamp() {
 		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 1, 0));
