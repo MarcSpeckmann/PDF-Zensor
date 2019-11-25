@@ -20,7 +20,8 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 /**
  * The class is responsible for parsing the given command-line arguments
  */
-@Command(name = "pdf-zensor", version = DummyVersionProvider.VERSION, separator = " ", mixinStandardHelpOptions = true,
+//TODO: Make help beautiful
+@Command(name = "pdf-zensor", versionProvider = VersionProvider.class, separator = " ", mixinStandardHelpOptions = true,
 		headerHeading = "%n@|bold,underline HEADER|@%n",
 		header = "--header--",
 		synopsisHeading = "%n@|bold,underline SYNOPSIS|@%n%n",
@@ -30,7 +31,7 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 		optionListHeading = "%n@|bold,underline OPTIONS|@%n%n",
 		footerHeading = "%n@|bold,underline FOOTER|@%n",
 		footer = "--footer--")
-public final class CLArgs {
+final class CLArgs {
 	
 	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", description = {"Set the input file to censor. Required."}, arity = "1")
 	@Nullable
@@ -56,27 +57,7 @@ public final class CLArgs {
 		final CLArgs clArgs = new CLArgs();
 		final CommandLine cmd = new CommandLine(clArgs);
 		cmd.parseArgs(Validate.noNullElements(args));
-		if (cmd.isUsageHelpRequested()) {
-			cmd.usage(System.out, createColorScheme());
-			System.exit(cmd.getCommandSpec()
-						   .exitCodeOnUsageHelp());
-		}
 		return clArgs;
-	}
-	
-	/**
-	 * The color scheme is only enabled on ANSI-compatible consoles.
-	 *
-	 * @return The Ansi color scheme for coloring the help dialog in compatible command lines.
-	 */
-	@NotNull
-	private static CommandLine.Help.ColorScheme createColorScheme() {
-		return new CommandLine.Help.ColorScheme.Builder()
-				.commands(CommandLine.Help.Ansi.Style.fg("0x0C"))
-				.options(CommandLine.Help.Ansi.Style.fg("0xD6"))
-				.optionParams(CommandLine.Help.Ansi.Style.fg("0xE2"))
-				.parameters(CommandLine.Help.Ansi.Style.fg("0x09"))
-				.build();
 	}
 	
 	/**
