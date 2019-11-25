@@ -35,7 +35,7 @@ class UtilsTest {
 		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyarray, 0));
 	}
 	
-	/** Multiple tests related to method call fitToArray with null instead an array. */
+	/** Multiple tests related to method call fitToArray with null instead of an array. */
 	@Test
 	void fitToArrayNullArray() {
 		//test null array
