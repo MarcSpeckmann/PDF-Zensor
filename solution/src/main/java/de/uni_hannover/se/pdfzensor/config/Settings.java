@@ -22,9 +22,6 @@ import java.util.regex.Pattern;
  * prioritized correctly.
  */
 public final class Settings {
-	
-	private static final String SIX_DIGIT_HEX_PATTERN = "(?i)^(0x|#)[0-9a-f]{6}$";
-	private static final String THREE_DIGIT_HEX_PATTERN = "(?i)^(0x|#)[0-9a-f]{3}$";
 	private static final String DEFAULT_CENSOR_COLOR = "#000000";
 	
 	@NotNull
@@ -67,23 +64,6 @@ public final class Settings {
 		logger.log(Level.DEBUG, "\tDefined-Expressions");
 		for (var exp : expressions)
 			logger.log(Level.DEBUG, "\t\t{}", exp);
-	}
-	
-	/**
-	 * @param hexCode A string containing a hexadecimal color code.
-	 * @return The awt.Color of the hexadecimal color code or null, if the given string was null.
-	 */
-	@Contract("null -> null")
-	@Nullable
-	// TODO: move to utils
-	static Color getColorOrNull(@Nullable String hexCode) {
-		if (hexCode == null) return null;
-		if (hexCode.matches(THREE_DIGIT_HEX_PATTERN)) {//replace 0X and 0x by # and than double each hex-digit
-			hexCode = hexCode.replaceFirst("(?i)0x", "#")
-							 .replaceAll("(?i)[0-9A-F]", "$0$0");
-		}
-		Validate.matchesPattern(hexCode, SIX_DIGIT_HEX_PATTERN, "Must be a valid hex color code.");
-		return Color.decode(hexCode);
 	}
 	
 	@NotNull

@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.util.Objects;
 
+import static de.uni_hannover.se.pdfzensor.utils.Utils.getColorOrNull;
+
 /**
  * A class containing regular expressions and information on the color with which to censor text which matches the
  * regular expression.
@@ -30,7 +32,7 @@ final class Expression {
 	Expression(@NotNull @JsonProperty("regex") final String regex,
 			   @Nullable @JsonProperty("color") final String hexColor) {
 		this.regex = Objects.requireNonNull(regex);
-		this.color = Settings.getColorOrNull(hexColor);
+		this.color = getColorOrNull(hexColor);
 	}
 	
 	/**
