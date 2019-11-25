@@ -44,14 +44,14 @@ public final class Settings {
 	 * @throws IOException If the configuration file could not be parsed.
 	 */
 	public Settings(@NotNull final String... args) throws IOException {
-		final var cla = CLArgs.fromStringArray(args);
+		final var clargs = CLArgs.fromStringArray(args);
 		final var config = getDefaultConfig();
 		final var cp = ConfigParser.fromFile(config);
-		final var verbose = ObjectUtils.firstNonNull(cla.getVerbosity(), cp.getVerbosity(), Level.OFF);
+		final var verbose = ObjectUtils.firstNonNull(clargs.getVerbosity(), cp.getVerbosity(), Level.OFF);
 		Logging.init(verbose);
 		
-		input = cla.getInput();
-		output = ObjectUtils.firstNonNull(checkOutput(cla.getOutput()), checkOutput(cp.getOutput()), getDefaultOutput(
+		input = clargs.getInput();
+		output = ObjectUtils.firstNonNull(checkOutput(clargs.getOutput()), checkOutput(cp.getOutput()), getDefaultOutput(
 				input.getParent()));
 		linkColor = Color.BLUE;
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
