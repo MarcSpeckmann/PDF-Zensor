@@ -59,10 +59,7 @@ class SettingsTest {
 		assertThrows(IllegalArgumentException.class, () -> new Settings(new String[2]));
 		// if the command line argument is given but not valid
 		// split uses whitespace as delimiter and splits the single string into an array of multiple strings for using it as an argument
-		assertThrows(picocli.CommandLine.OverwrittenOptionException.class, () -> new Settings("pdf-zensor", "\"NichtExistenteDatei.pdf\""));
-		// for this test there has to be a zensieren.pdf file in the same directory but no config.json
-		assertThrows(picocli.CommandLine.OverwrittenOptionException.class,
-					 () -> new Settings("pdf-zensor", "\"zensieren.pdf\"", "-c", "\"config.json\""));
+		assertThrows(IllegalArgumentException.class, () -> new Settings("\"NichtExistenteDatei.pdf\""));
 	}
 	
 	/**
