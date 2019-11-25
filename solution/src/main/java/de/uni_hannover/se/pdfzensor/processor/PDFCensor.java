@@ -7,14 +7,17 @@ import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 
 
-
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public final class PDFCensor implements PDFHandler {
+    private Predicate<Rectangle2D> removePredicate;
 
     public PDFCensor(@NotNull Settings settings) throws IOException {
         Objects.requireNonNull(settings);
+        this.removePredicate = rect -> true;
     }
 
     @Override
