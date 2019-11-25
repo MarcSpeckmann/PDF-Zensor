@@ -3,7 +3,6 @@ package de.uni_hannover.se.pdfzensor.config;
 import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.util.FileUtils;
 import org.jetbrains.annotations.Contract;
@@ -15,7 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Pattern;
+
+import static de.uni_hannover.se.pdfzensor.utils.Utils.colorToString;
 
 /**
  * The class which holds all the settings from the parsed configuration file and commandline arguments, validated and
@@ -128,18 +128,5 @@ public final class Settings {
 				.filter(f -> "json".equals(FileUtils.getFileExtension(f)))
 				.map(File::getAbsoluteFile)
 				.orElse(null);
-	}
-	
-	/**
-	 * @param color The color to convert into a hexadecimal color code.
-	 * @return The hexadecimal color code representing the given color.
-	 */
-	@NotNull
-	@Contract("_ -> !null")
-	// TODO: move to utils
-	public static String colorToString(@Nullable Color color) {
-		return Optional.ofNullable(color)
-				.map(c -> String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue()))
-				.orElse("null");
 	}
 }

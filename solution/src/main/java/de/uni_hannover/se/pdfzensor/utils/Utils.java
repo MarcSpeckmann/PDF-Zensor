@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Utils is a simple utility-class that provides only the {@link #fitToArray(Object[], int)} method to the outside. This
@@ -80,7 +81,20 @@ public final class Utils {
 			hexCode = hexCode.replaceFirst("(?i)0x", "#")
 							 .replaceAll("(?i)[0-9A-F]", "$0$0");
 		}
-		Validate.matchesPattern(hexCode, SIX_DIGIT_HEX_PATTERN, "Must be a valid hex color code.");
+		Validate.matchesPattern(hexCode, SIX_DIGIT_HEX_PATTERN, hexCode+" is not a valid hex color code.");
 		return Color.decode(hexCode);
+	}
+	
+	
+	/**
+	 * @param color The color to convert into a hexadecimal color code.
+	 * @return The hexadecimal color code representing the given color.
+	 */
+	@NotNull
+	@Contract("_ -> !null")
+	public static String colorToString(@Nullable Color color) {
+		return Optional.ofNullable(color)
+					   .map(c -> String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue()))
+					   .orElse("null");
 	}
 }

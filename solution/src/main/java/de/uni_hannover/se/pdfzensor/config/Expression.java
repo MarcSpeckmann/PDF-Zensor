@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.util.Objects;
 
-import static de.uni_hannover.se.pdfzensor.utils.Utils.getColorOrNull;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 
 /**
  * A class containing regular expressions and information on the color with which to censor text which matches the
@@ -59,6 +59,6 @@ final class Expression {
 	@NotNull
 	@Override
 	public String toString() {
-		return String.format("\"%s\" - %s", regex, Settings.colorToString(color));
+		return String.format("\"%s\" - %s", regex, colorToString(color));
 	}
 }

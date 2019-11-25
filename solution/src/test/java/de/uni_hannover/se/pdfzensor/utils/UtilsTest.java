@@ -15,14 +15,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.config.Settings.colorToString;
-import static de.uni_hannover.se.pdfzensor.utils.Utils.getColorOrNull;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** UtilsTest should contain all unit-tests related to {@link Utils}. */
-class UtilsTest {
+public class UtilsTest {
 	private static final String[] COLOR_PREFIXES = {"0X", "0x", "#"};
-	private static final Map<Color, String[]> COLORS = new HashMap<>();
+	public static final Map<Color, String[]> COLORS = new HashMap<>();
 	
 	static {
 		COLORS.put(Color.black, new String[]{"000", "000000"});
