@@ -46,12 +46,12 @@ public final class Settings {
 	public Settings(@NotNull final String... args) throws IOException {
 		final var clargs = CLArgs.fromStringArray(args);
 		final var config = getDefaultConfig();
-		final var cp = ConfigParser.fromFile(config);
-		final var verbose = ObjectUtils.firstNonNull(clargs.getVerbosity(), cp.getVerbosity(), Level.OFF);
+		final var configParser = ConfigParser.fromFile(config);
+		final var verbose = ObjectUtils.firstNonNull(clargs.getVerbosity(), configParser.getVerbosity(), Level.OFF);
 		Logging.init(verbose);
 		
 		input = clargs.getInput();
-		output = ObjectUtils.firstNonNull(checkOutput(clargs.getOutput()), checkOutput(cp.getOutput()), getDefaultOutput(
+		output = ObjectUtils.firstNonNull(checkOutput(clargs.getOutput()), checkOutput(configParser.getOutput()), getDefaultOutput(
 				input.getParent()));
 		linkColor = Color.BLUE;
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
