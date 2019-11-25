@@ -15,40 +15,35 @@ class UtilsTest {
 		TestUtility.assertIsUtilityClass(Utils.class);
 		
 		assertEquals(0, Utils.fitToArray(VERBOSITY_LEVELS, -1));
-		for (int i = 0; i < VERBOSITY_LEVELS.length; i++) {
+		for (int i = 0; i < VERBOSITY_LEVELS.length; i++)
 			assertEquals(i, Utils.fitToArray(VERBOSITY_LEVELS, i));
-		}
 		
 		assertEquals(VERBOSITY_LEVELS.length - 1, Utils.fitToArray(VERBOSITY_LEVELS, VERBOSITY_LEVELS.length + 1));
 		assertEquals(VERBOSITY_LEVELS.length - 1, Utils.fitToArray(VERBOSITY_LEVELS, VERBOSITY_LEVELS.length));
-		
-		
 	}
 	
 	/** Multiple tests related to method call fitToArray with an empty array. */
 	@Test
 	void fitToArrayEmptyArray() {
-		//test empty array
-		String[] emptyarray = new String[0];
-		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyarray, 1));
-		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyarray, -1));
-		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyarray, 0));
+		var emptyArray = new Object[0];
+		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyArray, 1));
+		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyArray, -1));
+		assertThrows(IllegalArgumentException.class, () -> Utils.fitToArray(emptyArray, 0));
 	}
 	
 	/** Multiple tests related to method call fitToArray with null instead of an array. */
+	@SuppressWarnings("ConstantConditions") //may be suppressed here as want to ensure that null values throw an error
 	@Test
 	void fitToArrayNullArray() {
-		//test null array
-		//TODO the following tests does not Work yet
-		//assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, 1));
-		//assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, -1));
-		//assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, 0));
+		assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, 1));
+		assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, -1));
+		assertThrows(NullPointerException.class, () -> Utils.fitToArray(null, 0));
 	}
 	
 	/** Multiple tests related to method call clamp with null. */
+	@SuppressWarnings("ConstantConditions") //may be suppressed here as want to ensure that null values throw an error
 	@Test
-	void clampNull() {
-		//test null
+	void clampInvalidArguments() {
 		assertThrows(NullPointerException.class, () -> Utils.clamp(null, null, null));
 		assertThrows(NullPointerException.class, () -> Utils.clamp(null, 0, 0));
 		assertThrows(NullPointerException.class, () -> Utils.clamp(0, 0, null));
@@ -56,13 +51,14 @@ class UtilsTest {
 		assertThrows(NullPointerException.class, () -> Utils.clamp(null, 0, 0));
 		assertThrows(NullPointerException.class, () -> Utils.clamp(0, 0, null));
 		assertThrows(NullPointerException.class, () -> Utils.clamp(0, null, 0));
+		
+		//Issue: max < min
+		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 1, 0));
 	}
 	
 	/** Multiple tests related to using fitToArray. */
 	@Test
 	void clamp() {
-		assertThrows(IllegalArgumentException.class, () -> Utils.clamp(0, 1, 0));
-		
 		assertEquals(1, Utils.clamp(0, 1, 6));
 		assertEquals(4, Utils.clamp(6, 2, 4));
 		assertEquals(2, Utils.clamp(2, 1, 3));
