@@ -53,16 +53,15 @@ class SettingsTest {
 	@Test
 	void testSettings() {
 		// if the command line argument is not given or has a faulty structure
-		//TODO the following test does not Work yet
-		//assertThrows(NullPointerException.class, () -> new Settings(null));
+		// following test should be right but test in CLArgsTest is not running!!
+		// TODO: uncomment if CLArgsTest is fixed
+		// assertThrows(NullPointerException.class, () -> new Settings(null));
 		assertThrows(IllegalArgumentException.class, () -> new Settings(new String[2]));
 		// if the command line argument is given but not valid
 		// split uses whitespace as delimiter and splits the single string into an array of multiple strings for using it as an argument
-		//
-		assertThrows(picocli.CommandLine.UnmatchedArgumentException.class,
-					 () -> new Settings("pdf-zensor", "\"NichtExistenteDatei.pdf\""));
+		assertThrows(picocli.CommandLine.OverwrittenOptionException.class, () -> new Settings("pdf-zensor", "\"NichtExistenteDatei.pdf\""));
 		// for this test there has to be a zensieren.pdf file in the same directory but no config.json
-		assertThrows(picocli.CommandLine.UnmatchedArgumentException.class,
+		assertThrows(picocli.CommandLine.OverwrittenOptionException.class,
 					 () -> new Settings("pdf-zensor", "\"zensieren.pdf\"", "-c", "\"config.json\""));
 	}
 	
