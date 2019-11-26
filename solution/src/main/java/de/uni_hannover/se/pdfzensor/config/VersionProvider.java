@@ -4,24 +4,25 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 
 /**
- * TODO: Add Javadoc
+ * This Class provides the version for {@link CLHelp} and implements {@link picocli.CommandLine.IVersionProvider}
  */
 public final class VersionProvider implements CommandLine.IVersionProvider {
 	
 	/**
-	 * TODO: Add JavaDoc
+	 * Returns version of the project
 	 *
-	 * @return
-	 * @throws Exception
+	 * @return project version
+	 * @throws IOException
 	 */
 	@NotNull
 	@Contract(value = " -> new", pure = true)
 	@Override
-	public String[] getVersion() throws Exception {
+	public String[] getVersion() throws IOException {
 		final Properties properties = new Properties();
 		properties.load(Objects.requireNonNull(this.getClass()
 												   .getResourceAsStream("/project.properties")));
