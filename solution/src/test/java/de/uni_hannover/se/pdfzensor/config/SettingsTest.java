@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,5 +67,20 @@ class SettingsTest {
 		final var settings = new Settings(args);
 		assertEquals(input, settings.getInput());
 		assertEquals(output, settings.getOutput());
+	}
+	
+	/** Unit-tests for function getLinkColor */
+	@Test
+	void getLinkColor(String[] args, Color linkColor) throws IOException {
+		final var settings = new Settings(args);
+		assertEquals(linkColor, settings.getLinkColor());
+	}
+	
+	/** Unit-tests for function getExpressions */
+	@Test
+	void getExpressions() throws IOException {
+		//TODO
+		final var settings = new Settings(getResource("/pdf-files/sample.pdf").getAbsolutePath());
+		assertEquals(new Expression[]{new Expression(".", "#000000")}, settings.getExpressions());
 	}
 }
