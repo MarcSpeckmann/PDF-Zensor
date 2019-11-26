@@ -22,7 +22,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	private boolean removedLastTextPosition = false;
 	
 	/**
-	 * The processor informs the handler about important events and transfers the documents..
+	 * The processor informs the handler about important events and transfers the documents.
 	 *
 	 * @param handler the internal handler which acts to process the documents.
 	 * @throws IOException if no superior class does not exist
@@ -64,8 +64,8 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processTextPosition(final TextPosition text) {
-		super.processTextPosition(text);
 		removedLastTextPosition = handler.shouldCensorText(text);
+        super.processTextPosition(text);
 	}
 	
 	/**
@@ -76,8 +76,8 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void endPage(final PDPage page) throws IOException {
-		super.endPage(page);
 		handler.endPage(document, page, document.getPages().indexOf(page));
+		super.endPage(page);
 	}
 	
 	/**
@@ -88,8 +88,8 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void endDocument(final PDDocument document) throws IOException {
-		super.endDocument(document);
 		handler.endDocument(document);
+		super.endDocument(document);
 	}
 	
 	/**
