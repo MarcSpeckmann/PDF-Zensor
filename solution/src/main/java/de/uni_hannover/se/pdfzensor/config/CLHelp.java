@@ -1,10 +1,9 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Help.Ansi.Style;
-import picocli.CommandLine.Help.ColorScheme;
 import picocli.CommandLine.ParseResult;
 
 /**
@@ -15,6 +14,7 @@ public final class CLHelp {
 	/**
 	 * Private constructor of {@link CLHelp}
 	 */
+	@Contract(pure = true)
 	private CLHelp() {
 	}
 	
@@ -27,10 +27,11 @@ public final class CLHelp {
 	public static boolean printStandardHelpOptionsIfRequested(String... args) {
 		var cmd = new CommandLine(CLHelp.class);
 		if (isVersionOrHelpRequested(cmd.parseArgs(args))) {
-			if (cmd.isVersionHelpRequested())
-				new CommandLine(CLArgs.class).printVersionHelp(System.out);
-			if (cmd.isUsageHelpRequested())
+			if (cmd.isUsageHelpRequested()) {
 				new CommandLine(CLArgs.class).usage(System.out);
+			} else if (cmd.isVersionHelpRequested()) {
+				new CommandLine(CLArgs.class).printVersionHelp(System.out);
+			}
 			return true;
 		}
 		return false;

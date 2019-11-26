@@ -24,6 +24,7 @@ class CLArgsTest {
 	 * Creates arguments for a function call of {@link #testArgsParser(String[], File, File, Level)} from the provided
 	 * data.
 	 */
+	@NotNull
 	private static Arguments createArgument(@NotNull String in, @Nullable String out, int lvl) {
 		var arguments = new ArrayList<String>();
 		arguments.add(in);
