@@ -30,7 +30,7 @@ public final class CLHelp {
 			if (cmd.isVersionHelpRequested())
 				new CommandLine(CLArgs.class).printVersionHelp(System.out);
 			if (cmd.isUsageHelpRequested())
-				new CommandLine(CLArgs.class).usage(System.out, createColorScheme());
+				new CommandLine(CLArgs.class).usage(System.out);
 			return true;
 		}
 		return false;
@@ -44,20 +44,5 @@ public final class CLHelp {
 	 */
 	private static boolean isVersionOrHelpRequested(@NotNull ParseResult pr) {
 		return pr.isUsageHelpRequested() || pr.isVersionHelpRequested();
-	}
-	
-	/**
-	 * The color scheme is only enabled on ANSI-compatible consoles.
-	 *
-	 * @return The Ansi color scheme for coloring the help dialog in compatible command lines.
-	 */
-	@NotNull
-	private static ColorScheme createColorScheme() {
-		return new ColorScheme.Builder()
-				.commands(Style.fg("0x0C"))
-				.options(Style.fg("0xD6"))
-				.optionParams(Style.fg("0xE2"))
-				.parameters(Style.fg("0x09"))
-				.build();
 	}
 }
