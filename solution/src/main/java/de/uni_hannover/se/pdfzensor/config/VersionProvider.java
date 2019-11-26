@@ -14,6 +14,7 @@ public final class VersionProvider implements CommandLine.IVersionProvider {
 	
 	/**
 	 * TODO: Add JavaDoc
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -23,8 +24,7 @@ public final class VersionProvider implements CommandLine.IVersionProvider {
 	public String[] getVersion() throws Exception {
 		final Properties properties = new Properties();
 		properties.load(Objects.requireNonNull(this.getClass()
-												   .getClassLoader()
-												   .getResourceAsStream("project.properties")));
+												   .getResourceAsStream("/project.properties")));
 		String[] version = {properties.getProperty("version")};
 		return version;
 	}

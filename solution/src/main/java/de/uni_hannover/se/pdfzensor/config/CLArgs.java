@@ -52,7 +52,7 @@ final class CLArgs {
 	 * @return an CLArgs object which contains all information about the parsed arguments
 	 */
 	@NotNull
-	public static CLArgs fromStringArray(@NotNull final String... args) {
+	static CLArgs fromStringArray(@NotNull final String... args) {
 		Validate.notEmpty(args);
 		final CLArgs clArgs = new CLArgs();
 		final CommandLine cmd = new CommandLine(clArgs);
