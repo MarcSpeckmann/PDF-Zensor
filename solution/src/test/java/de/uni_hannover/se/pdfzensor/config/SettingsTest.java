@@ -79,8 +79,8 @@ class SettingsTest {
 	/** Unit-tests for function getExpressions */
 	@Test
 	void getExpressions() throws IOException {
-		//TODO
 		final var settings = new Settings(getResource("/pdf-files/sample.pdf").getAbsolutePath());
-		assertEquals(new Expression[]{new Expression(".", "#000000")}, settings.getExpressions());
+		assertEquals(new Expression[]{new Expression(".", "#000000")}[0].getColor(),
+				     settings.getExpressions()[0].getColor());
 	}
 }
