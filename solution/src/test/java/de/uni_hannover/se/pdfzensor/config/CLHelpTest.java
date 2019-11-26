@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.config;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CLHelpTest {
 	
 	/**
-	 * Creates arguments for a function call of {@link #printStandardHelpOptionsIfRequested(String[], String, boolean,
-	 * boolean)}
+	 * Creates arguments for a function call of {@link #printStandardHelpOptionsIfRequested(String[], File, boolean, boolean)}
 	 */
 	@NotNull
 	private static Arguments createArgumentCLHelp(@NotNull String in, boolean help, boolean version) {
@@ -35,8 +33,7 @@ class CLHelpTest {
 	}
 	
 	/**
-	 * Provides a stream with the arguments for thorough testing of {@link #printStandardHelpOptionsIfRequested(String[],
-	 * String, boolean, boolean)}.
+	 * Provides a stream with the arguments for thorough testing of {@link #printStandardHelpOptionsIfRequested(String[], File, boolean, boolean)}.
 	 */
 	private static Stream<Arguments> testArgumentsCLHelp() {
 		String inputFile = "src/test/resources/sample.pdf";
@@ -50,9 +47,9 @@ class CLHelpTest {
 	}
 	
 	/**
-	 *
+	 *	Multiple test on different inputs
 	 */
-	@ParameterizedTest(name = "Run {index}: help {2}: version {3}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, help: {2}, version: {3}")
 	@MethodSource("testArgumentsCLHelp")
 	void printStandardHelpOptionsIfRequested(String[] args, File inFile, boolean help, boolean version) {
 		final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -65,7 +62,7 @@ class CLHelpTest {
 			assertTrue(outContent.toString()
 								 .length() > 10);
 		}else{
-			assertTrue(!CLHelp.printStandardHelpOptionsIfRequested(args));
+			assertFalse(CLHelp.printStandardHelpOptionsIfRequested(args));
 		}
 		System.setOut(originalOut);
 		

@@ -25,7 +25,7 @@ public final class CLHelp {
 	 * @return true if help or version is requested
 	 */
 	public static boolean printStandardHelpOptionsIfRequested(String... args) {
-		var cmd = new CommandLine(CLHelp.class);
+		var cmd = new CommandLine(CLArgs.class);
 		if (isVersionOrHelpRequested(cmd.parseArgs(args))) {
 			if (cmd.isUsageHelpRequested()) {
 				new CommandLine(CLArgs.class).usage(System.out);
