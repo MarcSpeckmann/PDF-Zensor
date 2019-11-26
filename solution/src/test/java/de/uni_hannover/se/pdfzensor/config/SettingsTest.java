@@ -80,7 +80,9 @@ class SettingsTest {
 	@Test
 	void getExpressions() throws IOException {
 		final var settings = new Settings(getResource("/pdf-files/sample.pdf").getAbsolutePath());
-		assertEquals(new Expression[]{new Expression(".", "#000000")}[0].getColor(),
-				     settings.getExpressions()[0].getColor());
+		for (int i = 0; i < settings.getExpressions().length; i++) {
+			assertEquals(new Expression[]{new Expression(".", "#000000")}[0].getColor(),
+						 settings.getExpressions()[i].getColor());
+		}
 	}
 }
