@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.util.FileUtils;
@@ -74,7 +75,8 @@ final class CLArgs {
 	@Nullable
 	final File getOutput() {
 		return Optional.ofNullable(output)
-					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)) || f.isDirectory())
+					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)) || f.isDirectory() || StringUtils
+							   .isEmpty(FileUtils.getFileExtension(f)))
 					   .map(File::getAbsoluteFile)
 					   .orElse(null);
 	}

@@ -3,6 +3,7 @@ package de.uni_hannover.se.pdfzensor.config;
 import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.util.FileUtils;
 import org.jetbrains.annotations.Contract;
@@ -100,7 +101,7 @@ public final class Settings {
 	private File checkOutput(@Nullable final File out) {
 		if (out == null) return null;
 		if ("pdf".equals(FileUtils.getFileExtension(out))) return out.getAbsoluteFile();
-		if (out.isDirectory()) return getDefaultOutput(out.getPath());
+		if (out.isDirectory() || StringUtils.isEmpty(FileUtils.getFileExtension(out))) return getDefaultOutput(out.getPath());
 		return null;
 	}
 	
