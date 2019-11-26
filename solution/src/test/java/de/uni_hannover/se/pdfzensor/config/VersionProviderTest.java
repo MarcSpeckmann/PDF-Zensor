@@ -14,7 +14,9 @@ class VersionProviderTest {
 	 */
 	@Test
 	void getVersion() {
-		//TODO: implement tests
-		fail("No tests implemented yet");
+		var versionProvider = new VersionProvider();
+		assertDoesNotThrow(versionProvider::getVersion);
+		assertNotNull(versionProvider.getVersion());
+		assertTrue(versionProvider.getVersion().length > 0, "The version output has no lines");
 	}
 }
