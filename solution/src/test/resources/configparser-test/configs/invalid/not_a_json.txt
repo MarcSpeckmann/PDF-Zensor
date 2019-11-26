@@ -1,0 +1,4 @@
+{
+  "verbose": -3,
+  "output":"censoredFile.pdf"
+}
