@@ -29,7 +29,7 @@ public final class TestUtility {
 	 */
 	public static void assertIsUtilityClass(@NotNull Class<?> cls) {
 		assertNotNull(cls);
-		assertTrue(Modifier.isFinal(cls.getModifiers()));
+		assertTrue(Modifier.isFinal(cls.getModifiers()), "A utility class should be final");
 		for (var c : cls.getDeclaredConstructors())
 			assertEquals(0, c.getParameterCount(),
 						 String.format("%s may not contain any constructor other than the default", cls.getName()));
