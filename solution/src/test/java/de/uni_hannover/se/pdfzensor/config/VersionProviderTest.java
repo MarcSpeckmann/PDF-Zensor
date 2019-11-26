@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * TODO: Add JavaDoc
+ * CLHelpTest should contain all unit-tests related to {@link VersionProvider}.
  */
 class VersionProviderTest {
 	

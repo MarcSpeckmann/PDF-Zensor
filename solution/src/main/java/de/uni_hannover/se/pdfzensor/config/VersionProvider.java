@@ -17,7 +17,7 @@ public final class VersionProvider implements CommandLine.IVersionProvider {
 	 * Returns version of the project
 	 *
 	 * @return project version
-	 * @throws IOException
+	 * @throws IOException if project.properties is can not be loaded
 	 */
 	@NotNull
 	@Contract(value = " -> new", pure = true)
@@ -26,8 +26,7 @@ public final class VersionProvider implements CommandLine.IVersionProvider {
 		final Properties properties = new Properties();
 		properties.load(Objects.requireNonNull(this.getClass()
 												   .getResourceAsStream("/project.properties")));
-		String[] version = {"PDF-Zensor","Version: " + properties.getProperty("version"), "Build: " + properties.getProperty("timestamp")};
-		return version;
+		return new String[]{"PDF-Zensor", "Version: " + properties.getProperty("version"), "Build: " + properties.getProperty("timestamp")};
 	}
 }
 
