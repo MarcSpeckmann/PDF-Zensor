@@ -37,12 +37,13 @@ public final class Settings {
 	 * Constructs the settings object from the configuration file and the commandline arguments. The settings of this
 	 * object will be logged at {@link Level#DEBUG}.
 	 *
+	 * @param configPath the path to the config file (SHOULD BE REMOVED LATER)
 	 * @param args The commandline arguments.
 	 * @throws IOException If the configuration file could not be parsed.
 	 */
-	public Settings(@NotNull final String... args) throws IOException {
+	public Settings(@NotNull String configPath,@NotNull final String... args) throws IOException {
 		final var clargs = CLArgs.fromStringArray(args);
-		final var config = getDefaultConfig();
+		final var config = getDefaultConfig(configPath);
 		final var configParser = ConfigParser.fromFile(config);
 		final var verbose = ObjectUtils.firstNonNull(clargs.getVerbosity(), configParser.getVerbosity(), Level.OFF);
 		Logging.init(verbose);
@@ -120,9 +121,8 @@ public final class Settings {
 	 * @return The absolute default configuration file or null if it did not exist.
 	 */
 	@Nullable
-	private File getDefaultConfig() {
-		// TODO: set proper default config
-		final var c = new File("config.json");
+	private File getDefaultConfig(String configPath) {
+		final var c = new File(configPath);
 		return Optional.of(c)
 				.filter(File::isFile)
 				.filter(f -> "json".equals(FileUtils.getFileExtension(f)))

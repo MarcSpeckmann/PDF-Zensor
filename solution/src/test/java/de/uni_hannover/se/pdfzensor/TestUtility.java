@@ -66,5 +66,18 @@ public final class TestUtility {
 		var caller = StackLocatorUtil.getCallerClass(2);
 		return new File(URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8));
 	}
-	
+	/**
+	 * Retrieves the Absolute Path of the given resource from the provided location. This will use the caller-class' {@link
+	 * Class#getResource(String)}.
+	 *
+	 * @param path the path in the resources to get the Absolute Path from. Should not be null and should start with a slash.
+	 * @return the Absolute Path of the given resource-path.
+	 */
+	@NotNull
+	@Contract("_ -> new")
+	public static String getResourcePath(@NotNull String path) {
+		Objects.requireNonNull(path);
+		var caller = StackLocatorUtil.getCallerClass(2);
+		return URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8);
+	}
 }
