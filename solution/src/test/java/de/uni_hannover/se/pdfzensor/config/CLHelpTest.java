@@ -1,6 +1,8 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import de.uni_hannover.se.pdfzensor.TestUtility;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,6 +48,14 @@ class CLHelpTest {
 			for (boolean version : bools)
 				list.add(createArgumentCLHelp(inputFile, help, version));
 		return list.stream();
+	}
+	
+	/**
+	 * Basic tests related to {@link CLHelp}
+	 */
+	@Test
+	void testCLHelp() {
+		TestUtility.assertIsUtilityClass(CLHelp.class);
 	}
 	
 	/**
