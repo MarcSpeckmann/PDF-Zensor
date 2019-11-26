@@ -8,15 +8,15 @@ import picocli.CommandLine.Help.ColorScheme;
 import picocli.CommandLine.ParseResult;
 
 /**
- * TODO: ADD JavaDoc
+ * The class is responsible for printing version and help if requested
  */
 @Command(mixinStandardHelpOptions = true)
 public final class CLHelp {
 	/**
-	 * TODO: ADD JavaDoc
+	 * Prints help or Version if -h or -V is given by the user
 	 *
-	 * @param args
-	 * @return
+	 * @param args the command-line arguments which will be parsed
+	 * @return true if help or version is requested
 	 */
 	public static boolean printStandardHelpOptionsIfRequested(String... args) {
 		var cmd = new CommandLine(CLHelp.class);
@@ -31,10 +31,10 @@ public final class CLHelp {
 	}
 	
 	/**
-	 * TODO: ADD JavaDoc
+	 * Returns true if help or version is requested
 	 *
-	 * @param pr
-	 * @return
+	 * @param pr a parsed commando-line arguments
+	 * @return true if help or version is requested
 	 */
 	private static boolean isVersionOrHelpRequested(@NotNull ParseResult pr) {
 		return pr.isUsageHelpRequested() || pr.isVersionHelpRequested();
