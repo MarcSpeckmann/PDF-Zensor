@@ -123,7 +123,8 @@ class SettingsTest {
 		assertEquals(new File("a/path-that-does-not-exist/sample.bla_cens.pdf").getAbsoluteFile(), settings.getOutput());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
 		
-		settings = new Settings(configPath2, getResourcePath("/pdf-files/sample.bla.pdf"), "-o", "not_a_pdf.notpdf");
+		//not a pdf is passed as output
+		settings = new Settings(configPath2, getResourcePath("/pdf-files/sample.bla.pdf"), "-o", configPath2);
 		assertEquals("censoredFile.pdf", settings.getOutput().getName());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
 		
