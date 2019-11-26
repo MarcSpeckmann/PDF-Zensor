@@ -26,7 +26,8 @@ public final class VersionProvider implements CommandLine.IVersionProvider {
 		final Properties properties = new Properties();
 		properties.load(Objects.requireNonNull(this.getClass()
 												   .getResourceAsStream("/project.properties")));
-		return new String[]{"PDF-Zensor", "Version: " + properties.getProperty("version"), "Build: " + properties.getProperty("timestamp")};
+		return new String[]{"PDF-Zensor",
+				"Version: " + properties.getProperty("version"), "Build: " + properties.getProperty("timestamp")};
 	}
 }
 

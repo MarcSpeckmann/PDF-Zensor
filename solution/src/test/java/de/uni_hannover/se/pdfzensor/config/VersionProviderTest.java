@@ -2,11 +2,11 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * CLHelpTest should contain all unit-tests related to {@link VersionProvider}.

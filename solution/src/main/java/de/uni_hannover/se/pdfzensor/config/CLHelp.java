@@ -7,7 +7,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ParseResult;
 
 /**
- * The class is responsible for printing version and help if requested
+ * This class is responsible for printing version and help if requested.
  */
 @Command(mixinStandardHelpOptions = true)
 public final class CLHelp {
@@ -19,7 +19,7 @@ public final class CLHelp {
 	}
 	
 	/**
-	 * Prints help or Version if -h or -V is given by the user
+	 * Prints help or Version if -h or -V is given by the user.
 	 *
 	 * @param args the command-line arguments which will be parsed
 	 * @return true if help or version is requested
@@ -38,9 +38,9 @@ public final class CLHelp {
 	}
 	
 	/**
-	 * Returns true if help or version is requested
+	 * Returns true if help or version is requested.
 	 *
-	 * @param pr a parsed commando-line arguments
+	 * @param pr parsed commando-line arguments
 	 * @return true if help or version is requested
 	 */
 	private static boolean isVersionOrHelpRequested(@NotNull ParseResult pr) {

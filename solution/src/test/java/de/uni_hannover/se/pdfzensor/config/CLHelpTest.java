@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class CLHelpTest {
 	
 	/**
-	 * Creates arguments for a function call of {@link #printStandardHelpOptionsIfRequested(String[], File, boolean, boolean)}
+	 * Creates arguments for a function call of {@link #printStandardHelpOptionsIfRequested(String[], File, boolean,
+	 * boolean)}
 	 */
 	@NotNull
 	private static Arguments createArgumentCLHelp(@NotNull String in, boolean help, boolean version) {
@@ -33,7 +34,8 @@ class CLHelpTest {
 	}
 	
 	/**
-	 * Provides a stream with the arguments for thorough testing of {@link #printStandardHelpOptionsIfRequested(String[], File, boolean, boolean)}.
+	 * Provides a stream with the arguments for thorough testing of {@link #printStandardHelpOptionsIfRequested(String[],
+	 * File, boolean, boolean)}.
 	 */
 	private static Stream<Arguments> testArgumentsCLHelp() {
 		String inputFile = "src/test/resources/sample.pdf";
@@ -47,7 +49,7 @@ class CLHelpTest {
 	}
 	
 	/**
-	 *	Multiple test on different inputs
+	 * Multiple test on different inputs.
 	 */
 	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, help: {2}, version: {3}")
 	@MethodSource("testArgumentsCLHelp")
@@ -61,7 +63,7 @@ class CLHelpTest {
 			assertNotNull(outContent.toString());
 			assertTrue(outContent.toString()
 								 .length() > 10);
-		}else{
+		} else {
 			assertFalse(CLHelp.printStandardHelpOptionsIfRequested(args));
 		}
 		System.setOut(originalOut);
