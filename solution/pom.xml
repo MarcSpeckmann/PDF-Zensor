@@ -63,6 +63,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.main.class>de.uni_hannover.se.pdfzensor.App</java.main.class>
         <exec.mainClass>de.uni_hannover.se.pdfzensor.App</exec.mainClass>
+		<timestamp>${maven.build.timestamp}</timestamp>
+		<maven.build.timestamp.format>dd.MM.yyyy HH:mm</maven.build.timestamp.format>
     </properties>
 
 	<dependencies>
