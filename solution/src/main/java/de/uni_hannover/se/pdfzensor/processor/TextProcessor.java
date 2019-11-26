@@ -97,7 +97,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 *
 	 * @param operator The operation to perform.
 	 * @param operands The list of arguments.
-	 * @throws IOException  If there is an error loading the properties.
+	 * @throws IOException  If there is an error processing the operation.
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
