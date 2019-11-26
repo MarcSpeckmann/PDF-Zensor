@@ -12,6 +12,11 @@ import picocli.CommandLine.ParseResult;
  */
 @Command(mixinStandardHelpOptions = true)
 public final class CLHelp {
+	/**
+	 * Private constructor of {@link CLHelp}
+	 */
+	private CLHelp() {
+	}
 	
 	/**
 	 * Prints help or Version if -h or -V is given by the user
