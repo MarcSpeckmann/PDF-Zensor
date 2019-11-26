@@ -12,6 +12,16 @@ import picocli.CommandLine.ParseResult;
  */
 @Command(mixinStandardHelpOptions = true)
 public final class CLHelp {
+	
+	/**
+	 * This constructor should not be called as no instance of {@link CLHelp} shall be created.
+	 *
+	 * @throws UnsupportedOperationException when being called
+	 */
+	private CLHelp() {
+		throw new UnsupportedOperationException();
+	}
+	
 	/**
 	 * Prints help or Version if -h or -V is given by the user
 	 *
