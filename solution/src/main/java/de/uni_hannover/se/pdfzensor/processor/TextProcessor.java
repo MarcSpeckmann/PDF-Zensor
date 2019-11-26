@@ -25,7 +25,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 * The processor informs the handler about important events and transfers the documents.
 	 *
 	 * @param handler the internal handler which acts to process the documents.
-	 * @throws IOException if no superior class does not exist
+	 * @throws IOException if object of superior class does not exist
 	 */
 	TextProcessor(PDFHandler handler) throws IOException {
 		super();
@@ -45,7 +45,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * Start the current page and passed to the handler.
+	 * Start the current page and pass it to the handler.
 	 *
 	 * @param page The page we are about to process.
 	 * @throws IOException if the page is in invalid state.
@@ -58,7 +58,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	
 	/**
 	 * Checks whether the last position to be processed is reached.
-	 * If yes removedTextPosition is set to true.
+	 * If so, removedTextPosition is set to true.
 	 *
 	 * @param text Text position to be processed.
 	 */
@@ -69,9 +69,9 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * End editing page and passed it to the handler.
+	 * End editing page and pass it to the handler.
 	 *
-	 * @param page The page we are just got processed.
+	 * @param page The page we just got processed.
 	 * @throws IOException  If there is an error loading the properties.
 	 */
 	@Override
@@ -81,7 +81,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * Ends the current document and give it to the Handler.
+	 * Ends the current document and gives it to the Handler.
 	 *
 	 * @param document The PDF document that has been processed.
 	 * @throws IOException if the document is in invalid state.
@@ -93,7 +93,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * This is used to handle an operation.
+	 * Used to handle an operation.
 	 *
 	 * @param operator The operation to perform.
 	 * @param operands The list of arguments.
