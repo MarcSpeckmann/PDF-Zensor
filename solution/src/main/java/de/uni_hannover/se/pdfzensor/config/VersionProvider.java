@@ -14,15 +14,6 @@ import java.util.Properties;
 public final class VersionProvider implements CommandLine.IVersionProvider {
 	
 	/**
-	 * This constructor should not be called as no instance of {@link VersionProvider} shall be created.
-	 *
-	 * @throws UnsupportedOperationException when being called
-	 */
-	private VersionProvider() {
-		throw new UnsupportedOperationException();
-	}
-	
-	/**
 	 * Returns version of the project
 	 *
 	 * @return project version

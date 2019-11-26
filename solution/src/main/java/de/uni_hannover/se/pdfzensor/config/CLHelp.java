@@ -14,15 +14,6 @@ import picocli.CommandLine.ParseResult;
 public final class CLHelp {
 	
 	/**
-	 * This constructor should not be called as no instance of {@link CLHelp} shall be created.
-	 *
-	 * @throws UnsupportedOperationException when being called
-	 */
-	private CLHelp() {
-		throw new UnsupportedOperationException();
-	}
-	
-	/**
 	 * Prints help or Version if -h or -V is given by the user
 	 *
 	 * @param args the command-line arguments which will be parsed
