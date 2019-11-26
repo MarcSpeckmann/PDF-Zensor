@@ -1,9 +1,15 @@
 package de.uni_hannover.se.pdfzensor;
 
+import org.apache.logging.log4j.util.StackLocatorUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,4 +52,32 @@ public final class TestUtility {
 					   String.format("%s::%s is not static", cls.getName(), f.getName()));
 	}
 	
+	/**
+	 * Retrieves the given resource from the provided location. This will use the caller-class' {@link
+	 * Class#getResource(String)}.
+	 *
+	 * @param path the path in the resources to load the file from. Should not be null and should start with a slash.
+	 * @return the file that is located at the given resource-path.
+	 */
+	@NotNull
+	@Contract("_ -> new")
+	public static File getResource(@NotNull String path) {
+		Objects.requireNonNull(path);
+		var caller = StackLocatorUtil.getCallerClass(2);
+		return new File(URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8));
+	}
+	/**
+	 * Retrieves the Absolute Path of the given resource from the provided location. This will use the caller-class' {@link
+	 * Class#getResource(String)}.
+	 *
+	 * @param path the path in the resources to get the Absolute Path from. Should not be null and should start with a slash.
+	 * @return the Absolute Path of the given resource-path.
+	 */
+	@NotNull
+	@Contract("_ -> new")
+	public static String getResourcePath(@NotNull String path) {
+		Objects.requireNonNull(path);
+		var caller = StackLocatorUtil.getCallerClass(2);
+		return URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8);
+	}
 }
