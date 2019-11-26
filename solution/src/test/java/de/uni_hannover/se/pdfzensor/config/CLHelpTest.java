@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * TODO: Add JavaDocs
+ * CLHelpTest should contain all unit-tests related to {@link CLHelp}.
  */
 class CLHelpTest {
 	
