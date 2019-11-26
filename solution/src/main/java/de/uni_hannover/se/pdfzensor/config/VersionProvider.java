@@ -14,10 +14,10 @@ import java.util.Properties;
 public final class VersionProvider implements CommandLine.IVersionProvider {
 	
 	/**
-	 * Returns version of the project
+	 * Returns the version of the project
 	 *
 	 * @return project version
-	 * @throws IOException if project.properties is can not be loaded
+	 * @throws IOException if project.properties can not be loaded
 	 */
 	@NotNull
 	@Contract(value = " -> new", pure = true)

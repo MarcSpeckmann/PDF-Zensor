@@ -16,6 +16,7 @@ public final class CLHelp {
 	 */
 	@Contract(pure = true)
 	private CLHelp() {
+		throw new UnsupportedOperationException();
 	}
 	
 	/**

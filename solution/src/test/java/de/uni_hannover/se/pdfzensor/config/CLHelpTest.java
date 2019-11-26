@@ -49,7 +49,7 @@ class CLHelpTest {
 	}
 	
 	/**
-	 * Multiple test on different inputs.
+	 * Multiple tests on different inputs.
 	 */
 	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, help: {2}, version: {3}")
 	@MethodSource("testArgumentsCLHelp")
@@ -58,9 +58,10 @@ class CLHelpTest {
 		final PrintStream originalOut = System.out;
 		System.setOut(new PrintStream(outContent));
 		if (help || version) {
-			CLHelp.printStandardHelpOptionsIfRequested(args);
+			assertDoesNotThrow(() -> CLHelp.printStandardHelpOptionsIfRequested(args));
 			assertTrue(CLHelp.printStandardHelpOptionsIfRequested(args));
 			assertNotNull(outContent.toString());
+			// check if something was written into the output
 			assertTrue(outContent.toString()
 								 .length() > 10);
 		} else {
