@@ -10,7 +10,7 @@ public class App {
 	
 	
 	public static void main(String[] args) {
-		int errorcode = CLHelp.checkValidArguments();
+		int errorcode = CLHelp.checkValidArguments(args);
 		if (errorcode != 0) {
 			System.exit(errorcode);
 		}

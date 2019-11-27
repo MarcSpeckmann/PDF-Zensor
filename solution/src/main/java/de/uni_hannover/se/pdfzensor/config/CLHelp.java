@@ -55,6 +55,6 @@ public final class CLHelp {
 	 * @return exit code on error
 	 */
 	public static int checkValidArguments(String... args){
-		 return new CommandLine(CLArgs.class).setParameterExceptionHandler(new CLErrorMessageHandler()).execute();
+		 return new CommandLine(CLArgs.class).setParameterExceptionHandler(new CLErrorMessageHandler()).execute(args);
 	}
 }
