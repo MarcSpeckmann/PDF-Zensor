@@ -13,12 +13,12 @@ public class CLErrorMessageHandler implements CommandLine.IParameterExceptionHan
 		
 		writer.println(ex.getMessage());
 		CommandLine.UnmatchedArgumentException.printSuggestions(ex, writer);
-		//TODO: Print Synopsis
-		/*writer.print(cmd.getHelp()
-						.fullSynopsis()); */
+		
+		writer.print(cmd.getHelp()
+						.fullSynopsis());
 		
 		CommandLine.Model.CommandSpec spec = cmd.getCommandSpec();
-		writer.printf("Try '%s --help' for more information.%n", spec.qualifiedName());
+		writer.printf("\nTry '%s --help' for more information.%n", spec.qualifiedName());
 		
 		return cmd.getExitCodeExceptionMapper() != null
 				? cmd.getExitCodeExceptionMapper()
