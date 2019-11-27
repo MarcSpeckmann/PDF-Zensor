@@ -21,17 +21,15 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 /**
  * The class is responsible for parsing the given command-line arguments
  */
-//TODO: Make help beautiful
 @Command(name = "pdf-zensor", versionProvider = VersionProvider.class, separator = " ", mixinStandardHelpOptions = true,
-		headerHeading = "%n@|bold,underline HEADER|@%n",
-		header = "--header--",
+		header = "PDF-Zensor",
 		synopsisHeading = "%n@|bold,underline SYNOPSIS|@%n%n",
 		descriptionHeading = "%n@|bold,underline DESCRIPTION|@%n",
-		description = {"--description--"},
+		description = {"PDF-Zensor is a program to censor PDF documents."},
 		parameterListHeading = "%n@|bold,underline PARAMETERS|@%n%n",
-		optionListHeading = "%n@|bold,underline OPTIONS|@%n%n",
-		footerHeading = "%n@|bold,underline FOOTER|@%n",
-		footer = "--footer--")
+		optionListHeading = "%n@|bold,underline OPTIONS|@%n%n"
+)
+
 final class CLArgs {
 	
 	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", description = {"Set the input file to censor. Required."}, arity = "1")

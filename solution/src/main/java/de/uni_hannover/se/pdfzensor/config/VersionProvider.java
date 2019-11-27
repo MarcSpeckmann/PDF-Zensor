@@ -9,12 +9,12 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * This Class provides the version for {@link CLHelp} and implements {@link picocli.CommandLine.IVersionProvider}
+ * This class provides the version for {@link CLHelp} and implements {@link picocli.CommandLine.IVersionProvider}.
  */
 public final class VersionProvider implements CommandLine.IVersionProvider {
 	
 	/**
-	 * Returns the version of the project
+	 * Returns the text-lines that should be shown when the version is requested.
 	 *
 	 * @return project version
 	 * @throws IOException if project.properties can not be loaded

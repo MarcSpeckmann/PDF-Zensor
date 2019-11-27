@@ -12,7 +12,7 @@ import picocli.CommandLine.ParseResult;
 @Command(mixinStandardHelpOptions = true)
 public final class CLHelp {
 	/**
-	 * Private constructor of {@link CLHelp}
+	 * The default constructor should not be called and thus will always throw an exception when called.
 	 */
 	@Contract(pure = true)
 	private CLHelp() {
@@ -20,7 +20,7 @@ public final class CLHelp {
 	}
 	
 	/**
-	 * Prints help or Version if -h or -V is given by the user.
+	 * Prints help or version if either -h or -V is present in the arguments.
 	 *
 	 * @param args the command-line arguments which will be parsed
 	 * @return true if help or version is requested

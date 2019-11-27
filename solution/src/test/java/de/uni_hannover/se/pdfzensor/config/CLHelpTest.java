@@ -63,6 +63,7 @@ class CLHelpTest {
 	 */
 	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, help: {2}, version: {3}")
 	@MethodSource("testArgumentsCLHelp")
+	@SuppressWarnings("squid:S106") //we specifically want to print to System.out and not log this output
 	void printStandardHelpOptionsIfRequested(String[] args, File inFile, boolean help, boolean version) {
 		final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 		final PrintStream originalOut = System.out;
@@ -71,7 +72,8 @@ class CLHelpTest {
 			assertDoesNotThrow(() -> CLHelp.printStandardHelpOptionsIfRequested(args));
 			assertTrue(CLHelp.printStandardHelpOptionsIfRequested(args));
 			assertNotNull(outContent.toString());
-			// check if something was written into the output
+			// check if something was written into the output. The the value is completely arbitrary but
+			// definitely smaller than the output of the help or version information
 			assertTrue(outContent.toString()
 								 .length() > 10);
 		} else {

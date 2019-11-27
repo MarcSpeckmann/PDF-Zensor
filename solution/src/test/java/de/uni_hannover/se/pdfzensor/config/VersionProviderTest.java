@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * CLHelpTest should contain all unit-tests related to {@link VersionProvider}.
  */
-class VersionProviderTest {
+final class VersionProviderTest {
 	
 	/**
-	 * Automatised tests to check if version and timestamp exist in properties.
+	 * Automated tests to check if version and timestamp exist in properties.
 	 */
 	@Test
 	void getProperties() {
@@ -31,7 +31,7 @@ class VersionProviderTest {
 	}
 	
 	/**
-	 * Automatised test that checks if the getVersion function returns parameters that are longer than their
+	 * Automated tests that checks if the getVersion function returns parameters that are longer than their
 	 * description.
 	 */
 	@Test
