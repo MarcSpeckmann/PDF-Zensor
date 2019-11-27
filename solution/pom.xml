@@ -29,6 +29,9 @@
 						<manifest>
 							<mainClass>de.uni_hannover.se.pdfzensor.App</mainClass>
 						</manifest>
+						<manifestEntries>
+							<Multi-Release>true</Multi-Release>
+						</manifestEntries>
 					</archive>
 					<finalName>pdfzensor</finalName>
 				</configuration>
