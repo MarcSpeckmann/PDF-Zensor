@@ -63,6 +63,7 @@ class CLHelpTest {
 	 */
 	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, help: {2}, version: {3}")
 	@MethodSource("testArgumentsCLHelp")
+	@SuppressWarnings("squid:S106") //we specifically want to print to System.out and not log this output
 	void printStandardHelpOptionsIfRequested(String[] args, File inFile, boolean help, boolean version) {
 		final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 		final PrintStream originalOut = System.out;
