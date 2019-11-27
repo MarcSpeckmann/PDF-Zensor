@@ -10,10 +10,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Deque;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,6 +42,18 @@ class PDFStreamProcessorTest {
 		return null;
 	}
 	
+	/**
+	 * @return A stream of all files in the directory {@link #PDF_PATH}.
+	 * @throws IOException If there is an error loading the files.
+	 */
+	private static Stream<Arguments> testForFile() throws IOException {
+		return Files.walk(Paths.get(TestUtility.getResource(PDF_PATH).getAbsolutePath())).map(Path::toFile)
+					.filter(File::isFile).map(Arguments::of);
+	}
+	
+	/**
+	 * @throws IOException If there is an error loading the properties.
+	 */
 	@Test
 	void testIllegalArguments() throws IOException {
 		final var processor = new PDFStreamProcessor();
@@ -41,17 +61,17 @@ class PDFStreamProcessorTest {
 	}
 	
 	/**
-	 * @throws IOException If there is an error loading the properties.
+	 * @throws IOException If there is an error loading the file or properties.
 	 */
-	@Test
-	void testStreamStack() throws IOException {
+	@ParameterizedTest(name = "Run {index}: file: {0}")
+	@MethodSource("testForFile")
+	void testStreamStack(File file) throws IOException {
 		final var processor = new CheckPDFStreamProcessorStack();
 		
-		var doc1 = PDDocument.load(TestUtility.getResource(PDF_PATH + "formAndTransparencyGroup.pdf"));
-		assertNotNull(doc1);
-		assertDoesNotThrow(() -> processor.writeText(doc1, new StringWriter()));
-		
-		doc1.close();
+		var doc = PDDocument.load(file);
+		assertNotNull(doc);
+		assertDoesNotThrow(() -> processor.writeText(doc, new StringWriter()));
+		doc.close();
 	}
 	
 	private static class CheckPDFStreamProcessorStack extends PDFStreamProcessor {
