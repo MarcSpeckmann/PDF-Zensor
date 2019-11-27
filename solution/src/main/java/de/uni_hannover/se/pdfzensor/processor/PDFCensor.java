@@ -20,9 +20,9 @@ public final class PDFCensor implements PDFHandler {
     
     /**
      * @param settings Settings that contain information about the mode and expressions
-     * @throws IOException if settings is null
+     * @throws NullPointerException if settings is null
      */
-    public PDFCensor(@NotNull Settings settings) throws IOException {
+    public PDFCensor(@NotNull Settings settings) throws NullPointerException {
         Objects.requireNonNull(settings);
         this.removePredicate = rect -> true;
     }
