@@ -47,4 +47,8 @@ public final class CLHelp {
 	private static boolean isVersionOrHelpRequested(@NotNull ParseResult pr) {
 		return pr.isUsageHelpRequested() || pr.isVersionHelpRequested();
 	}
+	
+	public static int checkValidArguments(String... args){
+		 return new CommandLine(CLArgs.class).setParameterExceptionHandler(new CLErrorMessageHandler()).execute();
+	}
 }
