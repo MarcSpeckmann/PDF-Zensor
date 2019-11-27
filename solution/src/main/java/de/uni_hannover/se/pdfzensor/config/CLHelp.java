@@ -27,7 +27,7 @@ public final class CLHelp {
 	 */
 	public static boolean printStandardHelpOptionsIfRequested(String... args) {
 		var cmd = new CommandLine(CLArgs.class);
-		if (isVersionOrHelpRequested(cmd.parseArgs(args))) {
+		if (isVersionOrHelpRequested(cmd.setParameterExceptionHandler(new CLErrorMessageHandler()).parseArgs(args))) {
 			if (cmd.isUsageHelpRequested()) {
 				new CommandLine(CLArgs.class).usage(System.out);
 			} else if (cmd.isVersionHelpRequested()) {
@@ -47,14 +47,5 @@ public final class CLHelp {
 	private static boolean isVersionOrHelpRequested(@NotNull ParseResult pr) {
 		return pr.isUsageHelpRequested() || pr.isVersionHelpRequested();
 	}
-	
-	/**
-	 * Check command-line arguments for valid syntax.
-	 *
-	 * @param args the command-line arguments which will be check for valid syntax
-	 * @return exit code on error
-	 */
-	public static int checkValidArguments(String... args){
-		 return new CommandLine(CLArgs.class).setParameterExceptionHandler(new CLErrorMessageHandler()).execute(args);
-	}
+
 }

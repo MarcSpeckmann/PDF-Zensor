@@ -8,12 +8,7 @@ import java.io.IOException;
 
 public class App {
 	
-	
 	public static void main(String[] args) {
-		int errorcode = CLHelp.checkValidArguments(args);
-		if (errorcode != 0) {
-			System.exit(errorcode);
-		}
 		if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
 			try {
 				Settings settings = new Settings("", args);
