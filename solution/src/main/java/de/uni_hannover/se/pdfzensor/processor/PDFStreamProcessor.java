@@ -67,12 +67,11 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * @param bs the stream that should be pushed to the top of the stack.
 	 */
 	private void pushStream(@NotNull final DoubleBufferedStream bs) {
-		if (currentStream == null) {
+		if (currentStream == null)
 			LOGGER.log(Level.WARN,
 					   "It was tried to push a stream when the PDFStreamProcessor-instance's stack has not yet been initialized.");
-			return;
-		}
-		currentStream.push(Objects.requireNonNull(bs));
+		else
+			currentStream.push(Objects.requireNonNull(bs));
 	}
 	
 	/**
@@ -82,9 +81,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 */
 	@NotNull
 	private DoubleBufferedStream popStream() {
-		var ret = Optional.ofNullable(currentStream)
-						  .orElseThrow(NoSuchElementException::new)
-						  .pop();
+		var ret = Optional.ofNullable(currentStream).orElseThrow(NoSuchElementException::new).pop();
 		Objects.requireNonNull(ret);
 		try {
 			ret.close();

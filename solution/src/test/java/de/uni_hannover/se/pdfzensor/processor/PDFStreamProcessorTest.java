@@ -147,7 +147,6 @@ class PDFStreamProcessorTest {
 		 */
 		@Override
 		protected void startPage(@NotNull final PDPage page) throws IOException {
-//			var expStream = new DoubleBufferedStream(new PDStream(document), page.getContents());
 			var stackBefore = getStreamStack(this);
 			assertNotNull(stackBefore);
 			assertEquals(expStackSize, stackBefore.size());
@@ -159,9 +158,6 @@ class PDFStreamProcessorTest {
 			assertNotNull(stackAfter);
 			assertEquals(expStackSize, stackAfter.size());
 			assertDoesNotThrow(this::getCurrentContentStream);
-//			var topStream = Objects.requireNonNull(getStreamStack(this)).peek();
-//			var actStream = Objects.requireNonNull(topStream);
-//			assertEquals(expStream, actStream); // compare contents of the DoubleBufferedStreams?
 		}
 		
 		/**
@@ -178,8 +174,6 @@ class PDFStreamProcessorTest {
 		 */
 		@Override
 		protected void endPage(PDPage page) throws IOException {
-//			var topStream = Objects.requireNonNull(getStreamStack(this)).peek();
-//			var expStream = Objects.requireNonNull(topStream).getStream();
 			var stackBefore = getStreamStack(this);
 			assertNotNull(stackBefore);
 			assertEquals(expStackSize, stackBefore.size());
@@ -190,8 +184,6 @@ class PDFStreamProcessorTest {
 			var stackAfter = getStreamStack(this);
 			assertNotNull(stackAfter);
 			assertEquals(expStackSize, stackAfter.size());
-//			var actStream = page.getContentStreams().next();
-//			assertEquals(expStream, actStream); // compare contents of the PDStreams?
 		}
 		
 		/**
