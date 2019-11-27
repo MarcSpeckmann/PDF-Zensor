@@ -48,6 +48,12 @@ public final class CLHelp {
 		return pr.isUsageHelpRequested() || pr.isVersionHelpRequested();
 	}
 	
+	/**
+	 * Check command-line arguments for valid syntax.
+	 *
+	 * @param args the command-line arguments which will be check for valid syntax
+	 * @return exit code on error
+	 */
 	public static int checkValidArguments(String... args){
 		 return new CommandLine(CLArgs.class).setParameterExceptionHandler(new CLErrorMessageHandler()).execute();
 	}
