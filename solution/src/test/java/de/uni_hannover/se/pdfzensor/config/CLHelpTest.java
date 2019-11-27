@@ -71,7 +71,8 @@ class CLHelpTest {
 			assertDoesNotThrow(() -> CLHelp.printStandardHelpOptionsIfRequested(args));
 			assertTrue(CLHelp.printStandardHelpOptionsIfRequested(args));
 			assertNotNull(outContent.toString());
-			// check if something was written into the output
+			// check if something was written into the output, the value is completely arbitrary but
+			// definitely smaller than the output of the help or version information
 			assertTrue(outContent.toString()
 								 .length() > 10);
 		} else {
