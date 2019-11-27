@@ -27,7 +27,7 @@ public final class CLHelp {
 	 */
 	public static boolean printStandardHelpOptionsIfRequested(String... args) {
 		var cmd = new CommandLine(CLArgs.class);
-		if (isVersionOrHelpRequested(cmd.setParameterExceptionHandler(new CLErrorMessageHandler()).parseArgs(args))) {
+		if (isVersionOrHelpRequested(cmd.parseArgs(args))) {
 			if (cmd.isUsageHelpRequested()) {
 				new CommandLine(CLArgs.class).usage(System.out);
 			} else if (cmd.isVersionHelpRequested()) {
@@ -47,5 +47,4 @@ public final class CLHelp {
 	private static boolean isVersionOrHelpRequested(@NotNull ParseResult pr) {
 		return pr.isUsageHelpRequested() || pr.isVersionHelpRequested();
 	}
-
 }

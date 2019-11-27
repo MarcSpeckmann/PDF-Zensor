@@ -13,7 +13,7 @@ public class CLErrorMessageHandler implements CommandLine.IParameterExceptionHan
 	/**
 	 * Prints error message and synopsis on invalid syntax.
 	 *
-	 * @param ex Exception which was thrown because of invalid command-line argument syntax
+	 * @param ex   Exception which was thrown because of invalid command-line argument syntax
 	 * @param args command-line arguments
 	 * @return error code
 	 */
@@ -28,7 +28,7 @@ public class CLErrorMessageHandler implements CommandLine.IParameterExceptionHan
 						.fullSynopsis());
 		
 		CommandLine.Model.CommandSpec spec = cmd.getCommandSpec();
-		writer.printf("\nTry '%s --help' for more information.%n", spec.qualifiedName());
+		writer.printf("%nTry '%s --help' for more information.%n", spec.qualifiedName());
 		
 		return cmd.getExitCodeExceptionMapper() != null
 				? cmd.getExitCodeExceptionMapper()
