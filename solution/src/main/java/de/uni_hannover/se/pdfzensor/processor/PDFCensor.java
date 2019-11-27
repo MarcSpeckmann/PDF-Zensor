@@ -20,6 +20,7 @@ public final class PDFCensor implements PDFHandler {
     
     /**
      * @param settings Settings that contain information about the mode and expressions
+     * @throws IOException if settings is null
      */
     public PDFCensor(@NotNull Settings settings) throws IOException {
         Objects.requireNonNull(settings);
@@ -40,7 +41,7 @@ public final class PDFCensor implements PDFHandler {
      * A callback for when work on a new page starts.
      *
      * @param doc     the document which is being worked on
-     * @param page    the PDPage that is being worked on
+     * @param page    the PDPage (current pdf page) that is being worked on
      * @param pageNum the number of the page that is being worked on
      */
     @Override
@@ -52,7 +53,7 @@ public final class PDFCensor implements PDFHandler {
      * A callback for when work on a page has ended.
      *
      * @param doc     the document which is being worked on
-     * @param page    the PDPage that is being worked on
+     * @param page    the PDPage (current pdf page) that is being worked on
      * @param pageNum the number of the page that is being worked on
      */
     @Override
@@ -70,7 +71,7 @@ public final class PDFCensor implements PDFHandler {
     }
     
     /**
-     * @param pos the TextPosition to check
+     * @param pos the TextPosition (represents string + its character's screen positions) to check
      * @return true if {@code pos} should be censored, false otherwise
      */
     @Override
