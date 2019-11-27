@@ -5,10 +5,12 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 
-
 import java.awt.geom.Rectangle2D;
 import java.util.Objects;
 import java.util.function.Predicate;
+
+import de.uni_hannover.se.pdfzensor.config.Settings;
+
 /**
  * Runs functions to place censoring rectangles (or censoring graphics) and removes elements of the PDF depending on the
  * annotations and the mode
