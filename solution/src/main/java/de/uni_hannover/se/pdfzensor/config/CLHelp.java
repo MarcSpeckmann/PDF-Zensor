@@ -12,7 +12,7 @@ import picocli.CommandLine.ParseResult;
 @Command(mixinStandardHelpOptions = true)
 public final class CLHelp {
 	/**
-	 * Private constructor of {@link CLHelp}
+	 * The default constructor should not be called and thus will always throw an exception when called.
 	 */
 	@Contract(pure = true)
 	private CLHelp() {
