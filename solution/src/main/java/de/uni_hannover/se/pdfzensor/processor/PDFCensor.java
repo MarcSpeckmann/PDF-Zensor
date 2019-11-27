@@ -1,6 +1,5 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
-import de.uni_hannover.se.pdfzensor.config.Settings;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
@@ -8,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Predicate;
 /**
