@@ -20,7 +20,7 @@ public final class CLHelp {
 	}
 	
 	/**
-	 * Prints help or Version if -h or -V is given by the user.
+	 * Prints help or Version if -h either -V is present in the arguments.
 	 *
 	 * @param args the command-line arguments which will be parsed
 	 * @return true if help or version is requested
