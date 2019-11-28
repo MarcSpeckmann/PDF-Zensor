@@ -39,10 +39,10 @@ public final class Settings {
 	 * object will be logged at {@link Level#DEBUG}.
 	 *
 	 * @param configPath the path to the config file (SHOULD BE REMOVED LATER)
-	 * @param args The commandline arguments.
+	 * @param args       The commandline arguments.
 	 * @throws IOException If the configuration file could not be parsed.
 	 */
-	public Settings(@NotNull String configPath,@NotNull final String... args) throws IOException {
+	public Settings(@NotNull String configPath, @NotNull final String... args) throws IOException {
 		final var clargs = CLArgs.fromStringArray(args);
 		final var config = getDefaultConfig(configPath);
 		final var configParser = Config.fromFile(config);
@@ -50,8 +50,7 @@ public final class Settings {
 		Logging.init(verbose);
 		
 		input = clargs.getInput();
-		output = ObjectUtils.firstNonNull(checkOutput(clargs.getOutput()), checkOutput(configParser.getOutput()), getDefaultOutput(
-				input.getParent()));
+		output = checkOutput(ObjectUtils.firstNonNull(clargs.getOutput(), configParser.getOutput(), input.getParentFile()));
 		linkColor = Color.BLUE;
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
 		
@@ -96,13 +95,12 @@ public final class Settings {
 	 * @param out The output file which will be validated.
 	 * @return null if the output to check was null or was invalid, a valid output file otherwise.
 	 */
-	@Contract("null -> null")
-	@Nullable
-	private File checkOutput(@Nullable final File out) {
-		if (out == null) return null;
-		if ("pdf".equals(FileUtils.getFileExtension(out))) return out.getAbsoluteFile();
-		if (out.isDirectory() || StringUtils.isEmpty(FileUtils.getFileExtension(out))) return getDefaultOutput(out.getPath());
-		return null;
+	@NotNull
+	private File checkOutput(@NotNull final File out) {
+		var result = Objects.requireNonNull(out);
+		if (!out.isFile() && StringUtils.isEmpty(FileUtils.getFileExtension(out)))
+			result = getDefaultOutput(out.getPath());
+		return result;
 	}
 	
 	/**
@@ -123,11 +121,9 @@ public final class Settings {
 	 */
 	@Nullable
 	private File getDefaultConfig(String configPath) {
-		final var c = new File(configPath);
-		return Optional.of(c)
-				.filter(File::isFile)
-				.filter(f -> "json".equals(FileUtils.getFileExtension(f)))
-				.map(File::getAbsoluteFile)
-				.orElse(null);
+		return Optional.of(configPath)
+					   .map(File::new)
+					   .filter(File::isFile)
+					   .orElse(null);
 	}
 }

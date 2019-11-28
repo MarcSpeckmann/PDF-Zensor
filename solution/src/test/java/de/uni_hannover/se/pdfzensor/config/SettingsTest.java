@@ -38,8 +38,8 @@ class SettingsTest {
 		arguments.add(out);
 		if (lvl > 0)
 			arguments.add("-" + "v".repeat(lvl));
-		var inFile = new File(in).getAbsoluteFile();
-		var outFile = new File(out).getAbsoluteFile();
+		var inFile = new File(in);
+		var outFile = new File(out);
 		Level verbosity = Level.OFF;
 		if (lvl > 0 && lvl < VERBOSITY_LEVELS.length) verbosity = VERBOSITY_LEVELS[lvl];
 		else if (lvl >= VERBOSITY_LEVELS.length) verbosity = Level.ALL;
@@ -51,8 +51,7 @@ class SettingsTest {
 	 * Level)}.
 	 */
 	private static Stream<Arguments> testArguments() {
-		String[] inputFiles = {getResource("/pdf-files/sample.pdf").getAbsolutePath(), getResource(
-				"/pdf-files/sample.bla.pdf").getAbsolutePath()};
+		String[] inputFiles = {"/pdf-files/sample.pdf", "/pdf-files/sample.bla.pdf"};
 		String[] outputFiles = {"file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
 		int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1)
 										 .toArray();
@@ -94,7 +93,7 @@ class SettingsTest {
 		// the Paths to a test config files
 		String configPath = getResourcePath(CONFIG_PATH + "testVerbosityAsStringValidConfig.json");
 		String configPath2 = getResourcePath(CONFIG_PATH + "testConfigNegativeVerbosity.json");
-		String invalidConfigPath2 = getResourcePath(CONFIG_PATH + "invalid/not_a_json.txt");
+		String invalidConfigPath2 = getResourcePath(CONFIG_PATH + "valid/still_a_json.txt");
 		
 		// if there are no arguments but just a config File
 		assertThrows(IllegalArgumentException.class, () -> new Settings(configPath));
@@ -108,7 +107,7 @@ class SettingsTest {
 		// the Paths to a test config files
 		String configPath = getResourcePath(CONFIG_PATH + "testVerbosityAsStringValidConfig.json");
 		String configPath2 = getResourcePath(CONFIG_PATH + "testConfigNegativeVerbosity.json");
-		String invalidConfigPath2 = getResourcePath(CONFIG_PATH + "invalid/not_a_json.txt");
+		String invalidConfigPath2 = getResourcePath(CONFIG_PATH + "valid/still_a_json.txt");
 		
 		// if there are just arguments
 		var settings = new Settings(configPath, getResourcePath("/pdf-files/sample.pdf"));
@@ -139,14 +138,13 @@ class SettingsTest {
 					 settings.getOutput());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
 		
-		//not a pdf is passed as output
 		settings = new Settings(configPath2, getResourcePath("/pdf-files/sample.bla.pdf"), "-o", configPath2);
-		assertEquals("censoredFile.pdf", settings.getOutput().getName());
+		assertEquals(new File(configPath2), settings.getOutput());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
 		
 		//if the config is invalid
 		settings = new Settings(invalidConfigPath2, getResourcePath("/pdf-files/sample.bla.pdf"));
-		assertEquals("sample.bla_cens.pdf", settings.getOutput().getName());
+		assertEquals("censoredFile.pdf", settings.getOutput().getName());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
 		
 		// if config is overwritten correctly by the CLArgs with less specific level (config has Level.DEBUG)
