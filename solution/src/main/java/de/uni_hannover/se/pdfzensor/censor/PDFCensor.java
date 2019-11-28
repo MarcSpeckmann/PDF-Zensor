@@ -1,4 +1,4 @@
-package de.uni_hannover.se.pdfzensor.processor;
+package de.uni_hannover.se.pdfzensor.censor;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -9,6 +9,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 
 /**
