@@ -1,6 +1,6 @@
 package de.uni_hannover.se.pdfzensor;
 
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -87,13 +87,12 @@ public final class TestUtility {
 	}
 	
 	@NotNull
-	@SuppressWarnings("unchecked")
 	public static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
 		try {
-			var method = Logging.class.getDeclaredMethod("getRootLogger");
-			method.setAccessible(true);
-			var logger = method.invoke(Logger.class);
-			return (Optional<org.apache.logging.log4j.core.Logger>) logger;
+			var contextField = Logging.class.getDeclaredField("context");
+			contextField.setAccessible(true);
+			var context = (LoggerContext) contextField.get(null);
+			return Optional.ofNullable(context).map(LoggerContext::getRootLogger);
 		} catch (Exception e) {
 			Assertions.fail("Could not retrieve the RootLogger.", e);
 		}

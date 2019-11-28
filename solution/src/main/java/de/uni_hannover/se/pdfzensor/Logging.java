@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Logging is a simple utility-class that provides only the {@link #getLogger()}, {@link #init(Level)} and {@link
@@ -30,6 +29,7 @@ public final class Logging {
 	
 	/** The available logging levels ordered by their detail (ascending). */
 	@NotNull
+	@SuppressWarnings("squid:S2386") // we can disable it here as this is an enum array and should not be alterable
 	public static final Level[] VERBOSITY_LEVELS = {Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL};
 	
 	/** Stores the context that is currently initialized. */
@@ -56,15 +56,16 @@ public final class Logging {
 	@NotNull
 	public static Logger getLogger() {
 		init(Level.OFF); //Won't do anything if the logging is initialized already
+		//Taken from LogManager#getLogger
 		return LogManager.getLogger(StackLocatorUtil.getCallerClass(2));
 	}
 	
 	/**
-	 * Responsible for initializing the logging and configuring it. Does nothing if a context is initialize already.
+	 * Responsible for initializing the logging and configuring it. Does nothing if a context is initialized already.
 	 *
 	 * @param rootLevel Levels less specific than {@code rootLevel} will be filtered.
 	 */
-	public static void init(@NotNull(exception = NullPointerException.class) final Level rootLevel) {
+	public static void init(@NotNull final Level rootLevel) {
 		if (context != null) return;
 		Objects.requireNonNull(rootLevel);
 		var builder = ConfigurationBuilderFactory.newConfigurationBuilder();
@@ -78,9 +79,7 @@ public final class Logging {
 		context = Configurator.initialize(builder.build());
 	}
 	
-	/**
-	 * Deinitializes the current logging-context. Does nothing if none is initialized.
-	 */
+	/** Deinitializes the current logging-context. Does nothing if none is initialized. */
 	public static void deinit() {
 		Configurator.shutdown(context);
 		context = null;
@@ -95,6 +94,8 @@ public final class Logging {
 	 * @param name    the name of the created console appender
 	 * @return the created console appender
 	 */
+	@SuppressWarnings("SameParameterValue")
+	// if we decided to create more appenders with this code they should not be called the same
 	@NotNull
 	private static AppenderComponentBuilder createConsoleAppender(
 			@NotNull final ConfigurationBuilder<BuiltConfiguration> builder, @NotNull final String name) {
@@ -133,17 +134,5 @@ public final class Logging {
 			root.add(builder.newAppenderRef(appender.getName()));
 		builder.add(root);
 		return root;
-	}
-	
-	/**
-	 * <b><i>For Testing-Purposes only!</i></b><br>
-	 * Retrieves the root-logger that is currently initialized.
-	 *
-	 * @return an optional containing the root-logger of the current context. Returns an empty Optional when no context
-	 * was initialized
-	 */
-	private static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
-		return Optional.ofNullable(context)
-					   .map(LoggerContext::getRootLogger);
 	}
 }
