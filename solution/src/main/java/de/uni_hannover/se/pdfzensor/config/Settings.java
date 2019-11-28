@@ -45,7 +45,7 @@ public final class Settings {
 	public Settings(@NotNull String configPath,@NotNull final String... args) throws IOException {
 		final var clargs = CLArgs.fromStringArray(args);
 		final var config = getDefaultConfig(configPath);
-		final var configParser = ConfigParser.fromFile(config);
+		final var configParser = Config.fromFile(config);
 		final var verbose = ObjectUtils.firstNonNull(clargs.getVerbosity(), configParser.getVerbosity(), Level.OFF);
 		Logging.init(verbose);
 		
