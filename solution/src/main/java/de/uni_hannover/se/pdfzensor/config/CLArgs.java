@@ -1,9 +1,7 @@
 package de.uni_hannover.se.pdfzensor.config;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.util.FileUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,86 +11,104 @@ import picocli.CommandLine.Option;
 
 import java.io.File;
 import java.util.Objects;
-import java.util.Optional;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
-/**
- * The class is responsible for parsing the given command-line arguments
- */
+/** CLArgs represents the parsed command line arguments and provides simple aspect to specified options. */
 @Command(name = "pdf-zensor", versionProvider = VersionProvider.class, separator = " ", mixinStandardHelpOptions = true,
 		header = "PDF-Zensor",
 		synopsisHeading = "%n@|bold,underline SYNOPSIS|@%n%n",
 		descriptionHeading = "%n@|bold,underline DESCRIPTION|@%n",
-		description = {"PDF-Zensor is a program to censor PDF documents."},
+		description = {"PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as" +
+					   "well as textual and graphical content from the pdf file."},
 		parameterListHeading = "%n@|bold,underline PARAMETERS|@%n%n",
 		optionListHeading = "%n@|bold,underline OPTIONS|@%n%n"
 )
-
 final class CLArgs {
-	
-	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", description = {"Set the input file to censor. Required."}, arity = "1")
-	@Nullable
+	/** The input-file as it was specified. It's value <b>should not</b> be null. */
+	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", arity = "1",
+			description = {"Set the input pdf-file that should be censored. Required."})
 	private File input = null;
 	
-	@Option(names = {"-o", "--out"}, paramLabel = "\"out\"", description = {"Set a specific output file to use."}, arity = "1")
+	/** The output path. This may be a folder, a file or null. Null should be assigned if nothing else was specified. */
+	@Option(names = {"-o", "--out"}, paramLabel = "\"out\"", arity = "1",
+			description = {"The output file or path the censored file should be written to."})
 	@Nullable
 	private File output = null;
 	
-	@Option(names = {"-v", "--verbose"}, description = {"Specify multiple -v options to increase verbosity."}, arity = "0")
+	/**
+	 * The verbosity is given by how often -v was specified. If length is 0, verbosity is OFF. If null nothing was
+	 * specified in the command line arguments.
+	 */
+	@Option(names = {"-v", "--verbose"}, arity = "0",
+			description = {"Sets the logger's verbosity. Specify multiple -v options to increase verbosity."})
 	@Nullable
 	private boolean[] verbose = null;
 	
 	/**
-	 * This method is parsing the command-line arguments.
+	 * CLArgs' default constructor should be hidden to the public as {@link #fromStringArray(String...)} should be used
+	 * to initialize a new instance.
 	 *
-	 * @param args the command-line arguments which will be parsed
-	 * @return an CLArgs object which contains all information about the parsed arguments
+	 * @see #fromStringArray(String...)
+	 */
+	@Contract(pure = true)
+	private CLArgs() {}
+	
+	/**
+	 * This method should be called to construct a new CLArgs instance from command line arguments.
+	 *
+	 * @param args the command-line arguments which will be parsed.
+	 * @return an CLArgs object which contains all information about the parsed arguments.
+	 * @throws NullPointerException     if the provided argument-array is null.
+	 * @throws IllegalArgumentException if the provided argument-array is empty or contains null elements.
 	 */
 	@NotNull
 	static CLArgs fromStringArray(@NotNull final String... args) {
 		Validate.notEmpty(args);
-		final CLArgs clArgs = new CLArgs();
-		final CommandLine cmd = new CommandLine(clArgs);
+		final var clArgs = new CLArgs();
+		final var cmd = new CommandLine(clArgs);
 		cmd.parseArgs(Validate.noNullElements(args));
+		clArgs.validate();
 		return clArgs;
 	}
 	
 	/**
-	 * Returns input file given by the user
+	 * Validates the current CLArgs instance. If it is not valid it should not be returned to the outside.
 	 *
-	 * @return The absolute input file which was specified.
+	 * @throws NullPointerException if input is null.
+	 * @see #fromStringArray(String...)
 	 */
+	private void validate() {
+		Objects.requireNonNull(input);
+	}
+	
+	/**
+	 * Returns input file given by the user.
+	 *
+	 * @return The input file as it was specified by the user.
+	 */
+	@Contract(pure = true)
 	@NotNull
 	final File getInput() {
-		Objects.requireNonNull(input, "The input must be an existing PDF-file.");
-		return Optional.of(input)
-					   .filter(File::isFile)
-					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)))
-					   .map(File::getAbsoluteFile)
-					   .orElseThrow(() -> new IllegalArgumentException(
-							   "The provided input does not have the pdf suffix or is no file."));
+		return input;
 	}
 	
 	/**
-	 * Returns output fil given by the user
+	 * Returns output file given by the user
 	 *
-	 * @return null or the absolute output file if one was specified.
+	 * @return The output file as it was specified by the user or null if none was specified.
 	 */
+	@Contract(pure = true)
 	@Nullable
 	final File getOutput() {
-		return Optional.ofNullable(output)
-					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)) || f.isDirectory() || StringUtils
-							   .isEmpty(FileUtils.getFileExtension(f)))
-					   .map(File::getAbsoluteFile)
-					   .orElse(null);
+		return output;
 	}
 	
 	/**
-	 * Returns verbosity level given by the user
+	 * Returns verbosity level given by the user.
 	 *
-	 * @return null or the level of logging verbosity if verbose was given
+	 * @return null or the level of logging verbosity if verbose was given in the arguments.
 	 */
 	@Contract(pure = true)
 	@Nullable

@@ -36,10 +36,9 @@ class CLArgsTest {
 		if (lvl > 0)
 			arguments.add("-" + "v".repeat(lvl));
 		
-		var inFile = new File(in).getAbsoluteFile();
+		var inFile = new File(in);
 		var outFile = Optional.ofNullable(out)
 							  .map(File::new)
-							  .map(File::getAbsoluteFile)
 							  .orElse(null);
 		Level verbosity = null;
 		if (lvl > 0 && lvl < VERBOSITY_LEVELS.length) verbosity = VERBOSITY_LEVELS[lvl];
@@ -72,8 +71,7 @@ class CLArgsTest {
 		assertThrows(NullPointerException.class, () -> CLArgs.fromStringArray((String[]) null));
 		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray(new String[0]));
 		assertThrows(IllegalArgumentException.class, CLArgs::fromStringArray);
-		assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray("")
-																 .getInput());
+		//assertThrows(IllegalArgumentException.class, () -> CLArgs.fromStringArray("").getInput());
 		
 	}
 	
@@ -90,24 +88,26 @@ class CLArgsTest {
 	/** Multiple tests related to using getInput. */
 	@Test
 	void getInput() {
+		//No illegal arguments anymore as CLArgs should not check the input
 		var cla = CLArgs.fromStringArray("notExist.pdf");
-		assertThrows(IllegalArgumentException.class, cla::getInput);
+		//assertThrows(IllegalArgumentException.class, cla::getInput);
 		
 		cla = CLArgs.fromStringArray("wrongType.txt");
-		assertThrows(IllegalArgumentException.class, cla::getInput);
+		//assertThrows(IllegalArgumentException.class, cla::getInput);
 		
 		cla = CLArgs.fromStringArray("pom.xml");
-		assertThrows(IllegalArgumentException.class, cla::getInput);
+		//assertThrows(IllegalArgumentException.class, cla::getInput);
 		
 		cla = CLArgs.fromStringArray("wrongType");
-		assertThrows(IllegalArgumentException.class, cla::getInput);
+		//assertThrows(IllegalArgumentException.class, cla::getInput);
 	}
 	
 	/** Multiple tests related to using getOutput. */
 	@Test
 	void getOutput() {
-		var cla = CLArgs.fromStringArray(getResource("/pdf-files/sample.pdf").getAbsolutePath(), "-o", "wrongType.txt");
-		assertNull(cla.getOutput());
+		// This test should not throw an error since checking the filepath is removed from CLArgs.
+		//var cla = CLArgs.fromStringArray(getResource("/pdf-files/sample.pdf").getAbsolutePath(), "-o", "wrongType.txt");
+		//assertNull(cla.getOutput());
 		//This test should not throw an error as wrongType should correctly be noticed as a directory: ./wrongType/
 		//cla = CLArgs.fromStringArray(getResource("/pdf-files/sample.pdf").getAbsolutePath(), "-o", "wrongType");
 		//assertNull(cla.getOutput());

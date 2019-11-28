@@ -71,8 +71,8 @@ class SettingsTest {
 		// if the command line argument is not given or has a faulty structure
 		assertThrows(NullPointerException.class, () -> new Settings("", (String[]) null));
 		assertThrows(IllegalArgumentException.class, () -> new Settings("", (String) null));
-		// if the command line argument is given but invalid
-		assertThrows(IllegalArgumentException.class, () -> new Settings("", "this_file_does_not_exist.pdf"));
+		// if the command line argument is given but invalid -- it is not invalid anymore if the file does not exist
+		//assertThrows(IllegalArgumentException.class, () -> new Settings("", "this_file_does_not_exist.pdf"));
 	}
 	
 	/** Checks if the arguments are passed into the corresponding expected values. */
