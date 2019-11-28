@@ -20,8 +20,7 @@ class CLErrorMessageHandlerTest {
 	@Test
 	@DisplayName("Test CLErrorMessageHandler constructor")
 	void testConstructor() {
-		assertNotNull(new CLErrorMessageHandler());
-		assertDoesNotThrow(() -> new CLErrorMessageHandler());
+		assertDoesNotThrow(CLErrorMessageHandler::new);
 	}
 	
 	/**
@@ -40,13 +39,15 @@ class CLErrorMessageHandlerTest {
 		
 		
 		CommandLine.ParameterException ex = new CommandLine.ParameterException(cmd, "Error");
-		handler.handleParseException(ex, new String[]{});
+		assertTrue(handler.handleParseException(ex, new String[]{}) != 0);
 		
 		assertTrue(outContent.toString()
 							 .contains("Error"));
 		assertTrue(outContent.toString()
 							 .contains(cmd.getHelp()
 										  .fullSynopsis()));
+		//check if '--help' is mentioned inside the error message
+		assertTrue(outContent.toString().contains("--help"));
 		
 		System.setOut(originalOut);
 	}
