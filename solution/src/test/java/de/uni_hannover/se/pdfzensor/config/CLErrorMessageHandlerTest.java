@@ -39,6 +39,7 @@ class CLErrorMessageHandlerTest {
 		
 		
 		CommandLine.ParameterException ex = new CommandLine.ParameterException(cmd, "Error");
+		//string can be empty because it is not used inside the method handleParseException
 		assertTrue(handler.handleParseException(ex, new String[]{}) != 0);
 		
 		assertTrue(outContent.toString()
