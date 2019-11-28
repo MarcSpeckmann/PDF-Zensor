@@ -29,15 +29,16 @@ class CLErrorMessageHandlerTest {
 	@Test
 	@DisplayName("Test CLErrorMessageHandler output")
 	void testhandleParseException() {
-		//initialize handler
+		//redirect System.err to ByteArrayOutputStream
 		final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 		final PrintStream originalOut = System.err;
 		System.setErr(new PrintStream(outContent));
 		
+		//initialize handler
 		CLErrorMessageHandler handler = new CLErrorMessageHandler();
 		CommandLine cmd = new CommandLine(CLArgs.class);
 		
-		
+		//TODO: possibly add more tests and change @Test to @ParameterizedTest
 		CommandLine.ParameterException ex = new CommandLine.ParameterException(cmd, "Error");
 		//string can be empty because it is not used inside the method handleParseException
 		assertTrue(handler.handleParseException(ex, new String[]{}) != 0);

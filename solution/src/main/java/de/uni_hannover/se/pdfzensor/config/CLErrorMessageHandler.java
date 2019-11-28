@@ -6,7 +6,7 @@ import picocli.CommandLine;
 import java.io.PrintWriter;
 
 /**
- * Handles invalid syntax on command-line arguments.
+ * Handles invalid syntax in command-line arguments.
  */
 public class CLErrorMessageHandler implements CommandLine.IParameterExceptionHandler {
 	
