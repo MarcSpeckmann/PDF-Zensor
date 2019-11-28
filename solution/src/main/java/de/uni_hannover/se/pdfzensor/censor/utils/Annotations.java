@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 
 import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT;
 
+/**
+ * This Annotations class caches links and highlighted annotations. It also allows to test
+ * annotations for being links or highlights.
+ */
 public final class Annotations {
 	@NotNull
 	private List<Rectangle2D> highlights;
