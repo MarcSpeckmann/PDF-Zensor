@@ -9,8 +9,10 @@ import java.util.function.Predicate;
 
 /**
  * Criteria which can be chosen to check if an object are marked
+ * <ul>
  * <li>{@link #INTERSECT}</li>
  * <li>{@link #CONTAIN}</li>
+ * </ul>
  */
 enum MarkCriteria {
 
