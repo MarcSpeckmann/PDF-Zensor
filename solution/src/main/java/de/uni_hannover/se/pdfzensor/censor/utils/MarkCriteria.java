@@ -26,7 +26,7 @@ enum MarkCriteria {
 	CONTAIN(Rectangle2D::contains);
 
 	/**
-	 * teh wanted Predicate
+	 * the wanted Predicate
 	 */
 	private final BiPredicate<Rectangle2D, Rectangle2D> predicate;
 
