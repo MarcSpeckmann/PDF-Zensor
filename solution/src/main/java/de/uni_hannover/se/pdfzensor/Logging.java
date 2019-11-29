@@ -30,7 +30,8 @@ public final class Logging {
 	/** The available logging levels ordered by their detail (ascending). */
 	@NotNull
 	@SuppressWarnings("squid:S2386") // we can disable it here as this is an enum array and should not be alterable
-	public static final Level[] VERBOSITY_LEVELS = {Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL};
+	public static final Level[] VERBOSITY_LEVELS =
+			{Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL};
 	
 	/** Stores the context that is currently initialized. */
 	private static LoggerContext context = null;

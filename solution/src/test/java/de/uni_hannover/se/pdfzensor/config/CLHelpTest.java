@@ -1,6 +1,6 @@
 package de.uni_hannover.se.pdfzensor.config;
 
-import de.uni_hannover.se.pdfzensor.TestUtility;
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

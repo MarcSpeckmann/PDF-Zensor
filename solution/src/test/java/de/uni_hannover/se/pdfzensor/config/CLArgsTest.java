@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.TestUtility.getResource;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** CLArgsTest should contain all unit-tests related to {@link CLArgs}. */

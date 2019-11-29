@@ -1,42 +1,35 @@
 package de.uni_hannover.se.pdfzensor;
 
+import de.uni_hannover.se.pdfzensor.testing.LoggingUtility;
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
+import de.uni_hannover.se.pdfzensor.testing.appenders.TestAppender;
+import de.uni_hannover.se.pdfzensor.testing.argumentproviders.LogLevelProvider;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.impl.Log4jLogEvent;
-import org.apache.logging.log4j.message.FormattedMessageFactory;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static de.uni_hannover.se.pdfzensor.testing.LoggingUtility.LOG_LEVELS;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** LoggingTest should contain all unit-tests related to {@link Logging}. */
+/** LoggingTest should contain all unit-tests related only to {@link Logging}. */
+@SuppressWarnings("ConstantConditions")
 class LoggingTest {
 	
-	/** Returns a Stream of all log-levels as arguments. */
-	static Stream<Arguments> levelLoggingParameters() throws Throwable {
-		return Stream.of(Level.values())
-					 .map(Arguments::of);
+	@Test
+	void testGeneral() {
+		TestUtility.assertIsUtilityClass(Logging.class);
 	}
 	
 	/** Multiple tests related to the correct (and incorrect) initialization of the logging. */
 	@Test
 	void testInit() {
-		TestUtility.assertIsUtilityClass(Logging.class);
-		
 		//Logging is not initialized
-		assertTrue(TestUtility.getRootLogger()
-							  .isEmpty());
+		assertTrue(TestUtility.getRootLogger().isEmpty());
 		Logging.deinit();
 		//Logging is not initialized after deinitializing it when it was not initialized before
 		assertTrue(TestUtility.getRootLogger().isEmpty());
@@ -74,14 +67,12 @@ class LoggingTest {
 	 *                    FATAL) will be filtered out
 	 */
 	@ParameterizedTest(name = "Run {index}: level: {0}")
-	@MethodSource("levelLoggingParameters")
+	@ArgumentsSource(LogLevelProvider.class)
 	void testLoggingForEachLevel(Level loggerLevel) {
 		// A Stream with each Message for each (Valid) log-level (OFF and ALL are no log-levels)
-		final List<LogEvent> events = Stream.of("MSG1", "MSG2", "MSG3", "MSG4")
-											.map(str -> new FormattedMessageFactory().newMessage(str)).flatMap(
-						msg -> Stream.of(Level.TRACE, Level.DEBUG, Level.INFO, Level.WARN, Level.ERROR, Level.FATAL)
-									 .map(lvl -> new Log4jLogEvent.Builder().setLevel(lvl).setMessage(msg).build()))
-											.collect(Collectors.toUnmodifiableList());
+		final String[] messages = {"MSG1", "MSG2", "MSG3", "MSG4"};
+		final var events = TestUtility.join(Stream.of(messages), LOG_LEVELS, LoggingUtility::createLogEvent)
+									  .collect(Collectors.toUnmodifiableList());
 		
 		Logger logger;
 		org.apache.logging.log4j.core.Logger rootLogger;
@@ -96,24 +87,5 @@ class LoggingTest {
 		for (var e : events)
 			logger.log(e.getLevel(), e.getMessage());
 		Logging.deinit();
-	}
-	
-	/** Used to test if logging happens in the right order and gets filtered by log-level correctly. */
-	private static class TestAppender extends AbstractAppender {
-		Queue<LogEvent> events;
-		
-		TestAppender(@NotNull List<LogEvent> events, Level lvl) {
-			super("tmp", null, null, false, null);
-			this.events = new ArrayDeque<>();
-			events.stream().filter(e -> e.getLevel().isMoreSpecificThan(lvl)).forEach(this.events::offer);
-		}
-		
-		@Override
-		public void append(@NotNull final LogEvent event) {
-			assertFalse(events.isEmpty());
-			var cur = events.poll();
-			assertEquals(cur.getLevel(), event.getLevel());
-			assertEquals(cur.getMessage().getFormattedMessage(), event.getMessage().getFormattedMessage());
-		}
 	}
 }

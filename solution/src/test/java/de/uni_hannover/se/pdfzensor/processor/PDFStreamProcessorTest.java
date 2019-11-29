@@ -1,6 +1,6 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
-import de.uni_hannover.se.pdfzensor.TestUtility;
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import de.uni_hannover.se.pdfzensor.censor.utils.DoubleBufferedStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

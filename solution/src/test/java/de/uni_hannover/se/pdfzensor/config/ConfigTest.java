@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-import static de.uni_hannover.se.pdfzensor.TestUtility.getResource;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigTest {

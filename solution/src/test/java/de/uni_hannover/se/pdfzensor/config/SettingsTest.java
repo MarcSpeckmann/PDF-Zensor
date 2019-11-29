@@ -1,7 +1,7 @@
 package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.Logging;
-import de.uni_hannover.se.pdfzensor.TestUtility;
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.TestUtility.*;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
