@@ -16,7 +16,9 @@ class MetaDataRemoverTest {
      */
     @Test
     void testCensorMetadata() throws IOException {
-        File file = new File("src/test/resources/pdf-files/fullMetadata.pdf");
+        String link = "src/test/resources/pdf-files/fullMetadata.pdf";
+
+        File file = new File(link);
         PDDocument document = PDDocument.load(file);
         PDDocumentInformation docInfo = document.getDocumentInformation();
         Calendar creationDate = docInfo.getCreationDate();
