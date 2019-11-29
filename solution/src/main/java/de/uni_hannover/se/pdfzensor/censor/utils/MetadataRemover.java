@@ -13,7 +13,7 @@ import java.util.GregorianCalendar;
 abstract class MetadataRemover {
     /**
      * Receives a {@link PDDocument} and censors all the metadata.
-     * @param document The PDDocument that will be consored. May not be null.
+     * @param document The PDDocument that will be censored. May not be null.
      */
     static void censorMetadata(@NotNull PDDocument document){
             PDDocumentInformation docinfo = document.getDocumentInformation();
