@@ -27,6 +27,7 @@ class PDFUtilsTest {
 		DIMENSIONS.put(new Rectangle2D.Float(-1,-2,-3,-4), new Float[]{-1f, -2f, -3f, -4f});
 		DIMENSIONS.put(new Rectangle2D.Float(1,2,3,4), new Float[]{1f, 2f, 3f, 4f});
 		DIMENSIONS.put(new Rectangle2D.Float(1.5f,2.5f,3.5f,4.5f), new Float[]{1.5f, 2.5f, 3.5f, 4.5f});
+		// TODO maybe add more tests
 	}
 	
 	/** Provides a set of arguments for {@link #pdrectToRect2DTest(Float[], Rectangle2D)} generated from {@link #DIMENSIONS}. */
