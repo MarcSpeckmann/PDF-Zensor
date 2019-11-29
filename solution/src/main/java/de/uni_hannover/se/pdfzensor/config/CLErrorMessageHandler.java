@@ -1,9 +1,9 @@
 package de.uni_hannover.se.pdfzensor.config;
 
-import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * Handles invalid syntax in command-line arguments.
@@ -17,7 +17,8 @@ public class CLErrorMessageHandler implements CommandLine.IParameterExceptionHan
 	 * @param args command-line arguments
 	 * @return error code
 	 */
-	public int handleParseException(@NotNull CommandLine.ParameterException ex, String[] args) {
+	public int handleParseException(CommandLine.ParameterException ex, String[] args) {
+		Objects.requireNonNull(ex);
 		CommandLine cmd = ex.getCommandLine();
 		PrintWriter writer = cmd.getErr();
 		

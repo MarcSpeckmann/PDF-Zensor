@@ -34,17 +34,26 @@ class CLErrorMessageHandlerTest {
 		final PrintStream originalOut = System.err;
 		System.setErr(new PrintStream(outContent));
 		
-		//initialize handler
 		CLErrorMessageHandler handler = new CLErrorMessageHandler();
 		CommandLine cmd = new CommandLine(CLArgs.class);
 		
+		//check null input
+		assertThrows(NullPointerException.class, () -> handler.handleParseException(null, null));
+		assertThrows(NullPointerException.class, () ->handler.handleParseException(null, new String[]{}));
+		
+		//construct ParameterException
+		var errmsg = "Error";
+		CommandLine.ParameterException ex = new CommandLine.ParameterException(cmd, errmsg);
+		
+		assertDoesNotThrow(()->handler.handleParseException(ex, null));
+		
 		//TODO: possibly add more tests and change @Test to @ParameterizedTest
-		CommandLine.ParameterException ex = new CommandLine.ParameterException(cmd, "Error");
 		//string can be empty because it is not used inside the method handleParseException
+		//return isn't allowed to bei 0, because an exception occurred
 		assertTrue(handler.handleParseException(ex, new String[]{}) != 0);
 		
 		assertTrue(outContent.toString()
-							 .contains("Error"));
+							 .contains(errmsg));
 		assertTrue(outContent.toString()
 							 .contains(cmd.getHelp()
 										  .fullSynopsis()));
