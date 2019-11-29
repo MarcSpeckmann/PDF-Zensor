@@ -35,48 +35,36 @@ class LoggingTest {
 		TestUtility.assertIsUtilityClass(Logging.class);
 		
 		//Logging is not initialized
-		assertTrue(Logging.getRootLogger()
-						  .isEmpty());
+		assertTrue(TestUtility.getRootLogger()
+							  .isEmpty());
 		Logging.deinit();
 		//Logging is not initialized after deinitializing it when it was not initialized before
-		assertTrue(Logging.getRootLogger()
-						  .isEmpty());
+		assertTrue(TestUtility.getRootLogger().isEmpty());
 		//And that does not change if we call getRootLogger
-		assertTrue(Logging.getRootLogger()
-						  .isEmpty());
+		assertTrue(TestUtility.getRootLogger().isEmpty());
 		
 		//Initialize logging on each level and check if a RootLogger was initialized on the right level
 		for (Level level : Level.values()) {
-			assertTrue(Logging.getRootLogger()
-							  .isEmpty());
+			assertTrue(TestUtility.getRootLogger().isEmpty());
 			Logging.init(level);
-			assertTrue(Logging.getRootLogger()
-							  .isPresent());
-			assertEquals(level, Logging.getRootLogger()
-									   .orElseThrow()
-									   .getLevel());
+			assertTrue(TestUtility.getRootLogger().isPresent());
+			assertEquals(level, TestUtility.getRootLogger().orElseThrow().getLevel());
 			Logging.deinit();
-			assertTrue(Logging.getRootLogger()
-							  .isEmpty());
+			assertTrue(TestUtility.getRootLogger().isEmpty());
 		}
 		
 		//Initializing with log-level null should throw a NullPointerException
-		assertTrue(Logging.getRootLogger()
-						  .isEmpty());
+		assertTrue(TestUtility.getRootLogger().isEmpty());
 		assertThrows(NullPointerException.class, () -> Logging.init(null));
-		assertTrue(Logging.getRootLogger()
-						  .isEmpty());
+		assertTrue(TestUtility.getRootLogger().isEmpty());
 		
 		//Test for automatic initialization when getLogger() is called
-		assertTrue(Logging.getRootLogger()
-						  .isEmpty());
+		assertTrue(TestUtility.getRootLogger().isEmpty());
 		assertNotNull(Logging.getLogger());
-		assertTrue(Logging.getRootLogger()
-						  .isPresent());
-		assertEquals(Level.OFF, Logging.getRootLogger().orElseThrow().getLevel());
+		assertTrue(TestUtility.getRootLogger().isPresent());
+		assertEquals(Level.OFF, TestUtility.getRootLogger().orElseThrow().getLevel());
 		Logging.deinit();
-		assertTrue(Logging.getRootLogger()
-						  .isEmpty());
+		assertTrue(TestUtility.getRootLogger().isEmpty());
 	}
 	
 	/**
@@ -90,31 +78,23 @@ class LoggingTest {
 	void testLoggingForEachLevel(Level loggerLevel) {
 		// A Stream with each Message for each (Valid) log-level (OFF and ALL are no log-levels)
 		final List<LogEvent> events = Stream.of("MSG1", "MSG2", "MSG3", "MSG4")
-											.map(str -> new FormattedMessageFactory().newMessage(str))
-											.flatMap(msg -> Stream.of(Level.TRACE, Level.DEBUG, Level.INFO, Level.WARN,
-																	  Level.ERROR, Level.FATAL)
-																  .map(lvl -> new Log4jLogEvent.Builder().setLevel(lvl)
-																										 .setMessage(
-																												 msg)
-																										 .build()))
+											.map(str -> new FormattedMessageFactory().newMessage(str)).flatMap(
+						msg -> Stream.of(Level.TRACE, Level.DEBUG, Level.INFO, Level.WARN, Level.ERROR, Level.FATAL)
+									 .map(lvl -> new Log4jLogEvent.Builder().setLevel(lvl).setMessage(msg).build()))
 											.collect(Collectors.toUnmodifiableList());
 		
 		Logger logger;
 		org.apache.logging.log4j.core.Logger rootLogger;
 		Logging.init(loggerLevel);
 		assertNotNull(logger = Logging.getLogger());
-		rootLogger = Logging.getRootLogger()
-							.orElseThrow();
-		rootLogger.getAppenders()
-				  .values()
-				  .forEach(rootLogger::removeAppender);
+		rootLogger = TestUtility.getRootLogger().orElseThrow();
+		rootLogger.getAppenders().values().forEach(rootLogger::removeAppender);
 		var appender = new TestAppender(events, loggerLevel);
 		rootLogger.addAppender(appender);
 		appender.start();
 		
-		for (var e : events) {
+		for (var e : events)
 			logger.log(e.getLevel(), e.getMessage());
-		}
 		Logging.deinit();
 	}
 	
@@ -125,10 +105,7 @@ class LoggingTest {
 		TestAppender(@NotNull List<LogEvent> events, Level lvl) {
 			super("tmp", null, null, false, null);
 			this.events = new ArrayDeque<>();
-			events.stream()
-				  .filter(e -> e.getLevel()
-								.isMoreSpecificThan(lvl))
-				  .forEach(this.events::offer);
+			events.stream().filter(e -> e.getLevel().isMoreSpecificThan(lvl)).forEach(this.events::offer);
 		}
 		
 		@Override
@@ -136,9 +113,7 @@ class LoggingTest {
 			assertFalse(events.isEmpty());
 			var cur = events.poll();
 			assertEquals(cur.getLevel(), event.getLevel());
-			assertEquals(cur.getMessage()
-							.getFormattedMessage(), event.getMessage()
-														 .getFormattedMessage());
+			assertEquals(cur.getMessage().getFormattedMessage(), event.getMessage().getFormattedMessage());
 		}
 	}
 }
