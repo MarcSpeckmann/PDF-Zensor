@@ -68,10 +68,10 @@ class SettingsTest {
 	@Test
 	void testSettings() {
 		// if the command line argument is not given or has a faulty structure
-		assertThrows(NullPointerException.class, () -> new Settings("", (String[]) null));
-		assertThrows(IllegalArgumentException.class, () -> new Settings("", (String) null));
+		assertThrows(NullPointerException.class, () -> new Settings(null, (String[]) null));
+		assertThrows(IllegalArgumentException.class, () -> new Settings(null, (String) null));
 		// if the command line argument is given but invalid -- it is not invalid anymore if the file does not exist
-		//assertThrows(IllegalArgumentException.class, () -> new Settings("", "this_file_does_not_exist.pdf"));
+		//assertThrows(IllegalArgumentException.class, () -> new Settings(null, "this_file_does_not_exist.pdf"));
 	}
 	
 	/** Checks if the arguments are passed into the corresponding expected values. */
@@ -79,7 +79,7 @@ class SettingsTest {
 	@MethodSource("testArguments")
 	void testSettingsNoConfig(String[] args, File input, File output, Level verbosity) throws IOException {
 		Logging.deinit();
-		final var settings = new Settings("", args);
+		final var settings = new Settings(null, args);
 		assertEquals(input, settings.getInput());
 		assertEquals(output, settings.getOutput());
 		var rootLogger = TestUtility.getRootLogger();
@@ -165,14 +165,14 @@ class SettingsTest {
 	/** dummy Unit-tests for function getLinkColor */
 	@Test
 	void testLinkColor() throws IOException {
-		final var settings = new Settings("", getResource("/pdf-files/sample.pdf").getAbsolutePath());
+		final var settings = new Settings(null, getResource("/pdf-files/sample.pdf").getAbsolutePath());
 		assertEquals(Color.BLUE, settings.getLinkColor());
 	}
 	
 	/** dummy Unit-tests for function getExpressions */
 	@Test
 	void getExpressions() throws IOException {
-		final var settings = new Settings("", getResource("/pdf-files/sample.pdf").getAbsolutePath());
+		final var settings = new Settings(null, getResource("/pdf-files/sample.pdf").getAbsolutePath());
 		for (int i = 0; i < settings.getExpressions().length; i++) {
 			assertEquals(new Expression[]{new Expression(".", "#000000")}[0].getColor(),
 						 settings.getExpressions()[i].getColor());

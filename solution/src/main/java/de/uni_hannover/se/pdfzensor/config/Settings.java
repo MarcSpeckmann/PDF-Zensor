@@ -59,16 +59,15 @@ public final class Settings {
 	 * @param args       The commandline arguments.
 	 * @throws IOException If the configuration file could not be parsed.
 	 */
-	public Settings(@NotNull String configPath, @NotNull final String... args) throws IOException {
+	public Settings(@Nullable String configPath, @NotNull final String... args) throws IOException {
 		final var clArgs = CLArgs.fromStringArray(args);
-		final var config = getDefaultConfig(configPath);
-		final var configParser = Config.fromFile(config);
-		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), configParser.getVerbosity(), Level.OFF);
+		final var config = getConfig(configPath);
+		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.OFF);
 		Logging.init(verbose);
 		
 		input = clArgs.getInput();
 		output = checkOutput(
-				ObjectUtils.firstNonNull(clArgs.getOutput(), configParser.getOutput(), input.getParentFile()));
+				ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
 		
@@ -76,7 +75,7 @@ public final class Settings {
 		final var logger = Logging.getLogger();
 		logger.log(Level.DEBUG, "Finished parsing the settings:");
 		logger.log(Level.DEBUG, "\tInput-file: {}", input);
-		logger.log(Level.DEBUG, "\tConfig-file: {}", config);
+		logger.log(Level.DEBUG, "\tConfig-file: {}", configPath);
 		logger.log(Level.DEBUG, "\tOutput-file: {}", output);
 		logger.log(Level.DEBUG, "\tLogger verbosity: {}", verbose);
 		logger.log(Level.DEBUG, "\tLink-Color: {}", () -> colorToString(linkColor));
@@ -85,24 +84,40 @@ public final class Settings {
 			logger.log(Level.DEBUG, "\t\t{}", exp);
 	}
 	
+	/**
+	 * Tries to load the configuration file from the provided path. If the path is <code>null</code> the empty
+	 * configuration (everything <code>null</code>) will be used.
+	 *
+	 * @return The configuration file that was loaded from the specified path.
+	 * @throws IOException if the configuration file could not be found or read.
+	 */
+	@NotNull
+	private static Config getConfig(@Nullable String configPath) throws IOException {
+		return Config.fromFile(Optional.ofNullable(configPath).map(File::new).orElse(null));
+	}
+	
+	/** Returns the input file as it was specified in the command-line arguments. */
 	@NotNull
 	@Contract(pure = true)
 	public File getInput() {
 		return input;
 	}
 	
+	/** Returns the output file as it was specified in the command-line arguments and config. */
 	@NotNull
 	@Contract(pure = true)
 	public File getOutput() {
 		return output;
 	}
 	
+	/** Returns the color links should be censored in as it was specified in the command-line arguments and config. */
 	@NotNull
 	@Contract(pure = true)
 	public Color getLinkColor() {
 		return linkColor;
 	}
 	
+	/** Returns the expressions as they were specified in the command-line arguments and config. */
 	@NotNull
 	@Contract(pure = true)
 	public Expression[] getExpressions() {
@@ -137,16 +152,5 @@ public final class Settings {
 	private File getDefaultOutput(@NotNull final String path) {
 		final var inName = FilenameUtils.removeExtension(input.getName());
 		return new File(Objects.requireNonNull(path) + File.separatorChar + inName + "_cens.pdf").getAbsoluteFile();
-	}
-	
-	/**
-	 * @return The absolute default configuration file or null if it did not exist.
-	 */
-	@Nullable
-	private File getDefaultConfig(String configPath) {
-		return Optional.of(configPath)
-					   .map(File::new)
-					   .filter(File::isFile)
-					   .orElse(null);
 	}
 }
