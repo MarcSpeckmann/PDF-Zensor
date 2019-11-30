@@ -92,8 +92,8 @@ class PDFStreamProcessor extends PDFTextStripper {
 		Objects.requireNonNull(ret);
 		try {
 			ret.close();
-		} catch (Exception e) {
-			LOGGER.log(Level.ERROR, "Failed to close the PDFStreamProcessor-instance's current output stream.", e);
+		} catch (IOException e) {
+			LOGGER.log(Level.ERROR, "Failed to close the PDFStreamProcessor-instance's current input stream.", e);
 		}
 		return ret;
 	}

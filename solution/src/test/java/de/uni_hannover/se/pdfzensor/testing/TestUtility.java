@@ -3,15 +3,18 @@ package de.uni_hannover.se.pdfzensor.testing;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,5 +108,15 @@ public final class TestUtility {
 		Objects.requireNonNull(s2);
 		Objects.requireNonNull(joiner);
 		return s1.flatMap(t -> s2.stream().map(k -> joiner.apply(t, k)));
+	}
+	
+	public static Method getPrivateMethod(Class<?> cls, String methodName, Class<?>... paramTypes) {
+		try {
+			var method = cls.getDeclaredMethod(methodName, paramTypes);
+			method.setAccessible(true);
+			return method;
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
@@ -80,10 +81,10 @@ public class DoubleBufferedStream implements AutoCloseable {
 	/**
 	 * Closes the underlying streams and writes the OutputStream's contents to {@link #getStream()}.
 	 *
-	 * @throws Exception if the resource cannot be closed.
+	 * @throws IOException if the resource cannot be closed.
 	 */
 	@Override
-	public void close() throws Exception {
+	public void close() throws IOException {
 		is.close();
 		os.close();
 		try (var s = stream.createOutputStream()) {
