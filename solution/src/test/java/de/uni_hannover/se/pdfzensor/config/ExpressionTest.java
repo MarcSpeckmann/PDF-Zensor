@@ -4,6 +4,7 @@ import de.uni_hannover.se.pdfzensor.utils.Utils;
 import de.uni_hannover.se.pdfzensor.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
+import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ColorProvider.COLORS;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExpressionTest {
@@ -21,7 +22,7 @@ class ExpressionTest {
 		assertEquals("regex", nullColor.getRegex());
 		assertNull(nullColor.getColor());
 		
-		for (var pair : UtilsTest.COLORS.entrySet()) {
+		for (var pair : COLORS.entrySet()) {
 			var exp = new Expression("regex", "#" + pair.getValue()[0]);
 			assertEquals("regex", exp.getRegex());
 			assertEquals(Utils.getColorOrNull("#" + pair.getValue()[0]), exp.getColor());
