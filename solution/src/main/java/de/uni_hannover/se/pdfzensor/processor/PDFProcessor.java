@@ -1,5 +1,8 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
+import de.uni_hannover.se.pdfzensor.Logging;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 import java.io.IOException;
@@ -9,6 +12,8 @@ import java.util.Objects;
  * PDFProcessor is a class that runs a TextProcessor with a PDFHandler
  */
 public class PDFProcessor {
+    private static final Logger LOGGER = Logging.getLogger();
+
     private final PDFHandler handler;
     
     /**
@@ -16,6 +21,7 @@ public class PDFProcessor {
      */
     public PDFProcessor(PDFHandler handler) {
         this.handler = Objects.requireNonNull(handler, "PDFHandler must not be null");
+        LOGGER.log(Level.DEBUG, "Initialized a new PDFStreamProcessor-instance");
     }
     
     /**
@@ -25,6 +31,10 @@ public class PDFProcessor {
      */
     public void process(PDDocument document) throws IOException {
         final PDFStreamProcessor processor = new TextProcessor(handler);
+
+        var information = Objects.requireNonNull(document).getDocumentInformation();
+        LOGGER.log(Level.DEBUG, "Starting to process the document: {} ",information::getTitle);
+
         processor.getText(document);
     }
 }
