@@ -17,6 +17,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
+import static de.uni_hannover.se.pdfzensor.testing.LoggingUtility.getRootLogger;
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -82,7 +83,7 @@ class SettingsTest {
 		final var settings = new Settings(null, args);
 		assertEquals(input, settings.getInput());
 		assertEquals(output, settings.getOutput());
-		var rootLogger = TestUtility.getRootLogger();
+		var rootLogger = getRootLogger();
 		assertTrue(rootLogger.isPresent());
 		assertEquals(verbosity, rootLogger.get().getLevel());
 	}
@@ -150,14 +151,14 @@ class SettingsTest {
 		// if config is overwritten correctly by the CLArgs with less specific level (config has Level.DEBUG)
 		Logging.deinit();
 		settings = new Settings(configPath, getResourcePath("/pdf-files/sample.bla.pdf"), "-vvvvvvv");
-		var rootLogger = TestUtility.getRootLogger();
+		var rootLogger = getRootLogger();
 		assertTrue(rootLogger.isPresent());
 		assertEquals(Level.ALL, rootLogger.get().getLevel());
 		
 		// if config is overwritten correctly by the CLArgs with more specific level (config has Level.DEBUG)
 		Logging.deinit();
 		settings = new Settings(configPath, getResourcePath("/pdf-files/sample.bla.pdf"), "-vv");
-		rootLogger = TestUtility.getRootLogger();
+		rootLogger = getRootLogger();
 		assertTrue(rootLogger.isPresent());
 		assertEquals(Level.ERROR, rootLogger.get().getLevel());
 	}

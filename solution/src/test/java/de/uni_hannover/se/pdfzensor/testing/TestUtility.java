@@ -90,19 +90,6 @@ public final class TestUtility {
 		return URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8);
 	}
 	
-	@NotNull
-	public static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
-		try {
-			var contextField = Logging.class.getDeclaredField("context");
-			contextField.setAccessible(true);
-			var context = (LoggerContext) contextField.get(null);
-			return Optional.ofNullable(context).map(LoggerContext::getRootLogger);
-		} catch (Exception e) {
-			Assertions.fail("Could not retrieve the RootLogger.", e);
-		}
-		return Optional.empty();
-	}
-	
 	/**
 	 * Performs a join on the two streams. That means that for each value-combinations of the both streams the joiner is
 	 * called. The results are given in the resulting stream.
@@ -115,9 +102,9 @@ public final class TestUtility {
 	 * @param <R>    the return-type.
 	 * @return a stream consisting of the mapped combinations of s1's and s2's values.
 	 */
-	public static <T, K, R> Stream<R> join(@NotNull Stream<T> s1,
-										   @NotNull Collection<K> s2,
-										   @NotNull BiFunction<T, K, R> joiner) {
+	public static <T, K, R> Stream<R> crossJoin(@NotNull Stream<T> s1,
+												@NotNull Collection<K> s2,
+												@NotNull BiFunction<T, K, R> joiner) {
 		Objects.requireNonNull(s1);
 		Objects.requireNonNull(s2);
 		Objects.requireNonNull(joiner);
