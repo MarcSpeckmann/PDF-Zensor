@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * The ColorProvider may be used as a JUnit {@link ArgumentsProvider} to feed corresponding String[]-Color-pairs as
+ * arguments. Each of the string-values is a valid hexadecimal representation for the given color if any {@link
+ * #COLOR_PREFIXES} is added.
+ */
 public class ColorProvider implements ArgumentsProvider {
 	public static final String[] COLOR_PREFIXES = {"0X", "0x", "#"};
 	public static final Map<Color, String[]> COLORS = new HashMap<>();

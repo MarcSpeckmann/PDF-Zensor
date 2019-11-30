@@ -1,21 +1,16 @@
 package de.uni_hannover.se.pdfzensor.testing;
 
-import de.uni_hannover.se.pdfzensor.Logging;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
