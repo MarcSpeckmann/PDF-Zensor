@@ -17,7 +17,7 @@ import java.awt.geom.Rectangle2D;
  * PDFUtils is a utility class for the censor package and only provides {@link #transformTextPosition(TextPosition)} to
  * the outside of the package
  */
-public final class PDFUtils {
+final class PDFUtils {
 	
 	/**
 	 * Constructor of PDFUtils not usable!
@@ -25,7 +25,7 @@ public final class PDFUtils {
 	 * @throws UnsupportedOperationException thrown when trying to use the constructor
 	 */
 	@Contract(value = " -> fail", pure = true)
-	private PDFUtils() throws UnsupportedOperationException {
+	private PDFUtils() {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -47,7 +47,7 @@ public final class PDFUtils {
 	 * @return A rectangle from type Rectangle2D with the properties of height, width and position from the
 	 * 		   TextPosition or returns a Rectangle2D with height, width and position equals 0 if an error occurred
 	 */
-	public static Rectangle2D transformTextPosition(TextPosition pos) {
+	private static Rectangle2D transformTextPosition(TextPosition pos) {
 		try {
 			PDFont font = pos.getFont();
 			BoundingBox bb = font.getBoundingBox();

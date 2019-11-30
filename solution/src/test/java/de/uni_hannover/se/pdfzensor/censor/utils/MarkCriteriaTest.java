@@ -18,8 +18,10 @@ class MarkCriteriaTest {
     /** Hash Map containing Booleans for expected outputs 1: 'INTERSECT' and 2: 'CONTAIN' and the input-rectangles */
     public static final Map<Boolean[], Rectangle2D> RECTANGLES = new HashMap<>();
     
+    /** A rectangle to compare the test rectangles with. */
     static Rectangle2D rect = new Rectangle2D.Double(0, 0, 2, 2);
     
+    // This adds paires of inputs (rectangles) and outputs (boolean-values for intersect and contain).
     static {
         RECTANGLES.put(new Boolean[]{true,true}, rect);   // (0,0) (2,2), rectangle itself
         RECTANGLES.put(new Boolean[]{true,false}, new Rectangle2D.Double(1, 1, 2, 2));   // (1,1) (3,3)
@@ -30,7 +32,6 @@ class MarkCriteriaTest {
         RECTANGLES.put(new Boolean[]{false,false}, new Rectangle2D.Double(5, 5, 2, 2)); // (5,5) (7,7)
         RECTANGLES.put(new Boolean[]{false,false}, new Rectangle2D.Double(2, 2, 2, 2)); // (2,2) (4,4)
         RECTANGLES.put(new Boolean[]{false,false}, new Rectangle2D.Double(2, 2, -1, -1));    //empty
-        // TODO maybe add more tests
     }
     
     /** tests for {@link MarkCriteria} constructor  */

@@ -8,7 +8,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
- * Criteria which can be chosen to check if an object are marked
+ * Criteria which can be chosen to check if an object is marked
  * <ul>
  * <li>{@link #INTERSECT}</li>
  * <li>{@link #CONTAIN}</li>
