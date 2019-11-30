@@ -22,7 +22,7 @@ class PDFUtilsTest {
 	private static final Map<Rectangle2D, PDRectangle> DIMENSIONS = new HashMap<>();
 	
 	static {
-		// This adds paires of inputs (rectangles as PDRectangle) and outputs (rectangles as Rectangle2D).
+		// adds pairs of input rectangles (as {@link PDRectangle}) and output rectangles (as {@link Rectangle2D}).
 		DIMENSIONS.put(new Rectangle2D.Float(0f,0f,0f,0f),
 				new PDRectangle(0f, 0f, 0f, 0f));
 		DIMENSIONS.put(new Rectangle2D.Float(-1f, -2f, -3f, -4f),
