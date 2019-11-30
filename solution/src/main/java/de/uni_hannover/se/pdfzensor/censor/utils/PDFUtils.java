@@ -21,8 +21,6 @@ final class PDFUtils {
 	
 	/**
 	 * Constructor of PDFUtils not usable!
-	 *
-	 * @throws UnsupportedOperationException thrown when trying to use the constructor
 	 */
 	@Contract(value = " -> fail", pure = true)
 	private PDFUtils() {
