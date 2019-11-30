@@ -21,9 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit assertion fails.
  */
 public class TestAppender extends AbstractAppender {
+	@NotNull
 	private Queue<LogEvent> events = new ArrayDeque<>();
 	
-	public TestAppender(@NotNull List<? extends LogEvent> events, Level lvl) {
+	public TestAppender(@NotNull List<? extends LogEvent> events, @NotNull Level lvl) {
 		super("test appender", null, null, false, null);
 		events.stream().filter(e -> e.getLevel().isMoreSpecificThan(lvl)).forEach(this.events::offer);
 	}

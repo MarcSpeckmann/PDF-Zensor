@@ -72,6 +72,7 @@ public class DoubleBufferedStream implements AutoCloseable {
 	 *
 	 * @return The output-stream to the buffer that holds data until {@link #close()} is called.
 	 */
+	@NotNull
 	@SuppressWarnings("ReturnPrivateMutableField")//we want to return a reference here
 	@Contract(pure = true)
 	public OutputStream getOutputStream() {

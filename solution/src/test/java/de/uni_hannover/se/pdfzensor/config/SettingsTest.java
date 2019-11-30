@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.Logging;
-import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

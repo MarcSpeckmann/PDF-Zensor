@@ -62,7 +62,7 @@ final class Config {
 		Validate.isTrue(config.isFile(), "The configuration file is not a valid JSON-file.");
 		try {
 			return new ObjectMapper().readValue(config, Config.class);
-		} catch (JsonParseException | JsonMappingException e) {
+		} catch (@NotNull JsonParseException | JsonMappingException e) {
 			throw new IllegalArgumentException("The configuration file does not contain a valid JSON-string.");
 		}
 	}

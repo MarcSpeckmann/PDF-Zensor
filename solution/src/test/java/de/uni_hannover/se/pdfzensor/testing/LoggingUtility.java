@@ -35,7 +35,7 @@ public final class LoggingUtility {
 	 * @return a LogEvent containing the provided data.
 	 */
 	@NotNull
-	public static LogEvent createLogEvent(String msg, Level level) {
+	public static LogEvent createLogEvent(@NotNull String msg, Level level) {
 		var event = new MutableLogEvent(new StringBuilder(msg), new Object[0]);
 		event.setLevel(level);
 		return event;

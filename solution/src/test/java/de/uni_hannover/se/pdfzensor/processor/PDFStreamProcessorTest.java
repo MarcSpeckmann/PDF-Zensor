@@ -4,6 +4,7 @@ import de.uni_hannover.se.pdfzensor.censor.utils.DoubleBufferedStream;
 import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFProvider;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -36,7 +37,7 @@ class PDFStreamProcessorTest {
 	 */
 	@ParameterizedTest
 	@ArgumentsSource(PDFProvider.class)
-	void testStreamStack(File file) throws IOException {
+	void testStreamStack(@NotNull File file) throws IOException {
 		try (var doc = PDDocument.load(file)) {
 			final var processor = new StackCheckingStreamProcessor();
 			assertNotNull(doc);

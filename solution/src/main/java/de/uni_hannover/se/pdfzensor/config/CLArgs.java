@@ -27,6 +27,7 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 )
 final class CLArgs {
 	/** The input-file as it was specified. It's value <b>should not</b> be null. */
+	@Nullable
 	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", arity = "1",
 			description = {"Set the input pdf-file that should be censored. Required."})
 	private File input = null;

@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.utils.Utils;
-import de.uni_hannover.se.pdfzensor.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ColorProvider.COLORS;

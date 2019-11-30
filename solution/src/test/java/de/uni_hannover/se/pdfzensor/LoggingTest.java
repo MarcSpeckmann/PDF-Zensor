@@ -4,6 +4,7 @@ import de.uni_hannover.se.pdfzensor.testing.LoggingUtility;
 import de.uni_hannover.se.pdfzensor.testing.appenders.TestAppender;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.LogLevelProvider;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -33,7 +34,7 @@ class LoggingTest {
 	
 	@ParameterizedTest
 	@ArgumentsSource(LogLevelProvider.class)
-	void testInitializeLevel(Level level) {
+	void testInitializeLevel(@NotNull Level level) {
 		assertFalse(isLoggingInitialized());
 		Logging.init(level);
 		assertTrue(isLoggingInitialized());
@@ -67,7 +68,7 @@ class LoggingTest {
 	 */
 	@ParameterizedTest(name = "[{index}] level: {0}")
 	@ArgumentsSource(LogLevelProvider.class)
-	void testLoggingForEachLevel(Level loggerLevel) {
+	void testLoggingForEachLevel(@NotNull Level loggerLevel) {
 		// A Stream with each Message for each (valid) log-level (OFF and ALL are no log-levels)
 		final String[] messages = {null, "MSG1", "MSG2", "MSG3", "MSG4"};
 		final var events = crossJoin(Stream.of(messages), LOG_LEVELS, LoggingUtility::createLogEvent)

@@ -117,10 +117,6 @@ public class UtilsTest {
 	}
 	
 	/**
-	 * Checks if the colorCodes all produce the expected color and if the expected color will be converted into one of
-	 * the color-codes. The color-codes will be prepended with each of the {@link #COLOR_PREFIXES}.
-	 */
-	/**
 	 * Asserts for each ColorCodes-Color-pair that all of the provided color-codes are representing the expected color
 	 * when adding anyone of the {@link ColorProvider#COLOR_PREFIXES}. To test validty for each prefix-code-combination
 	 * it is asserted that {@link Utils#getColorOrNull(String)} returns the correct color.<br> The reverse direction is
