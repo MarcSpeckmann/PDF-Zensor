@@ -47,9 +47,8 @@ public final class Annotations {
 	 * and {@link #cacheHighlights}.
 	 *
 	 * @param page the current PDF page being worked on
-	 * @throws NullPointerException if PDF page is null
 	 */
-	public void cachePage(@NotNull PDPage page) throws  NullPointerException{
+	public void cachePage(@NotNull PDPage page){
 		cacheLinks(page);
 		cacheHighlights(page);
 	}
@@ -59,9 +58,8 @@ public final class Annotations {
 	 * {@link #links} the list will just be cleared.
 	 *
 	 * @param page the current PDF page being worked on
-	 * @throws NullPointerException if given page object is null
 	 */
-	private void cacheLinks(@NotNull PDPage page) throws NullPointerException{
+	private void cacheLinks(@NotNull PDPage page){
 		Objects.requireNonNull(page);
 		try {
 			links = page.getAnnotations(PDAnnotationLink.class::isInstance).stream()
@@ -77,9 +75,8 @@ public final class Annotations {
 	 * in the stream {@link #highlights} list will just be cleared.
 	 *
 	 * @param page the current PDF page being worked on
-	 * @throws NullPointerException if given page object is null
 	 */
-	private void cacheHighlights(@NotNull PDPage page) throws NullPointerException{
+	private void cacheHighlights(@NotNull PDPage page){
 		Objects.requireNonNull(page);
 		try {
 			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream()
@@ -96,9 +93,8 @@ public final class Annotations {
 	 *
 	 * @param rect the rectangle to be checked
 	 * @return true if the given rect entirely fits into at least one rect of {@link #highlights} otherwise false
-	 * @throws NullPointerException if given rect is null
 	 */
-	public boolean isMarked(@NotNull Rectangle2D rect) throws NullPointerException{
+	public boolean isMarked(@NotNull Rectangle2D rect){
 		return isMarked(rect, MarkCriteria.CONTAIN);
 	}
 
@@ -110,9 +106,8 @@ public final class Annotations {
 	 * @param criteria either {@link MarkCriteria#CONTAIN} or {@link MarkCriteria#INTERSECT}
 	 * @return true if at least one rect of {@link #highlights} matches the criteria with the given
 	 * 			rect otherwise false
-	 * @throws NullPointerException if given rect or criteria is null
 	 */
-	boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriteria criteria) throws NullPointerException{
+	boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriteria criteria){
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
 		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
@@ -125,9 +120,8 @@ public final class Annotations {
 	 *
 	 * @param rect the rectangle to be checked
 	 * @return true if the given rect entirely fits into at least one rect of {@link #links} otherwise false
-	 * @throws NullPointerException if given rect is null
 	 */
-	boolean isLinked(@NotNull Rectangle2D rect) throws NullPointerException{
+	boolean isLinked(@NotNull Rectangle2D rect){
 		return isLinked(rect, MarkCriteria.CONTAIN);
 	}
 
@@ -139,9 +133,8 @@ public final class Annotations {
 	 * @param criteria either {@link MarkCriteria#CONTAIN} or {@link MarkCriteria#INTERSECT}
 	 * @return true if at least one rect of {@link #links} matches the criteria with the given
 	 * 			rect otherwise false
-	 * @throws NullPointerException if given rect or criteria is null
 	 */
-	boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriteria criteria) throws NullPointerException{
+	boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriteria criteria){
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
 		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
