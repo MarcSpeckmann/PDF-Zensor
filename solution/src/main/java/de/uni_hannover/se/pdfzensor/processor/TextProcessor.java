@@ -22,8 +22,7 @@ import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT_AD
 
 
 /** TextProcessor has two main purposes:
- * for one is it responsible to abstract {@link org.apache.pdfbox.text.PDFTextStripper}'s
- * {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
+ * for one is it responsible to abstract {@link org.apache.pdfbox.text.PDFTextStripper}'s {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
  * and similar methods to the API outside of this package by forwarding these events to a {@link PDFHandler}.
  * For the other is it responsible to copy all read operators into {@link PDFStreamProcessor}'s builtin output-stream.
  * The latter has as only exception the Show-Text-Operators (TJ and Tj) as they should only be copied if the callback to
