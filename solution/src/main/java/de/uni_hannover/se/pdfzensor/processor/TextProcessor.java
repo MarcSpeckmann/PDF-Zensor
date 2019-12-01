@@ -60,7 +60,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	@Override
 	protected void startPage(final @NotNull PDPage page) throws IOException {
 		super.startPage(page);
-		handler.beginPage(document, page, document.getPages().indexOf(page));
+		handler.beginPage(document, page, getCurrentPageNo());
 	}
 	
 	/**
