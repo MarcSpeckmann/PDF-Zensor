@@ -1,7 +1,9 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.util.FileUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,17 +11,34 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.io.File;
+import java.util.Objects;
+import java.util.Optional;
+
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
 /**
  * The class is responsible for parsing the given command-line arguments
- *
- * @author Marc Speckmann
- * @author Lennart Bohlin
  */
-@Command(name = "pdf-zensor", version = DummyVersionProvider.VERSION, description = {"--Here could be your description--"})
+@Command(name = "pdf-zensor", versionProvider = VersionProvider.class, separator = " ", mixinStandardHelpOptions = true,
+		header = "PDF-Zensor",
+		synopsisHeading = "%n@|bold,underline SYNOPSIS|@%n%n",
+		descriptionHeading = "%n@|bold,underline DESCRIPTION|@%n",
+		description = {"PDF-Zensor is a program to censor PDF documents."},
+		parameterListHeading = "%n@|bold,underline PARAMETERS|@%n%n",
+		optionListHeading = "%n@|bold,underline OPTIONS|@%n%n"
+)
+
 final class CLArgs {
+	
+	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", description = {"Set the input file to censor. Required."}, arity = "1")
+	@Nullable
+	private File input = null;
+	
+	@Option(names = {"-o", "--out"}, paramLabel = "\"out\"", description = {"Set a specific output file to use."}, arity = "1")
+	@Nullable
+	private File output = null;
 	
 	@Option(names = {"-v", "--verbose"}, description = {"Specify multiple -v options to increase verbosity."}, arity = "0")
 	@Nullable
@@ -41,7 +60,37 @@ final class CLArgs {
 	}
 	
 	/**
-	 * Returns verbosity level given bei the user
+	 * Returns input file given by the user
+	 *
+	 * @return The absolute input file which was specified.
+	 */
+	@NotNull
+	final File getInput() {
+		Objects.requireNonNull(input, "The input must be an existing PDF-file.");
+		return Optional.of(input)
+					   .filter(File::isFile)
+					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)))
+					   .map(File::getAbsoluteFile)
+					   .orElseThrow(() -> new IllegalArgumentException(
+							   "The provided input does not have the pdf suffix or is no file."));
+	}
+	
+	/**
+	 * Returns output fil given by the user
+	 *
+	 * @return null or the absolute output file if one was specified.
+	 */
+	@Nullable
+	final File getOutput() {
+		return Optional.ofNullable(output)
+					   .filter(f -> "pdf".equals(FileUtils.getFileExtension(f)) || f.isDirectory() || StringUtils
+							   .isEmpty(FileUtils.getFileExtension(f)))
+					   .map(File::getAbsoluteFile)
+					   .orElse(null);
+	}
+	
+	/**
+	 * Returns verbosity level given by the user
 	 *
 	 * @return null or the level of logging verbosity if verbose was given
 	 */
@@ -50,5 +99,4 @@ final class CLArgs {
 	Level getVerbosity() {
 		return verbose == null ? null : VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, verbose.length)];
 	}
-	
 }
