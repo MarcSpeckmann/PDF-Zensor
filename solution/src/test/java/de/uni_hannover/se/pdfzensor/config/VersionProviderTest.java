@@ -3,7 +3,6 @@ package de.uni_hannover.se.pdfzensor.config;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,14 +16,9 @@ final class VersionProviderTest {
 	 * Automated tests to check if version and timestamp exist in properties.
 	 */
 	@Test
-	void getProperties() {
+	void testPropertyExistence() {
 		final Properties properties = new Properties();
-		try {
-			properties.load(Objects.requireNonNull(this.getClass()
-													   .getResourceAsStream("/project.properties")));
-		} catch (IOException ex) {
-			fail("failed to load properties");
-		}
+		assertDoesNotThrow(() -> properties.load(VersionProviderTest.class.getResourceAsStream("/project.properties")));
 		assertNotNull(properties);
 		assertNotNull(properties.getProperty("version"));
 		assertNotNull(properties.getProperty("timestamp"));
@@ -35,14 +29,15 @@ final class VersionProviderTest {
 	 * description.
 	 */
 	@Test
-	void getVersion() {
+	void testGetVersion() {
 		var versionProvider = new VersionProvider();
 		assertDoesNotThrow(versionProvider::getVersion);
 		try {
 			String[] version = versionProvider.getVersion();
 			assertNotNull(version);
-			assertTrue(version[1].length() > "Version: ".length());
-			assertTrue(version[2].length() > "Build: ".length());
+			assertTrue(version.length >= 2);
+			assertTrue(version[1].startsWith("Version: "));
+			assertTrue(version[2].startsWith("Build: "));
 		} catch (IOException ex) {
 			fail("failed to load VersionProvider");
 		}
