@@ -21,11 +21,11 @@ public class PDFProcessor {
      */
     public PDFProcessor(PDFHandler handler) {
         this.handler = Objects.requireNonNull(handler, "PDFHandler must not be null");
-        LOGGER.log(Level.DEBUG, "Initialized a new PDFStreamProcessor-instance");
+        LOGGER.log(Level.DEBUG, "Initialized a new PDFProcessor-instance");
     }
     
     /**
-     * This function runs the TextProcessor with the delivered PDF document
+     * This function runs the TextProcessor with the delivered PDF document depending on the {@link #handler}
      * @param document The document to be processed in the TextProcessor
      * @throws IOException The exception is thrown in the constructor of the TextProcessor
      */
