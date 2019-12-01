@@ -18,8 +18,7 @@ public class TextProcessorTest {
 	private int pageEndCounter = 0;
 	private boolean beginDocument = false;
 	private boolean endDocument = false;
-
-	PDFHandler handler = new PDFHandler() {
+	private PDFHandler handler = new PDFHandler() {
 		@Override
 		public void beginDocument(final PDDocument doc) {
 			System.out.println("beginDocument");
@@ -56,13 +55,12 @@ public class TextProcessorTest {
 	 */
 	@Test
 	void testTextProcessingOrderOfFunctionCallsInTextProcessor() throws IOException {
-
 		TextProcessor tp = new TextProcessor(handler);
 		File file = new File(path);
 		PDDocument doc;
-
 		doc = PDDocument.load(file);
 		tp.getText(doc);
+
 		var numberOfPages = doc.getPages().getCount();
 
 		assertEquals(numberOfPages, pageBeginCounter);

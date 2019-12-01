@@ -20,11 +20,18 @@ import java.util.Objects;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT_ADJUSTED;
 
-/** The processor informs the handler about important events and transfers the documents to the {@link PDFHandler}.*/
+
+/** TextProcessor has two main purposes:
+ * for one is it responsible to abstract {@link org.apache.pdfbox.text.PDFTextStripper}'s
+ * {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
+ * and similar methods to the API outside of this package by forwarding these events to a {@link PDFHandler}.
+ * For the other is it responsible to copy all read operators into {@link PDFStreamProcessor}'s builtin output-stream.
+ * The latter has as only exception the Show-Text-Operators (TJ and Tj) as they should only be copied if the callback to
+ * {@link PDFHandler#shouldCensorText(TextPosition)} had returned false. */
 public class TextProcessor extends PDFStreamProcessor {
+	private static final Logger LOGGER = Logging.getLogger();
 	private PDFHandler handler;
 	private boolean removedLastTextPosition = false;
-	protected static final Logger LOGGER = Logging.getLogger();
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
 	 *
@@ -60,7 +67,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	@Override
 	protected void startPage(final @NotNull PDPage page) throws IOException {
 		super.startPage(page);
-		handler.beginPage(document, page, document.getPages().indexOf(page));
+		handler.beginPage(document, page, getCurrentPageNo());
 	}
 	
 	/**
@@ -83,7 +90,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void endPage(final PDPage page) throws IOException {
-		handler.endPage(document, page, document.getPages().indexOf(page));
+		handler.beginPage(document, page, getCurrentPageNo());
 		super.endPage(page);
 	}
 	
@@ -108,15 +115,13 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
-		ContentStreamWriter writer = getCurrentContentStream();
+		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
 		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)){
-			assert writer != null;
 			writer.writeToken(operator);
 			writer.writeTokens(operands);
 		}
 		super.processOperator(operator, operands);
 		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !removedLastTextPosition){
-			assert writer != null;
 			writer.writeToken(operator);
 			writer.writeTokens(operands);
 		}
