@@ -42,7 +42,7 @@ public class DoubleBufferedStream implements AutoCloseable {
 	}
 	
 	/**
-	 * Returns the pdf-stream as it was set in the constructor. All buffered data will be written into this stream uppon
+	 * Returns the pdf-stream as it was set in the constructor. All buffered data will be written into this stream upon
 	 * closing.
 	 *
 	 * @return The PDF-Stream as set in the constructor.

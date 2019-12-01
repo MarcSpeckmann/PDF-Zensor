@@ -27,12 +27,14 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 )
 final class CLArgs {
 	/** The input-file as it was specified. It's value <b>should not</b> be null. */
+	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
 	@Nullable
 	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", arity = "1",
 			description = {"Set the input pdf-file that should be censored. Required."})
 	private File input = null;
 	
 	/** The output path. This may be a folder, a file or null. Null should be assigned if nothing else was specified. */
+	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
 	@Option(names = {"-o", "--out"}, paramLabel = "\"out\"", arity = "1",
 			description = {"The output file or path the censored file should be written to."})
 	@Nullable
@@ -42,6 +44,7 @@ final class CLArgs {
 	 * The verbosity is given by how often -v was specified. If length is 0, verbosity is OFF. If null nothing was
 	 * specified in the command line arguments.
 	 */
+	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
 	@Option(names = {"-v", "--verbose"}, arity = "0",
 			description = {"Sets the logger's verbosity. Specify multiple -v options to increase verbosity."})
 	@Nullable
@@ -92,7 +95,7 @@ final class CLArgs {
 	@Contract(pure = true)
 	@NotNull
 	final File getInput() {
-		return input;
+		return Objects.requireNonNull(input);
 	}
 	
 	/**

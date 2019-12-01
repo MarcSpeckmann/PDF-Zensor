@@ -1,6 +1,5 @@
 package de.uni_hannover.se.pdfzensor.testing.argumentproviders;
 
-import de.uni_hannover.se.pdfzensor.utils.Utils;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +9,6 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;

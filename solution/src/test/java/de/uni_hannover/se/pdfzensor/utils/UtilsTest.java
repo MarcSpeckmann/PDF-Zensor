@@ -80,6 +80,7 @@ public class UtilsTest {
 	 * Comparable)} (except non <code>null</code>) if they all get identified as erroneous inputs and if thus a {@link
 	 * NullPointerException} is thrown.
 	 */
+	@SuppressWarnings("ConstantConditions") // we explicitly want to check if this issue is noted at runtime
 	@Test
 	void clampInvalidArguments() {
 		final Integer[] values = {0, null};
@@ -118,7 +119,7 @@ public class UtilsTest {
 	
 	/**
 	 * Asserts for each ColorCodes-Color-pair that all of the provided color-codes are representing the expected color
-	 * when adding anyone of the {@link ColorProvider#COLOR_PREFIXES}. To test validty for each prefix-code-combination
+	 * when adding anyone of the {@link ColorProvider#COLOR_PREFIXES}. To test validity for each prefix-code-combination
 	 * it is asserted that {@link Utils#getColorOrNull(String)} returns the correct color.<br> The reverse direction is
 	 * also tested by calling {@link Utils#colorToString(Color)} and checking if it returns any of the color-codes when
 	 * stripped of its prefix.

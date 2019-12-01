@@ -2,22 +2,12 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider;
 import org.apache.logging.log4j.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** CLArgsTest should contain all unit-tests related to {@link CLArgs}. */

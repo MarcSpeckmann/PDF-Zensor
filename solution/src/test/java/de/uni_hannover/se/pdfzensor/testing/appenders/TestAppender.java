@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class TestAppender extends AbstractAppender {
 	@NotNull
-	private Queue<LogEvent> events = new ArrayDeque<>();
+	private final Queue<LogEvent> events = new ArrayDeque<>();
 	
 	public TestAppender(@NotNull List<? extends LogEvent> events, @NotNull Level lvl) {
 		super("test appender", null, null, false, null);

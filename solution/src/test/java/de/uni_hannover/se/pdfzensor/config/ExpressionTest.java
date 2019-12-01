@@ -37,7 +37,7 @@ class ExpressionTest {
 		assertDoesNotThrow(exp::toString);
 	}
 	
-	//More rigorous testing for this is done in UtiltsTest
+	//More rigorous testing for this is done in UtilsTest
 	@ParameterizedTest
 	@ValueSource(strings = {"#", "ffffff", "fffffz"})
 	void testIllegalConstructorArguments(String color) {

@@ -217,10 +217,10 @@ class PDFStreamProcessor extends PDFTextStripper {
 	@Override
 	public void showForm(@NotNull final PDFormXObject form) throws IOException {
 		Objects.requireNonNull(form);
-		LOGGER.log(Level.DEBUG, "Entering formxobject");
+		LOGGER.log(Level.DEBUG, "Entering FormXObject");
 		pushStream(new DoubleBufferedStream(form.getContentStream(), form.getContents()));
 		super.showForm(form);
 		popStream();
-		LOGGER.log(Level.DEBUG, "Exiting formxobject");
+		LOGGER.log(Level.DEBUG, "Exiting FormXObject");
 	}
 }
