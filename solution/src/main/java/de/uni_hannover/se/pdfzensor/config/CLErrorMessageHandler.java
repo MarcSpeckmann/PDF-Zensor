@@ -4,6 +4,9 @@ import picocli.CommandLine;
 
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.Optional;
+
+import static picocli.CommandLine.UnmatchedArgumentException.printSuggestions;
 
 /**
  * Handles invalid syntax in command-line arguments.
@@ -23,17 +26,16 @@ public class CLErrorMessageHandler implements CommandLine.IParameterExceptionHan
 		PrintWriter writer = cmd.getErr();
 		
 		writer.println(ex.getMessage());
-		CommandLine.UnmatchedArgumentException.printSuggestions(ex, writer);
+		printSuggestions(ex, writer);
 		
 		writer.print(cmd.getHelp()
 						.fullSynopsis());
 		
-		CommandLine.Model.CommandSpec spec = cmd.getCommandSpec();
+		var spec = cmd.getCommandSpec();
 		writer.printf("%nTry '%s --help' for more information.%n", spec.qualifiedName());
 		
-		return cmd.getExitCodeExceptionMapper() != null
-				? cmd.getExitCodeExceptionMapper()
-					 .getExitCode(ex)
-				: spec.exitCodeOnInvalidInput();
+		return Optional.ofNullable(cmd.getExitCodeExceptionMapper())
+					   .map(e -> e.getExitCode(ex))
+					   .orElseGet(spec::exitCodeOnInvalidInput);
 	}
 }

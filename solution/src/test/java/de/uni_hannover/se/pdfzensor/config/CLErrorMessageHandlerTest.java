@@ -25,6 +25,9 @@ class CLErrorMessageHandlerTest {
 	
 	/**
 	 * Testing if {@link CommandLine.ParameterException} is handled the right way.
+	 * The error message provided from the exception should be printed into System.err.
+	 * Further more should the synopsis and a hint to use the --help command printed to System.err.
+	 * If a exception was handled the return code should be not null.
 	 */
 	@Test
 	@DisplayName("Test CLErrorMessageHandler output")
@@ -47,7 +50,6 @@ class CLErrorMessageHandlerTest {
 		
 		assertDoesNotThrow(()->handler.handleParseException(ex, null));
 		
-		//TODO: possibly add more tests and change @Test to @ParameterizedTest
 		//string can be empty because it is not used inside the method handleParseException
 		//return isn't allowed to bei 0, because an exception occurred
 		assertTrue(handler.handleParseException(ex, new String[]{}) != 0);
