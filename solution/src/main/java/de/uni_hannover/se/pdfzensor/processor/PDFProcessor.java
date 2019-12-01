@@ -9,8 +9,7 @@ public class PDFProcessor {
     private final PDFHandler handler;
 
     public PDFProcessor(PDFHandler handler) {
-        Objects.requireNonNull(handler);
-        this.handler = handler;
+        this.handler = Objects.requireNonNull(handler);
     }
     public void process(PDDocument document) throws IOException {
         final PDFStreamProcessor processor = new TextProcessor(handler);
