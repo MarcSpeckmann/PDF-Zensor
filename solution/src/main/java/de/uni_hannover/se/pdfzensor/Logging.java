@@ -118,6 +118,8 @@ public final class Logging {
 	 * @param appenderComponentBuilders the appenders that should be assigned to the root logger
 	 * @return the created root logger
 	 */
+	@SuppressWarnings("UnusedReturnValue")
+	// return value is unused, for possible future API reasons it still exists though
 	@NotNull
 	private static RootLoggerComponentBuilder setRootLogger(
 			@NotNull final ConfigurationBuilder<BuiltConfiguration> builder,
@@ -140,7 +142,7 @@ public final class Logging {
 	 * @return an optional containing the root-logger of the current context. Returns an empty Optional when no context
 	 * was initialized
 	 */
-	static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
+	private static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
 		return Optional.ofNullable(context)
 					   .map(LoggerContext::getRootLogger);
 	}

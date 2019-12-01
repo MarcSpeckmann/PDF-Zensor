@@ -1,8 +1,10 @@
 package de.uni_hannover.se.pdfzensor;
 
+import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -10,6 +12,7 @@ import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +32,7 @@ public final class TestUtility {
 	 */
 	public static void assertIsUtilityClass(@NotNull Class<?> cls) {
 		assertNotNull(cls);
-		assertTrue(Modifier.isFinal(cls.getModifiers()));
+		assertTrue(Modifier.isFinal(cls.getModifiers()), "A utility class should be final");
 		for (var c : cls.getDeclaredConstructors())
 			assertEquals(0, c.getParameterCount(),
 						 String.format("%s may not contain any constructor other than the default", cls.getName()));
@@ -66,11 +69,13 @@ public final class TestUtility {
 		var caller = StackLocatorUtil.getCallerClass(2);
 		return new File(URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8));
 	}
+	
 	/**
-	 * Retrieves the Absolute Path of the given resource from the provided location. This will use the caller-class' {@link
-	 * Class#getResource(String)}.
+	 * Retrieves the Absolute Path of the given resource from the provided location. This will use the caller-class'
+	 * {@link Class#getResource(String)}.
 	 *
-	 * @param path the path in the resources to get the Absolute Path from. Should not be null and should start with a slash.
+	 * @param path the path in the resources to get the Absolute Path from. Should not be null and should start with a
+	 *             slash.
 	 * @return the Absolute Path of the given resource-path.
 	 */
 	@NotNull
@@ -79,5 +84,19 @@ public final class TestUtility {
 		Objects.requireNonNull(path);
 		var caller = StackLocatorUtil.getCallerClass(2);
 		return URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8);
+	}
+	
+	@NotNull
+	@SuppressWarnings("unchecked")
+	public static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
+		try {
+			var method = Logging.class.getDeclaredMethod("getRootLogger");
+			method.setAccessible(true);
+			var logger = method.invoke(Logger.class);
+			return (Optional<org.apache.logging.log4j.core.Logger>) logger;
+		} catch (Exception e) {
+			Assertions.fail("Could not retrieve the RootLogger.", e);
+		}
+		return Optional.empty();
 	}
 }
