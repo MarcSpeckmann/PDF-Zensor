@@ -1,9 +1,15 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ColorProvider;
 import de.uni_hannover.se.pdfzensor.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ColorProvider.COLORS;
+import java.awt.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExpressionTest {
@@ -12,23 +18,30 @@ class ExpressionTest {
 	@Test
 	void testConstructor() {
 		assertThrows(NullPointerException.class, () -> new Expression(null, "#ffffff"));
-		//More rigorous testing for this is done in UtiltsTest
-		assertThrows(IllegalArgumentException.class, () -> new Expression("regex", "#"));
-		assertThrows(IllegalArgumentException.class, () -> new Expression("regex", "ffffff"));
-		assertThrows(IllegalArgumentException.class, () -> new Expression("regex", "fffffz"));
-		
+	}
+	
+	@Test
+	void testNullColor() {
 		var nullColor = new Expression("regex", null);
 		assertEquals("regex", nullColor.getRegex());
 		assertNull(nullColor.getColor());
-		
-		for (var pair : COLORS.entrySet()) {
-			var exp = new Expression("regex", "#" + pair.getValue()[0]);
-			assertEquals("regex", exp.getRegex());
-			assertEquals(Utils.getColorOrNull("#" + pair.getValue()[0]), exp.getColor());
-			assertDoesNotThrow(exp::toString);
-		}
-		
-		
+	}
+	
+	@ParameterizedTest
+	@ArgumentsSource(ColorProvider.class)
+	void testValidColor(@NotNull String[] colorCodes, Color color) {
+		var colorCode = "#" + colorCodes[0];
+		var exp = new Expression("regex", colorCode);
+		assertEquals("regex", exp.getRegex());
+		assertEquals(Utils.getColorOrNull(colorCode), exp.getColor());
+		assertDoesNotThrow(exp::toString);
+	}
+	
+	//More rigorous testing for this is done in UtiltsTest
+	@ParameterizedTest
+	@ValueSource(strings = {"#", "ffffff", "fffffz"})
+	void testIllegalConstructorArguments(String color) {
+		assertThrows(IllegalArgumentException.class, () -> new Expression("regex", color));
 	}
 	
 }
