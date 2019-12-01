@@ -14,7 +14,7 @@ import java.util.function.Predicate;
  * <li>{@link #CONTAIN}</li>
  * </ul>
  */
-enum MarkCriteria {
+enum MarkCriterion {
 
 	/**
 	 * INTERSECT is used when checking if rectangles intersect
@@ -35,7 +35,7 @@ enum MarkCriteria {
 	 * @param predicate a predicate that can be one of {@link Rectangle2D#intersects} or {@link Rectangle2D#contains}
 	 */
 	@Contract(pure = true)
-	MarkCriteria(BiPredicate<Rectangle2D, Rectangle2D> predicate) {
+	MarkCriterion(BiPredicate<Rectangle2D, Rectangle2D> predicate) {
 		this.predicate = predicate;
 	}
 	

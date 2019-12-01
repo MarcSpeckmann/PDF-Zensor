@@ -95,19 +95,19 @@ public final class Annotations {
 	 * @return true if the given rect entirely fits into at least one rect of {@link #highlights} otherwise false
 	 */
 	public boolean isMarked(@NotNull Rectangle2D rect){
-		return isMarked(rect, MarkCriteria.CONTAIN);
+		return isMarked(rect, MarkCriterion.CONTAIN);
 	}
 
 	/**
 	 * Checks if given annotation bounding box either intersects or entirely fits into one of the elements(bounding box
-	 * rectangles) of {@link #highlights} list depending on the given {@link MarkCriteria}.
+	 * rectangles) of {@link #highlights} list depending on the given {@link MarkCriterion}.
 	 *
 	 * @param rect the rectangle to be checked
-	 * @param criteria either {@link MarkCriteria#CONTAIN} or {@link MarkCriteria#INTERSECT}
+	 * @param criteria either {@link MarkCriterion#CONTAIN} or {@link MarkCriterion#INTERSECT}
 	 * @return true if at least one rect of {@link #highlights} matches the criteria with the given
 	 * 			rect otherwise false
 	 */
-	boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriteria criteria){
+	boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria){
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
 		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
@@ -122,19 +122,19 @@ public final class Annotations {
 	 * @return true if the given rect entirely fits into at least one rect of {@link #links} otherwise false
 	 */
 	boolean isLinked(@NotNull Rectangle2D rect){
-		return isLinked(rect, MarkCriteria.CONTAIN);
+		return isLinked(rect, MarkCriterion.CONTAIN);
 	}
 
 	/**
 	 * Checks if given annotation bounding box either intersects or entirely fits into one of the elements
-	 * (bounding box rectangles) of {@link #links} list depending on the given {@link MarkCriteria}.
+	 * (bounding box rectangles) of {@link #links} list depending on the given {@link MarkCriterion}.
 	 *
 	 * @param rect the rectangle to be checked
-	 * @param criteria either {@link MarkCriteria#CONTAIN} or {@link MarkCriteria#INTERSECT}
+	 * @param criteria either {@link MarkCriterion#CONTAIN} or {@link MarkCriterion#INTERSECT}
 	 * @return true if at least one rect of {@link #links} matches the criteria with the given
 	 * 			rect otherwise false
 	 */
-	boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriteria criteria){
+	boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria){
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
 		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);

@@ -2,10 +2,6 @@ package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import de.uni_hannover.se.pdfzensor.censor.utils.*;
 
 import java.awt.geom.Rectangle2D;
 
@@ -24,7 +20,7 @@ public class AnnotationsTest {
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().cachePage(null));
     }
 
-    /** test for {@link Annotations#isMarked(Rectangle2D, MarkCriteria)} */
+    /** test for {@link Annotations#isMarked(Rectangle2D, MarkCriterion)} */
     @Test
     void testIsMarked(){
         // both arguments are null
@@ -37,7 +33,7 @@ public class AnnotationsTest {
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isMarked(null));
     }
 
-    /** test for {@link Annotations#isLinked(Rectangle2D, MarkCriteria)} */
+    /** test for {@link Annotations#isLinked(Rectangle2D, MarkCriterion)} */
     @Test
     void testIsLinked(){
         // both arguments are null

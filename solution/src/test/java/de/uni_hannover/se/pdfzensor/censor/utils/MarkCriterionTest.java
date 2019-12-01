@@ -14,16 +14,16 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * This test class tests the {@link MarkCriteria#getPredicate} function to compare a rectangle {@link #rect} with a set
+ * This test class tests the {@link MarkCriterion#getPredicate} function to compare a rectangle {@link #rect} with a set
  * of other rectangles in two ways:
  * <ul>
- * <li>{@link MarkCriteria#INTERSECT} tests whether the rectangle {@link #rect} intersects one of the test rectangles in
+ * <li>{@link MarkCriterion#INTERSECT} tests whether the rectangle {@link #rect} intersects one of the test rectangles in
  * {@link #RECTANGLES}</li>
- * <li>{@link MarkCriteria#CONTAIN} tests whether the rectangle {@link #rect} contains one of the test rectangles in
+ * <li>{@link MarkCriterion#CONTAIN} tests whether the rectangle {@link #rect} contains one of the test rectangles in
  * {@link #RECTANGLES}</li>
  * </ul>
  */
-class MarkCriteriaTest {
+class MarkCriterionTest {
     
     /** A Hash Map containing some input-rectangles and the corresponding expected output values for
      * 1: 'INTERSECT' and 2: 'CONTAIN' */
@@ -45,11 +45,11 @@ class MarkCriteriaTest {
         RECTANGLES.put(new Boolean[]{false,false}, new Rectangle2D.Double(2, 2, -1, -1));    //empty
     }
     
-    /** tests for {@link MarkCriteria} constructor  */
+    /** tests for {@link MarkCriterion} constructor  */
     @Test
     void testMarkCriteria(){
-        assertDoesNotThrow(() -> MarkCriteria.CONTAIN);
-        assertDoesNotThrow(() -> MarkCriteria.INTERSECT);
+        assertDoesNotThrow(() -> MarkCriterion.CONTAIN);
+        assertDoesNotThrow(() -> MarkCriterion.INTERSECT);
     }
     
     /** Provides a set of arguments for {@link #getPredicateTest(Rectangle2D, Boolean[])} generated from {@link #RECTANGLES}. */
@@ -59,12 +59,12 @@ class MarkCriteriaTest {
                 .map(e -> Arguments.of(e.getValue(), e.getKey()));
     }
     
-    /** tests for {@link MarkCriteria#getPredicate} function */
+    /** tests for {@link MarkCriterion#getPredicate} function */
     @ParameterizedTest(name = "Run {index}: Rectangles: {0}")
     @MethodSource("rectangleProvider")
     void getPredicateTest(@NotNull Rectangle2D input, Boolean[] expected) {
-        var predIntersect = MarkCriteria.INTERSECT.getPredicate(rect);
-        var predContain = MarkCriteria.CONTAIN.getPredicate(rect);
+        var predIntersect = MarkCriterion.INTERSECT.getPredicate(rect);
+        var predContain = MarkCriterion.CONTAIN.getPredicate(rect);
         assertEquals(expected[0], predIntersect.test(input));  //checks if output Criteria is {@link Rectangle2D#intersects}
         assertEquals(expected[1], predContain.test(input));    //checks if output Criteria is {@link Rectangle2D#contains}
     }
