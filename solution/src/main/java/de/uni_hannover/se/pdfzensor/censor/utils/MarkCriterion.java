@@ -15,7 +15,7 @@ import java.util.function.Predicate;
  * </ul>
  */
 enum MarkCriterion {
-
+	
 	/**
 	 * INTERSECT is used when checking if rectangles intersect
 	 */
@@ -24,14 +24,15 @@ enum MarkCriterion {
 	 * CONTAIN INTERSECT is used when checking if rectangle entirely contains one another
 	 */
 	CONTAIN(Rectangle2D::contains);
-
+	
 	/**
 	 * the wanted Predicate
 	 */
 	private final BiPredicate<Rectangle2D, Rectangle2D> predicate;
-
+	
 	/**
-	 *  Constructs the wanted Criteria depending on the input function
+	 * Constructs the wanted Criteria depending on the input function
+	 *
 	 * @param predicate a predicate that can be one of {@link Rectangle2D#intersects} or {@link Rectangle2D#contains}
 	 */
 	@Contract(pure = true)

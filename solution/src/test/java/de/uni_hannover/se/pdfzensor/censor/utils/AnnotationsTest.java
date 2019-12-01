@@ -5,44 +5,58 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.geom.Rectangle2D;
 
-/** AnnotationsTest should contain all unit-tests related to {@link Annotations}. */
+/**
+ * AnnotationsTest should contain all unit-tests related to {@link Annotations}.
+ */
 public class AnnotationsTest {
-
-    /** tests for {@link Annotations} constructor */
+    
+    /**
+     * tests for {@link Annotations} constructor
+     */
     @Test
-    void testAnnotationsConstructor(){
+    void testAnnotationsConstructor() {
         Assertions.assertDoesNotThrow(AnnotationsTest::new);
     }
-
-    /** test for {@link Annotations#cachePage} */
+    
+    /**
+     * test for {@link Annotations#cachePage}
+     */
     @Test
-    void testCachePage(){
+    void testCachePage() {
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().cachePage(null));
     }
-
-    /** test for {@link Annotations#isMarked(Rectangle2D, MarkCriterion)} */
+    
+    /**
+     * test for {@link Annotations#isMarked(Rectangle2D, MarkCriterion)}
+     */
     @Test
-    void testIsMarked(){
+    void testIsMarked() {
         // both arguments are null
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isMarked(null, null));
     }
-
-    /** test for {@link Annotations#isMarked(Rectangle2D)} */
+    
+    /**
+     * test for {@link Annotations#isMarked(Rectangle2D)}
+     */
     @Test
-    void testIsMarkedOnlyContain(){
+    void testIsMarkedOnlyContain() {
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isMarked(null));
     }
-
-    /** test for {@link Annotations#isLinked(Rectangle2D, MarkCriterion)} */
+    
+    /**
+     * test for {@link Annotations#isLinked(Rectangle2D, MarkCriterion)}
+     */
     @Test
-    void testIsLinked(){
+    void testIsLinked() {
         // both arguments are null
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null, null));
     }
-
-    /** test for {@link Annotations#isLinked(Rectangle2D)} */
+    
+    /**
+     * test for {@link Annotations#isLinked(Rectangle2D)}
+     */
     @Test
-    void testIsLinkedOnlyContain(){
+    void testIsLinkedOnlyContain() {
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null));
     }
 }

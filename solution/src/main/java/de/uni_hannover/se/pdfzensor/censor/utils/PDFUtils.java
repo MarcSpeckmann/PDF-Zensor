@@ -29,6 +29,7 @@ final class PDFUtils {
 	
 	/**
 	 * Generates a Rectangle2D element with the properties of a PDRectangle
+	 *
 	 * @param rect A rectangle from type PDRectangle with height, width and position
 	 * @return A rectangle from type Rectangle2D with the properties of the input rectangle
 	 */
@@ -41,9 +42,10 @@ final class PDFUtils {
 	
 	/**
 	 * Generates a rectangle from type Rectangle2D with the height, width and position of a given text line
+	 *
 	 * @param pos A TextPosition representing a string and a position of characters on the screen
 	 * @return A rectangle from type Rectangle2D with the properties of height, width and position from the
-	 * 		   TextPosition or returns a Rectangle2D with height, width and position equals 0 if an error occurred
+	 * TextPosition or returns a Rectangle2D with height, width and position equals 0 if an error occurred
 	 */
 	private static Rectangle2D transformTextPosition(TextPosition pos) {
 		try {

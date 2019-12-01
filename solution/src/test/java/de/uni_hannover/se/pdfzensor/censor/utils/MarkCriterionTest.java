@@ -25,41 +25,49 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class MarkCriterionTest {
     
-    /** A Hash Map containing some input-rectangles and the corresponding expected output values for
-     * 1: 'INTERSECT' and 2: 'CONTAIN' */
+    /**
+     * A Hash Map containing some input-rectangles and the corresponding expected output values for
+     * 1: 'INTERSECT' and 2: 'CONTAIN'
+     */
     public static final Map<Boolean[], Rectangle2D> RECTANGLES = new HashMap<>();
     
-    /** A rectangle to compare the test rectangles with used by {@link #rectangleProvider()} */
+    /**
+     * A rectangle to compare the test rectangles with used by {@link #rectangleProvider()}
+     */
     static Rectangle2D rect = new Rectangle2D.Double(0, 0, 2, 2);
     
     // This adds pairs of input rectangles and corresponding outputs (boolean-values for intersect and contain).
     static {
-        RECTANGLES.put(new Boolean[]{true,true}, rect);   // (0,0) (2,2), rectangle itself
-        RECTANGLES.put(new Boolean[]{true,false}, new Rectangle2D.Double(1, 1, 2, 2));   // (1,1) (3,3)
-        RECTANGLES.put(new Boolean[]{true,false}, new Rectangle2D.Double(-1, -1, 2, 2)); // (-1,-1) (1,1)
-        RECTANGLES.put(new Boolean[]{true,false}, new Rectangle2D.Double(-1, 1, 2, 2));   // (-1,1) (1,3)
-        RECTANGLES.put(new Boolean[]{true,false}, new Rectangle2D.Double(1, -1, 2, 2)); // (1,-1) (3,1)
-        RECTANGLES.put(new Boolean[]{true,true}, new Rectangle2D.Double(-1, -1, 4, 4)); // (-1,-1) (3,3)
-        RECTANGLES.put(new Boolean[]{false,false}, new Rectangle2D.Double(5, 5, 2, 2)); // (5,5) (7,7)
-        RECTANGLES.put(new Boolean[]{false,false}, new Rectangle2D.Double(2, 2, 2, 2)); // (2,2) (4,4)
-        RECTANGLES.put(new Boolean[]{false,false}, new Rectangle2D.Double(2, 2, -1, -1));    //empty
+        RECTANGLES.put(new Boolean[]{true, true}, rect);   // (0,0) (2,2), rectangle itself
+        RECTANGLES.put(new Boolean[]{true, false}, new Rectangle2D.Double(1, 1, 2, 2));   // (1,1) (3,3)
+        RECTANGLES.put(new Boolean[]{true, false}, new Rectangle2D.Double(-1, -1, 2, 2)); // (-1,-1) (1,1)
+        RECTANGLES.put(new Boolean[]{true, false}, new Rectangle2D.Double(-1, 1, 2, 2));   // (-1,1) (1,3)
+        RECTANGLES.put(new Boolean[]{true, false}, new Rectangle2D.Double(1, -1, 2, 2)); // (1,-1) (3,1)
+        RECTANGLES.put(new Boolean[]{true, true}, new Rectangle2D.Double(-1, -1, 4, 4)); // (-1,-1) (3,3)
+        RECTANGLES.put(new Boolean[]{false, false}, new Rectangle2D.Double(5, 5, 2, 2)); // (5,5) (7,7)
+        RECTANGLES.put(new Boolean[]{false, false}, new Rectangle2D.Double(2, 2, 2, 2)); // (2,2) (4,4)
+        RECTANGLES.put(new Boolean[]{false, false}, new Rectangle2D.Double(2, 2, -1, -1));    //empty
     }
     
-    /** tests for {@link MarkCriterion} constructor  */
+    /**
+     * tests for {@link MarkCriterion} constructor
+     */
     @Test
-    void testMarkCriteria(){
+    void testMarkCriteria() {
         assertDoesNotThrow(() -> MarkCriterion.CONTAIN);
         assertDoesNotThrow(() -> MarkCriterion.INTERSECT);
     }
     
-    /** Provides a set of arguments for {@link #getPredicateTest(Rectangle2D, Boolean[])} generated from {@link #RECTANGLES}. */
+    /**
+     * Provides a set of arguments for {@link #getPredicateTest(Rectangle2D, Boolean[])} generated from {@link #RECTANGLES}.
+     */
     private static Stream<Arguments> rectangleProvider() {
-        return RECTANGLES.entrySet()
-                .stream()
-                .map(e -> Arguments.of(e.getValue(), e.getKey()));
+        return RECTANGLES.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
     }
     
-    /** tests for {@link MarkCriterion#getPredicate} function */
+    /**
+     * tests for {@link MarkCriterion#getPredicate} function
+     */
     @ParameterizedTest(name = "Run {index}: Rectangles: {0}")
     @MethodSource("rectangleProvider")
     void getPredicateTest(@NotNull Rectangle2D input, Boolean[] expected) {

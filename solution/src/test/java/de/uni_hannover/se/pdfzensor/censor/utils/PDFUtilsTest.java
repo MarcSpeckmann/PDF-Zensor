@@ -18,26 +18,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PDFUtilsTest {
 	
-	/** Hash Map for 1: height,width and 2: position x, y */
+	/**
+	 * Hash Map for 1: height,width and 2: position x, y
+	 */
 	private static final Map<Rectangle2D, PDRectangle> DIMENSIONS = new HashMap<>();
 	
 	static {
 		// adds pairs of input rectangles (as {@link PDRectangle}) and output rectangles (as {@link Rectangle2D}).
-		DIMENSIONS.put(new Rectangle2D.Float(0f,0f,0f,0f),
-				new PDRectangle(0f, 0f, 0f, 0f));
-		DIMENSIONS.put(new Rectangle2D.Float(-1f, -2f, -3f, -4f),
-				new PDRectangle(-1f, -2f, -3f, -4f));
-		DIMENSIONS.put(new Rectangle2D.Float(1f, 2f, 3f, 4f),
-				new PDRectangle(1f, 2f, 3f, 4f));
-		DIMENSIONS.put(new Rectangle2D.Float(1.5f, 2.5f, 3.5f, 4.5f),
-				new PDRectangle(1.5f, 2.5f, 3.5f, 4.5f));
+		DIMENSIONS.put(new Rectangle2D.Float(0f, 0f, 0f, 0f), new PDRectangle(0f, 0f, 0f, 0f));
+		DIMENSIONS.put(new Rectangle2D.Float(-1f, -2f, -3f, -4f), new PDRectangle(-1f, -2f, -3f, -4f));
+		DIMENSIONS.put(new Rectangle2D.Float(1f, 2f, 3f, 4f), new PDRectangle(1f, 2f, 3f, 4f));
+		DIMENSIONS.put(new Rectangle2D.Float(1.5f, 2.5f, 3.5f, 4.5f), new PDRectangle(1.5f, 2.5f, 3.5f, 4.5f));
 	}
 	
-	/** Provides a set of arguments for {@link #pdrectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link #DIMENSIONS}. */
+	/**
+	 * Provides a set of arguments for {@link #pdrectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link #DIMENSIONS}.
+	 */
 	private static Stream<Arguments> dimensionsProvider() {
-		return DIMENSIONS.entrySet()
-				.stream()
-				.map(e -> Arguments.of(e.getValue(), e.getKey()));
+		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
 	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
