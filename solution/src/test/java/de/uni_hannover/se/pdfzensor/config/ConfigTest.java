@@ -2,32 +2,28 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
+import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigTest {
-	private static final String CONFIG_PATH = "/configparser-test/configs/";
 	
-	/**
-	 * Tests if trying to parse invalid configuration files (not a file, not a ".json" file, invalid syntax) throws the
-	 * correct exception.
-	 */
 	@Test
-	void testIllegalArguments() {
-		// file not found / not a file: throw IllegalArgumentException
+	void testErroneousConfigPath() {
 		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(new File("/no/path")));
-		
-		// file has JSON-String with invalid syntax
-		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(getResource(
-				CONFIG_PATH + "invalid/invalid_json.json")));
-		// file has no JSON-String
-		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(getResource(
-				CONFIG_PATH + "invalid/empty_config.json")));
+	}
+	
+	@ParameterizedTest
+	@ValueSource(strings = {"invalid/invalid_json.json", "invalid/empty_config.json"})
+	void testInvalidJson(String path) {
+		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(getResource(CONFIG_PATH + path)));
 	}
 	
 	/**
@@ -60,15 +56,15 @@ class ConfigTest {
 	@Test
 	void testInvalidValueFallbacks() throws IOException {
 		// Verbosity level as integer higher than the highest possible value (> 7)
-		var file = getResource(CONFIG_PATH + "testConfigHighVerbosity.json");
+		var file = getResource(CONFIG_PATH + "valid/high_verbosity.json");
 		assertSame(Level.ALL, Config.fromFile(file).getVerbosity());
 		
 		// Verbosity level as integer below zero (negative value)
-		file = getResource(CONFIG_PATH + "testConfigNegativeVerbosity.json");
+		file = getResource(CONFIG_PATH + "valid/negative_verbosity.json");
 		assertSame(Level.OFF, Config.fromFile(file).getVerbosity());
 		
 		// False verbosity string in configurations json file
-		file = getResource(CONFIG_PATH + "testConfigFalseVerbosityString.json");
+		file = getResource(CONFIG_PATH + "valid/unknown_verbosity.json");
 		assertNull(Config.fromFile(file).getVerbosity());
 	}
 }

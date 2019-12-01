@@ -47,7 +47,7 @@ class SettingsTest {
 	void testSettingsWithBoth() throws IOException {
 		// the paths to a test config files
 		String configPath = getResourcePath(CONFIG_PATH + "testVerbosityAsStringValidConfig.json");
-		String configPath2 = getResourcePath(CONFIG_PATH + "testConfigNegativeVerbosity.json");
+		String configPath2 = getResourcePath(CONFIG_PATH + "valid/negative_verbosity.json");
 		String invalidConfigPath2 = getResourcePath(CONFIG_PATH + "valid/still_a_json.txt");
 		
 		// if there are just arguments
