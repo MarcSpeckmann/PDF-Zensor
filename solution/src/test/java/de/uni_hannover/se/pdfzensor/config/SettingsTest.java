@@ -36,10 +36,16 @@ class SettingsTest {
 		Logging.deinit();
 		final var settings = new Settings(null, args);
 		assertEquals(input, settings.getInput());
-		assertEquals(output, settings.getOutput());
+		if (output != null)
+			assertEquals(output, settings.getOutput());
+		else
+			assertNotNull(settings.getOutput());
 		var rootLogger = getRootLogger();
 		assertTrue(rootLogger.isPresent());
-		assertEquals(verbosity, rootLogger.get().getLevel());
+		if (verbosity != null)
+			assertEquals(verbosity, rootLogger.get().getLevel());
+		else
+			assertNotNull(rootLogger.get().getLevel());
 	}
 	
 	/** Checks if it works correctly when both of config and arguments are Passed. */
