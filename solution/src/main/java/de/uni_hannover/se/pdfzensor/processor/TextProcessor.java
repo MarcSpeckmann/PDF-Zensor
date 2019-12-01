@@ -1,6 +1,9 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
+import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
@@ -11,16 +14,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 
 import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT_ADJUSTED;
 
-/** The processor informs the handler about important events and transfers the documents.*/
+/** The processor informs the handler about important events and transfers the documents to the {@link PDFHandler}.*/
 public class TextProcessor extends PDFStreamProcessor {
 	private PDFHandler handler;
 	private boolean removedLastTextPosition = false;
-	
+	protected static final Logger LOGGER = Logging.getLogger();
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
 	 *
@@ -29,7 +33,10 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	TextProcessor(PDFHandler handler) throws IOException {
 		super();
-		this.handler = handler;
+		if (handler == null)
+			LOGGER.log(Level.ERROR, "Handler is null");
+		this.handler = Objects.requireNonNull(handler);
+
 	}
 	
 	/**
