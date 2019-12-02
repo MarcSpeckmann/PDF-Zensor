@@ -29,12 +29,13 @@ class MarkCriterionTest {
      * A Hash Map containing some input-rectangles and the corresponding expected output values for
      * 1: 'INTERSECT' and 2: 'CONTAIN'
      */
-    public static final Map<Boolean[], Rectangle2D> RECTANGLES = new HashMap<>();
+	private static final Map<Boolean[], Rectangle2D> RECTANGLES = new HashMap<>();
     
     /**
      * A rectangle to compare the test rectangles with used by {@link #rectangleProvider()}
      */
-    static Rectangle2D rect = new Rectangle2D.Double(0, 0, 2, 2);
+	private static Rectangle2D rect = new Rectangle2D.Double(0, 0, 2, 2);
+    
     
     // This adds pairs of input rectangles and corresponding outputs (boolean-values for intersect and contain).
     static {
