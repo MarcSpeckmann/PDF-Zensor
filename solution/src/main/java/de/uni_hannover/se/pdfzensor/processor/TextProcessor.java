@@ -89,8 +89,8 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void endPage(final PDPage page) throws IOException {
-		handler.endPage(document, page, getCurrentPageNo());
 		super.endPage(page);
+		handler.endPage(document, page, getCurrentPageNo());
 	}
 	
 	/**
