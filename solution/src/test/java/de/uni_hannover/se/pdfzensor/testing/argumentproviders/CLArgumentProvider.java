@@ -16,12 +16,32 @@ import java.util.stream.Stream;
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
+/**
+ * This class generates arguments for CLArgsTest for testing CLArgs and implements {@link ArgumentsProvider}.
+ */
 public class CLArgumentProvider implements ArgumentsProvider {
+	/**
+	 * List of template input files.
+	 */
 	private static final String[] inputFiles = {"/pdf-files/sample.pdf", "/pdf-files/sample.bla.pdf"};
+	/**
+	 * List of template output files.
+	 */
 	private static final String[] outputFiles = {null, "file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
+	/**
+	 * List of all possible verbosity levels.
+	 */
 	private static final int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1).toArray();
 	
-	
+	/**
+	 * This method creates an Argument which contains a input file, output file and verbosity level depending on the
+	 * given method inputs.
+	 *
+	 * @param in  input file
+	 * @param out output file
+	 * @param lvl verbosity level
+	 * @return a Argument of created commando line arguments and the method inputs
+	 */
 	@NotNull
 	private static Arguments createArgument(@NotNull String in, @Nullable String out, final int lvl) {
 		var arguments = new ArrayList<String>();
@@ -35,12 +55,20 @@ public class CLArgumentProvider implements ArgumentsProvider {
 			arguments.add("-" + "v".repeat(lvl));
 			verbosity = VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, lvl)];
 		}
-		
+		// No tests without input file, because this case would be caught by the main.
 		var inFile = new File(in);
 		var outFile = Optional.ofNullable(out).map(File::new).orElse(null);
 		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile, verbosity);
 	}
 	
+	/**
+	 * This method provides an argument stream for parametrized test. {@link #createArgument(String, String, int)} will
+	 * be called with each possible combination of {@link #inputFiles}, {@link #outputFiles} and {@link
+	 * #verbosityLevels}
+	 *
+	 * @param extensionContext encapsulates the context in which the current test or container is being executed.
+	 * @return stream of all created arguments
+	 */
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();
