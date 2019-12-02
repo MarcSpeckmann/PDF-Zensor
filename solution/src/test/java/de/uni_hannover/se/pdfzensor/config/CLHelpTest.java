@@ -10,7 +10,7 @@ import org.junit.platform.commons.util.StringUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * CLHelpTest should contain all unit-tests related to {@link CLHelp}.
@@ -23,6 +23,13 @@ class CLHelpTest {
 		TestUtility.assertIsUtilityClass(CLHelp.class);
 	}
 	
+	/**
+	 * This test checks if help or version is printed into System.out when it was requested
+	 *
+	 * @param args    the command-line arguments which were given from the ArgumentSource
+	 * @param help    True if args contains -h *
+	 * @param version True if args contains -V
+	 */
 	@ParameterizedTest(name = "Run {index}: args: {0} => help: {1}, version: {2}")
 	@ArgumentsSource(HelpArgumentProvider.class)
 	void printStandardHelpOptionsIfRequested(String[] args, boolean help, boolean version) {
