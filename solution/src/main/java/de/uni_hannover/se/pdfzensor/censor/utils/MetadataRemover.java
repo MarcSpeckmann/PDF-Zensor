@@ -10,7 +10,13 @@ import java.util.GregorianCalendar;
  * MetadataRemover is used to censor all the metadata in a {@link PDDocument}.
  * The dates (date of creation and date of modification) will be set to the time the PDFZensor was used on the document.
  */
-abstract class MetadataRemover {
+final class MetadataRemover {
+    /**
+     * Constructor is not supposed to be called!
+     */
+    private MetadataRemover(){
+        throw new UnsupportedOperationException("private MetadataRemover() called. This is not supported.");
+    }
     /**
      * Receives a {@link PDDocument} and censors all the metadata.
      * @param document The PDDocument that will be consored. May not be null.
