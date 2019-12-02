@@ -119,13 +119,13 @@ public class TextProcessor extends PDFStreamProcessor {
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
 		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
 		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)){
-			writer.writeToken(operator);
 			writer.writeTokens(operands);
+			writer.writeToken(operator);
 		}
 		super.processOperator(operator, operands);
 		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored){
-			writer.writeToken(operator);
 			writer.writeTokens(operands);
+			writer.writeToken(operator);
 		}
 	}
 }
