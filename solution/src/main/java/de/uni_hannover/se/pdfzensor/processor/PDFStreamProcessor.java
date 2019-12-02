@@ -193,7 +193,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 *
 	 * @param form transparency group (form) XObject. May not be <code>null</code>.
 	 * @throws IOException          if the transparency group cannot be processed.
-	 * @throws NullPointerException if form is <code>null</code>.
+	 * @throws NullPointerException if <code>form</code> is <code>null</code>.
 	 */
 	@Override
 	public void showTransparencyGroup(@NotNull final PDTransparencyGroup form) throws IOException {
