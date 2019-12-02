@@ -23,7 +23,7 @@ public final class PDFCensor implements PDFHandler {
 	 * @param settings Settings that contain information about the mode and expressions
 	 * @throws NullPointerException if settings is null
 	 */
-	public PDFCensor(@NotNull Settings settings) throws NullPointerException {
+	public PDFCensor(@NotNull Settings settings) {
 		Objects.requireNonNull(settings);
 		this.removePredicate = rect -> true;
 	}
