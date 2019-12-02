@@ -25,7 +25,7 @@ class PDFProcessorTest {
 	private static final String PDF_PATH = "/pdf-files/";
 	
 	/**to checks a pdf-document is being processed In the right order */
-	private int counter = 0;
+	private int checkOrderCounter = 0;
 	/**to checks a pdf-document is being closed and opened In the right order */
 	private boolean isStarted = false;
 
@@ -48,9 +48,9 @@ class PDFProcessorTest {
 			//should be true as the document is opened
 			assertTrue(isStarted);
 			//it should not call beginPage before it end the last page
-			assertEquals(0,counter);
+			assertEquals(0, checkOrderCounter);
 			// increments it by opening a new page
-			counter += 1;
+			checkOrderCounter += 1;
 			// to checks if the function is called at all
 			doc.removePage(page);
 		}
@@ -59,14 +59,14 @@ class PDFProcessorTest {
 			//should be true as the document is opened
 			assertTrue(isStarted);
 			//it should not call endPage before it begin the page
-			assertEquals(1,counter);
+			assertEquals(1, checkOrderCounter);
 			// decrements it by ending the page
-			counter -= 1;
+			checkOrderCounter -= 1;
 		}
 		@Override
 		public void endDocument(final PDDocument doc) {
 			// there are no pages that es being not closed
-			assertEquals(0,counter);
+			assertEquals(0, checkOrderCounter);
 			//should be true as the document is opened
 			assertTrue(isStarted);
 			isStarted = false;
