@@ -20,11 +20,17 @@ import java.util.Objects;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT_ADJUSTED;
 
-/** The processor informs the handler about important events and transfers the documents to the {@link PDFHandler}.*/
+
+/** TextProcessor has two main purposes:
+ * for one is it responsible to abstract {@link org.apache.pdfbox.text.PDFTextStripper}'s {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
+ * and similar methods to the API outside of this package by forwarding these events to a {@link PDFHandler}.
+ * For the other is it responsible to copy all read operators into {@link PDFStreamProcessor}'s builtin output-stream.
+ * The latter has as only exception the Show-Text-Operators (TJ and Tj) as they should only be copied if the callback to
+ * {@link PDFHandler#shouldCensorText(TextPosition)} had returned false. */
 public class TextProcessor extends PDFStreamProcessor {
+	private static final Logger LOGGER = Logging.getLogger();
 	private PDFHandler handler;
-	private boolean removedLastTextPosition = false;
-	protected static final Logger LOGGER = Logging.getLogger();
+	private boolean shouldBeCensored = false;
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
 	 *
@@ -60,18 +66,18 @@ public class TextProcessor extends PDFStreamProcessor {
 	@Override
 	protected void startPage(final @NotNull PDPage page) throws IOException {
 		super.startPage(page);
-		handler.beginPage(document, page, document.getPages().indexOf(page));
+		handler.beginPage(document, page, getCurrentPageNo());
 	}
 	
 	/**
-	 * Checks whether the last position to be processed is reached.
-	 * If so, removedTextPosition is set to true.
+	 * Checks whether the current text should be censored.
+	 * If so, shouldBeCensored is set to true.
 	 *
 	 * @param text Text position to be processed.
 	 */
 	@Override
 	protected void processTextPosition(final TextPosition text) {
-		removedLastTextPosition = handler.shouldCensorText(text);
+		shouldBeCensored = handler.shouldCensorText(text);
         super.processTextPosition(text);
 	}
 	
@@ -83,7 +89,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void endPage(final PDPage page) throws IOException {
-		handler.endPage(document, page, document.getPages().indexOf(page));
+		handler.endPage(document, page, getCurrentPageNo());
 		super.endPage(page);
 	}
 	
@@ -101,22 +107,23 @@ public class TextProcessor extends PDFStreamProcessor {
 	
 	/**
 	 * Used to handle an operation.
-	 *
+	 * SHOW_TEXT_ADJUSTED and SHOW_TEXT are operators for text in the PDF structure.
+	 * The function copies everything that is not defined as text in the PDF structure.
+	 * Then the processOperator implemented in the {@link org.apache.pdfbox.text.PDFTextStripper} is called which calls shouldCensored to decide if text should be censored or not.
+	 * In shouldCensored a bool is stored to decide if text should be censored or not.
 	 * @param operator The operation to perform.
 	 * @param operands The list of arguments.
 	 * @throws IOException  If there is an error processing the operation.
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
-		ContentStreamWriter writer = getCurrentContentStream();
+		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
 		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)){
-			assert writer != null;
 			writer.writeToken(operator);
 			writer.writeTokens(operands);
 		}
 		super.processOperator(operator, operands);
-		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !removedLastTextPosition){
-			assert writer != null;
+		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored){
 			writer.writeToken(operator);
 			writer.writeTokens(operands);
 		}
