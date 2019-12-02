@@ -30,7 +30,7 @@ import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT_AD
 public class TextProcessor extends PDFStreamProcessor {
 	private static final Logger LOGGER = Logging.getLogger();
 	private PDFHandler handler;
-	private boolean removedLastTextPosition = false;
+	private boolean shouldBeCensored = false;
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
 	 *
@@ -70,14 +70,14 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * Checks whether the last position to be processed is reached.
-	 * If so, removedTextPosition is set to true.
+	 * Checks whether the current text should be censored.
+	 * If so, shouldBeCensored is set to true.
 	 *
 	 * @param text Text position to be processed.
 	 */
 	@Override
 	protected void processTextPosition(final TextPosition text) {
-		removedLastTextPosition = handler.shouldCensorText(text);
+		shouldBeCensored = handler.shouldCensorText(text);
         super.processTextPosition(text);
 	}
 	
@@ -107,7 +107,10 @@ public class TextProcessor extends PDFStreamProcessor {
 	
 	/**
 	 * Used to handle an operation.
-	 *
+	 * SHOW_TEXT_ADJUSTED and SHOW_TEXT are operators for text in the PDF structure.
+	 * The function copies everything that is not defined as text in the PDF structure.
+	 * Then the processOperator implemented in the {@link org.apache.pdfbox.text.PDFTextStripper} is called which calls shouldCensored to decide if text should be censored or not.
+	 * In shouldCensored a bool is stored to decide if text should be censored or not.
 	 * @param operator The operation to perform.
 	 * @param operands The list of arguments.
 	 * @throws IOException  If there is an error processing the operation.
@@ -120,7 +123,7 @@ public class TextProcessor extends PDFStreamProcessor {
 			writer.writeTokens(operands);
 		}
 		super.processOperator(operator, operands);
-		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !removedLastTextPosition){
+		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored){
 			writer.writeToken(operator);
 			writer.writeTokens(operands);
 		}
