@@ -1,5 +1,8 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
+import de.uni_hannover.se.pdfzensor.Logging;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
@@ -21,12 +24,15 @@ import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextM
  * annotations for being links or highlights.
  */
 public final class Annotations {
+	private static final Logger LOGGER = Logging.getLogger();
+
 	@NotNull
 	private List<Rectangle2D> highlights;
 	@NotNull
 	private List<Rectangle2D> links;
 	
 	public Annotations() {
+		LOGGER.log(Level.DEBUG, "Initialized a new Annotations-instance");
 		highlights = List.of();
 		links = List.of();
 	}
@@ -49,6 +55,7 @@ public final class Annotations {
 	 * @param page the current PDF page being worked on
 	 */
 	public void cachePage(@NotNull PDPage page){
+		LOGGER.log(Level.DEBUG, "Starting to cache page: {}", page);
 		cacheLinks(page);
 		cacheHighlights(page);
 	}
@@ -62,11 +69,14 @@ public final class Annotations {
 	private void cacheLinks(@NotNull PDPage page){
 		Objects.requireNonNull(page);
 		try {
+			LOGGER.log(Level.DEBUG, "Starting to cache the Links of page: {}", page);
 			links = page.getAnnotations(PDAnnotationLink.class::isInstance).stream()
 					.map(Annotations::getAnnotationRect)
 					.collect(Collectors.toUnmodifiableList());
 		} catch (IOException e) {
 			links = List.of();
+			LOGGER.log(Level.ERROR,
+					"Failed to cache the Links of page: {}", page ,e);
 		}
 	}
 
@@ -79,11 +89,14 @@ public final class Annotations {
 	private void cacheHighlights(@NotNull PDPage page){
 		Objects.requireNonNull(page);
 		try {
+			LOGGER.log(Level.DEBUG, "Starting to cache the Links of page: {}", page);
 			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream()
 					.map(Annotations::getAnnotationRect)
 					.collect(Collectors.toUnmodifiableList());
 		} catch (IOException e) {
 			highlights = List.of();
+			LOGGER.log(Level.ERROR,
+					"Failed to cache the highlighted annotations of page: {}", page ,e);
 		}
 	}
 

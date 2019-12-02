@@ -1,5 +1,8 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import de.uni_hannover.se.pdfzensor.Logging;
+import de.uni_hannover.se.pdfzensor.TestUtility;
+import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,12 +12,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
 import static de.uni_hannover.se.pdfzensor.TestUtility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,32 +27,40 @@ class SettingsTest {
 	private final String CONFIG_PATH = "/configparser-test/configs/";
 	
 	/**
-	 * Creates arguments for a function call of {@link #testSettingsNoConfig(String[], File, File)} from the provided
-	 * data.
+	 * Creates arguments for a function call of {@link #testSettingsNoConfig(String[], File, File, Level)} from the
+	 * provided data.
 	 */
 	@NotNull
-	private static Arguments createArgument(@NotNull String in, @NotNull String out) {
+	private static Arguments createArgument(@NotNull String in, @NotNull String out, final int lvl) {
 		var arguments = new ArrayList<String>();
 		arguments.add(in);
 		arguments.add("-o");
 		arguments.add(out);
+		if (lvl > 0)
+			arguments.add("-" + "v".repeat(lvl));
 		var inFile = new File(in).getAbsoluteFile();
 		var outFile = new File(out).getAbsoluteFile();
-		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile);
+		Level verbosity = Level.OFF;
+		if (lvl > 0 && lvl < VERBOSITY_LEVELS.length) verbosity = VERBOSITY_LEVELS[lvl];
+		else if (lvl >= VERBOSITY_LEVELS.length) verbosity = Level.ALL;
+		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile, verbosity);
 	}
 	
 	/**
-	 * Provides a stream with the arguments for thorough testing of {@link #testSettingsNoConfig(String[], File,
-	 * File)}.
+	 * Provides a stream with the arguments for thorough testing of {@link #testSettingsNoConfig(String[], File, File,
+	 * Level)}.
 	 */
 	private static Stream<Arguments> testArguments() {
 		String[] inputFiles = {getResource("/pdf-files/sample.pdf").getAbsolutePath(), getResource(
 				"/pdf-files/sample.bla.pdf").getAbsolutePath()};
 		String[] outputFiles = {"file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
+		int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1)
+										 .toArray();
 		var list = new ArrayList<Arguments>();
 		for (String in : inputFiles)
 			for (String out : outputFiles)
-				list.add(createArgument(in, out));
+				for (int lvl : verbosityLevels)
+					list.add(createArgument(in, out, lvl));
 		return list.stream();
 	}
 	
@@ -68,10 +78,14 @@ class SettingsTest {
 	/** Checks if the arguments are passed into the corresponding expected values. */
 	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}")
 	@MethodSource("testArguments")
-	void testSettingsNoConfig(String[] args, File input, File output) throws IOException {
+	void testSettingsNoConfig(String[] args, File input, File output, Level verbosity) throws IOException {
+		Logging.deinit();
 		final var settings = new Settings("", args);
 		assertEquals(input, settings.getInput());
 		assertEquals(output, settings.getOutput());
+		var rootLogger = TestUtility.getRootLogger();
+		assertTrue(rootLogger.isPresent());
+		assertEquals(verbosity, rootLogger.get().getLevel());
 	}
 	
 	/** checks the {@link Settings} constructor with there are no arguments but just a config File. */
@@ -119,8 +133,10 @@ class SettingsTest {
 		assertEquals(new File(path + "sample.bla_cens.pdf"), settings.getOutput());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
 		
-		settings = new Settings(configPath2, getResourcePath("/pdf-files/sample.bla.pdf"), "-o", "a/path-that-does-not-exist/");
-		assertEquals(new File("a/path-that-does-not-exist/sample.bla_cens.pdf").getAbsoluteFile(), settings.getOutput());
+		settings = new Settings(configPath2, getResourcePath("/pdf-files/sample.bla.pdf"), "-o",
+								"a/path-that-does-not-exist/");
+		assertEquals(new File("a/path-that-does-not-exist/sample.bla_cens.pdf").getAbsoluteFile(),
+					 settings.getOutput());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
 		
 		//not a pdf is passed as output
@@ -132,6 +148,20 @@ class SettingsTest {
 		settings = new Settings(invalidConfigPath2, getResourcePath("/pdf-files/sample.bla.pdf"));
 		assertEquals("sample.bla_cens.pdf", settings.getOutput().getName());
 		assertEquals("sample.bla.pdf", settings.getInput().getName());
+		
+		// if config is overwritten correctly by the CLArgs with less specific level (config has Level.DEBUG)
+		Logging.deinit();
+		settings = new Settings(configPath, getResourcePath("/pdf-files/sample.bla.pdf"), "-vvvvvvv");
+		var rootLogger = TestUtility.getRootLogger();
+		assertTrue(rootLogger.isPresent());
+		assertEquals(Level.ALL, rootLogger.get().getLevel());
+		
+		// if config is overwritten correctly by the CLArgs with more specific level (config has Level.DEBUG)
+		Logging.deinit();
+		settings = new Settings(configPath, getResourcePath("/pdf-files/sample.bla.pdf"), "-vv");
+		rootLogger = TestUtility.getRootLogger();
+		assertTrue(rootLogger.isPresent());
+		assertEquals(Level.ERROR, rootLogger.get().getLevel());
 	}
 	
 	/** dummy Unit-tests for function getLinkColor */
@@ -140,7 +170,6 @@ class SettingsTest {
 		final var settings = new Settings("", getResource("/pdf-files/sample.pdf").getAbsolutePath());
 		assertEquals(Color.BLUE, settings.getLinkColor());
 	}
-	
 	
 	/** dummy Unit-tests for function getExpressions */
 	@Test
