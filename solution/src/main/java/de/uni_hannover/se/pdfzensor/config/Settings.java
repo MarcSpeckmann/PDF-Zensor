@@ -126,7 +126,7 @@ public final class Settings {
 	
 	/**
 	 * Validates the provided output file. If it is a file it itself will be returned. If it is a folder (or does not
-	 * exist and has no suffix) a path to {@code {out}/{input name}_cens.pdf} is returned.
+	 * exist and has no suffix) a path to <code>{out}/{input name}_cens.pdf</code> is returned.
 	 *
 	 * @param out The output file that should be validated. May not be null.
 	 * @return the validated output file the censored PDF should be written into.
