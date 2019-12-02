@@ -12,7 +12,7 @@ import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** CLArgsTest should contain all unit-tests related to {@link CLArgs}. */
+/** ExpressionTest should contain all unit-tests related to {@link Expression}. */
 class ExpressionTest {
 
 	/** Checks if the constructor throws a <code>NullPointerException</code> if the input-regex is null.*/
@@ -22,7 +22,9 @@ class ExpressionTest {
 		assertThrows(NullPointerException.class, () -> new Expression(null, "#ffffff"));
 	}
 
-	/** Checks if the constructor can handle the initialization when the color is <code>null</code>.*/
+	/** Checks if the constructor can handle the initialization so its output will be DEFAULT_CENSOR_COLOR
+	 *  when the input-color is <code>null</code>.
+	 */
 	@Test
 	void testNullColor() {
 		var nullColor = new Expression("regex", (Color) null);
