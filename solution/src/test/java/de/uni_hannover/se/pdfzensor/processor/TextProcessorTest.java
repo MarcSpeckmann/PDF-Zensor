@@ -10,37 +10,38 @@ import java.io.IOException;
 
 
 /**
- * Tests the TextProcessor
+ * Tests the {@link TextProcessor}
+ * pageBeginCounter count how often start page has been visited to check if the whole document has been reviewed.
+ * pageEndCounter count how often end page was called.
+ * checkOrderSequenceCounter to check if the order is correct.
+ *
  */
 public class TextProcessorTest {
-	private String path = "src/test/resources/pdf-files/cusatop-intro.pdf";
 	private int pageBeginCounter = 0;
-	private int pageEndCounter = 0;
 	private boolean beginDocument = false;
 	private boolean endDocument = false;
-
-	PDFHandler handler = new PDFHandler() {
+	private int checkOrderSequenceCounter = 0;
+	private PDFHandler handler = new PDFHandler() {
 		@Override
 		public void beginDocument(final PDDocument doc) {
-			System.out.println("beginDocument");
 			beginDocument = true;
 		}
 
 		@Override
 		public void beginPage(final PDDocument doc, final PDPage page, final int pageNum) {
-			System.out.println("beginPage");
 			pageBeginCounter += 1;
+			assertEquals(0, checkOrderSequenceCounter);
+			checkOrderSequenceCounter += 1;
 		}
 
 		@Override
 		public void endPage(final PDDocument doc, final PDPage page, final int pageNum) {
-			System.out.println("EndPage");
-			pageEndCounter += 1;
+			assertEquals(1, checkOrderSequenceCounter);
+			checkOrderSequenceCounter -= 1;
 		}
 
 		@Override
 		public void endDocument(final PDDocument doc) {
-			System.out.println("EndDocument");
 			endDocument = true;
 		}
 
@@ -56,17 +57,17 @@ public class TextProcessorTest {
 	 */
 	@Test
 	void testTextProcessingOrderOfFunctionCallsInTextProcessor() throws IOException {
-
 		TextProcessor tp = new TextProcessor(handler);
+		String path = "src/test/resources/pdf-files/cusatop-intro.pdf";
 		File file = new File(path);
 		PDDocument doc;
-
 		doc = PDDocument.load(file);
 		tp.getText(doc);
+
 		var numberOfPages = doc.getPages().getCount();
 
 		assertEquals(numberOfPages, pageBeginCounter);
-		assertEquals(numberOfPages, pageEndCounter);
+		assertEquals(0, checkOrderSequenceCounter);
 		assertTrue(beginDocument);
 		assertTrue(endDocument);
 	}
