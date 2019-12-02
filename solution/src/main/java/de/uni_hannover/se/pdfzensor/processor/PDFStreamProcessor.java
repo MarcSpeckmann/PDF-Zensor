@@ -120,7 +120,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 *
 	 * @param document The PDF document that is about to be processed. May not be <code>null</code>.
 	 * @throws IOException          if an I/O error occurs.
-	 * @throws NullPointerException if document is <code>null</code>.
+	 * @throws NullPointerException if <code>document</code> is <code>null</code>.
 	 */
 	@Override
 	protected void startDocument(@NotNull final PDDocument document) throws IOException {
