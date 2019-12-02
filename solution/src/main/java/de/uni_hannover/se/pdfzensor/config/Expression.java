@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.Optional;
 
 import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 
@@ -24,7 +25,7 @@ final class Expression {
 	
 	/**
 	 * Initializes a new expression object with the provided regular expression and color (in hexadecimal notation). The
-	 * provided color may be null. The color can than be set at a later time. The regex on the other hand may not be
+	 * provided color may be null. The color can then be set at a later time. The regex on the other hand may not be
 	 * null and can not be changed later on.
 	 *
 	 * @param regex    The regex that should be matched to use this expression's color for censoring.
@@ -37,8 +38,22 @@ final class Expression {
 	@JsonCreator()
 	Expression(@NotNull @JsonProperty("regex") final String regex,
 			   @Nullable @JsonProperty("color") final String hexColor) {
+		this(regex, getColorOrNull(hexColor));
+	}
+	
+	/**
+	 * Initializes a new expression object with the provided regular expression and color. The provided color may be
+	 * null. The color can then be set at a later time. The regex on the other hand may not be null and can not be
+	 * changed later on.
+	 *
+	 * @param regex The regex that should be matched to use this expression's color for censoring.
+	 * @param color The color that should be used to censor a text that matches this expression.
+	 * @throws NullPointerException if regex is null
+	 */
+	Expression(@NotNull final String regex,
+			   @Nullable final Color color) {
 		this.regex = Objects.requireNonNull(regex);
-		this.color = getColorOrNull(hexColor);
+		this.color = color;
 	}
 	
 	/**
@@ -53,15 +68,19 @@ final class Expression {
 	}
 	
 	/**
-	 * Returns the color that should be used to censor a text-passage that matches this expression's regex.
+	 * Returns the color that should be used to censor a text-passage that matches this expression's regex. If none has
+	 * been set the <code>Settings.DEFAULT_CENSOR_COLOR</code> will be returned.
+	 * <br>
+	 * In theory, this allows two texts which match this object's regex to be colored differently (when this object is
+	 * used for censoring before setting the color, then setting the color and using it to censor text again).
 	 *
-	 * @return The color associated with this object. May be null if none was set.
+	 * @return The color associated with this object.
 	 * @see #getRegex()
 	 */
 	@Contract(pure = true)
-	@Nullable
+	@NotNull
 	public Color getColor() {
-		return color;
+		return Optional.ofNullable(color).orElse(Settings.DEFAULT_CENSOR_COLOR);
 	}
 	
 	/**

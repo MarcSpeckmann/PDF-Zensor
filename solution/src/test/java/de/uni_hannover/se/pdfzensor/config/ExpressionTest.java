@@ -25,9 +25,13 @@ class ExpressionTest {
 	/** Checks if the constructor can handle the initialization when the color is <code>null</code>.*/
 	@Test
 	void testNullColor() {
-		var nullColor = new Expression("regex", null);
+		var nullColor = new Expression("regex", (Color) null);
 		assertEquals("regex", nullColor.getRegex());
-		assertNull(nullColor.getColor());
+		assertEquals(Settings.DEFAULT_CENSOR_COLOR, nullColor.getColor());
+		
+		nullColor = new Expression("regex", (String) null);
+		assertEquals("regex", nullColor.getRegex());
+		assertEquals(Settings.DEFAULT_CENSOR_COLOR, nullColor.getColor());
 	}
 
 	/** Checks if the constructor can handle the initialization when the color is valid.*/

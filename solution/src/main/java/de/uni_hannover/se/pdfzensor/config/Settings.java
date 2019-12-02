@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
-import static de.uni_hannover.se.pdfzensor.utils.Utils.colorToString;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 
 /**
  * The Settings class constitutes an abstraction and unification of the configuration file ({@link Config}) and the
@@ -32,7 +32,7 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.colorToString;
  */
 public final class Settings {
 	/** The color that text should be censored in if it does not match any other specified expression. */
-	private static final String DEFAULT_CENSOR_COLOR = "#000000";
+	static final Color DEFAULT_CENSOR_COLOR = Color.BLACK;
 	/** The color links should be censored in if nothing else was specified. */
 	private static final Color DEFAULT_LINK_COLOR = Color.BLUE;
 	
