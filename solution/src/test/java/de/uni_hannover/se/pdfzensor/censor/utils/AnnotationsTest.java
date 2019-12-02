@@ -33,6 +33,11 @@ public class AnnotationsTest {
     void testIsMarked() {
         // both arguments are null
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isMarked(null, null));
+        // rect is null, criteria is given
+        Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isMarked(null, MarkCriterion.INTERSECT));
+        // rect is given, criteria is null
+
+        //rect and criteria is given
     }
     
     /**
@@ -50,6 +55,11 @@ public class AnnotationsTest {
     void testIsLinked() {
         // both arguments are null
         Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null, null));
+        // rect is null, criteria is given
+        Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null, MarkCriterion.INTERSECT));
+        // rect is given, criteria is null
+
+        //rect and criteria is given
     }
     
     /**
