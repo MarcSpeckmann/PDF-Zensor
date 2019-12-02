@@ -27,10 +27,17 @@ import java.util.function.Predicate;
  * annotations and the mode
  */
 public final class PDFCensor implements PDFHandler {
+	/** The maximum horizontal gap between two glyphs which would still be bridged by the censor bar. */
 	private static final float MAX_BRIDGED_WIDTH = 12f;
+	
+	/** The maximum difference in the y-coordinate between two glyphs which would still be bridged by the censor bar. */
 	private static final float MAX_BRIDGED_HEIGHT = .5f;
-	private Predicate<Rectangle2D> removePredicate;
+	
+	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
+	
+	private Predicate<Rectangle2D> removePredicate;
+	
 	private static final Logger LOGGER = Logging.getLogger();
 	
 	/**
@@ -99,6 +106,16 @@ public final class PDFCensor implements PDFHandler {
 		return true;
 	}
 	
+	/**
+	 * Either adds the given <code>pair</code> to the <code>boundingBoxes</code> list or extends the last element of the
+	 * list to also cover the the bounds of the given pair (if the bounds are within the margin and the color is the
+	 * same).
+	 * <br>
+	 * Whether or not the previous bounds will be extended depends on the coordinates of the glyphs and {@link
+	 * #MAX_BRIDGED_WIDTH} and {@link #MAX_BRIDGED_HEIGHT}.
+	 *
+	 * @param pair The pair to include in the <code>boundingBoxes</code> list.
+	 */
 	private void addOrExtendBoundingBoxes(@NotNull final ImmutablePair<Rectangle2D, Color> pair) {
 		if (!boundingBoxes.isEmpty()) {
 			var bb = pair.getKey();
@@ -116,6 +133,13 @@ public final class PDFCensor implements PDFHandler {
 		boundingBoxes.add(pair);
 	}
 	
+	/**
+	 * Transforms the <code>pos</code> into either a pair of its bounds and the color to censor the glyph with or an
+	 * empty optional.
+	 *
+	 * @param pos The TextPosition to transform into a bounds-color pair.
+	 * @return An optional containing either the bounds-color pair or nothing, if an error occurred.
+	 */
 	private Optional<ImmutablePair<Rectangle2D, Color>> getTextPositionInfo(@NotNull TextPosition pos) {
 		try {
 			var font = pos.getFont();
@@ -139,6 +163,14 @@ public final class PDFCensor implements PDFHandler {
 		return Optional.empty();
 	}
 	
+	/**
+	 * Draws the censor bars stored in {@link #boundingBoxes} with their respective color in the given
+	 * <code>document</code> on the given <code>page</code>.
+	 *
+	 * @param doc  the document which is being worked on
+	 * @param page the PDPage (current pdf page) that is being worked on
+	 * @throws IOException If there was an I/O error writing the contents of the page.
+	 */
 	private void drawCensorBars(PDDocument doc, PDPage page) throws IOException {
 		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, true)) {
 			pageContentStream.saveGraphicsState();
