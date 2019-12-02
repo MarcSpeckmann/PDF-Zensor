@@ -1,5 +1,7 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
+import de.uni_hannover.se.pdfzensor.Logging;
+import org.apache.logging.log4j.Level;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +21,16 @@ final class MetadataRemover {
     }
     /**
      * Receives a {@link PDDocument} and censors all the metadata.
-     * @param document The PDDocument that will be consored. May not be null.
+     * @param document The PDDocument that will be censored. May not be null.
      */
     static void censorMetadata(@NotNull PDDocument document){
-            PDDocumentInformation docinfo = document.getDocumentInformation();
+        PDDocumentInformation docinfo = null;
+        try {
+            docinfo = document.getDocumentInformation();
+        }catch (Exception e){
+            Logging.getLogger().log(Level.ERROR, "Could not remove metadata - unable to retrieve document information");
+        }
+        if(docinfo != null){
             docinfo.setAuthor("Censored Author");
             docinfo.setCreator("Censored Creator");
             docinfo.setTitle("Censored Title");
@@ -33,4 +41,5 @@ final class MetadataRemover {
             docinfo.setCreationDate(date);
             docinfo.setModificationDate(date);
         }
+    }
 }
