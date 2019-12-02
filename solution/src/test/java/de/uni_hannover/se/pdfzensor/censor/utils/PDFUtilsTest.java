@@ -32,7 +32,7 @@ class PDFUtilsTest {
 	}
 	
 	/**
-	 * Provides a set of arguments for {@link #pdrectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link #DIMENSIONS}.
+	 * Provides a set of arguments for {@link #pdRectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link #DIMENSIONS}.
 	 */
 	private static Stream<Arguments> dimensionsProvider() {
 		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
@@ -40,7 +40,7 @@ class PDFUtilsTest {
 	
 	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
 	@MethodSource("dimensionsProvider")
-	void pdrectToRect2DTest(@NotNull PDRectangle input, Rectangle2D expected) {
-		assertEquals(expected, PDFUtils.pdrectToRect2D(input));
+	void pdRectToRect2DTest(@NotNull PDRectangle input, Rectangle2D expected) {
+		assertEquals(expected, PDFUtils.pdRectToRect2D(input));
 	}
 }

@@ -35,7 +35,7 @@ final class PDFUtils {
 	 */
 	@NotNull
 	@Contract("_ -> new")
-	static Rectangle2D pdrectToRect2D(@NotNull PDRectangle rect) {
+	static Rectangle2D pdRectToRect2D(@NotNull PDRectangle rect) {
 		return new Rectangle2D.Float(rect.getLowerLeftX(), rect.getLowerLeftY(), rect.getWidth(), rect.getHeight());
 	}
 	

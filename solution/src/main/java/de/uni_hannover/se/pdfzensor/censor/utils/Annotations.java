@@ -39,7 +39,7 @@ public final class Annotations {
 	 */
 	@NotNull
 	private static Rectangle2D getAnnotationRect(@NotNull PDAnnotation annotation) {
-		return PDFUtils.pdrectToRect2D(annotation.getRectangle());
+		return PDFUtils.pdRectToRect2D(annotation.getRectangle());
 	}
 
 	/**
