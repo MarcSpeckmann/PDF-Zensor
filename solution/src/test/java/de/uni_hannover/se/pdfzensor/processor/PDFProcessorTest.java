@@ -103,11 +103,10 @@ class PDFProcessorTest {
 	 */
 	@ParameterizedTest(name = "Run {index}: file: {0}")
 	@MethodSource("testForFile")
-	void process(File file) throws IOException {
+	void testProcessing(File file) throws IOException {
 
 		var doc = PDDocument.load(file);
 		PDFProcessor processor = new PDFProcessor(dummyHandler);
-		System.out.println("pageCounts: " + doc.getPages().getCount());
 		processor.process(doc);
 
 		// it should be always 0 because the dummy handler removes all pages
