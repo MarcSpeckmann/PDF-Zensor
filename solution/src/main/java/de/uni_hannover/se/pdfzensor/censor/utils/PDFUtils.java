@@ -61,6 +61,7 @@ final class PDFUtils {
 			Shape s = at.createTransformedShape(r);
 			return s.getBounds2D();
 		} catch (Exception ignored) {/**/}
+		// If an exception is thrown, an empty rectangle is returned instead of an exception
 		return new Rectangle2D.Float(0, 0, 0, 0); // if an error occurred
 	}
 	
