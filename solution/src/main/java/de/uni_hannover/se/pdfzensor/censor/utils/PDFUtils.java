@@ -46,7 +46,7 @@ final class PDFUtils {
 	 * @return A rectangle from type Rectangle2D with the properties of height, width and position from the
 	 * TextPosition or returns a Rectangle2D with height, width and position equals 0 if an error occurred
 	 */
-	private static Rectangle2D transformTextPosition(TextPosition pos) {
+	static Rectangle2D transformTextPosition(TextPosition pos) {
 		try {
 			PDFont font = pos.getFont();
 			BoundingBox bb = font.getBoundingBox();
