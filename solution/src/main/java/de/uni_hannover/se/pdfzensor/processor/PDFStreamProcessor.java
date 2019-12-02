@@ -177,7 +177,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * replacing the data of the page that was read by the contents of the popped stream.
 	 *
 	 * @param page The page which just got processed. May not be <code>null</code>.
-	 * @throws IOException          if an IO error occurs.
+	 * @throws IOException          if an I/O error occurs.
 	 * @throws NullPointerException if page is <code>null</code>.
 	 */
 	@Override
