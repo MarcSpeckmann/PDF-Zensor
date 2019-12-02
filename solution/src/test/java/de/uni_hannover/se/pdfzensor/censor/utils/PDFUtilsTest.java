@@ -40,7 +40,7 @@ class PDFUtilsTest {
 	
 	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
 	@MethodSource("dimensionsProvider")
-	void pdRectToRect2DTest(@NotNull PDRectangle input, Rectangle2D expected) {
+	void pdRectToRect2DTest(@NotNull PDRectangle input, @NotNull Rectangle2D expected) {
 		assertEquals(expected, PDFUtils.pdRectToRect2D(input));
 	}
 }

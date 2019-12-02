@@ -70,7 +70,7 @@ class MarkCriterionTest {
      */
     @ParameterizedTest(name = "Run {index}: Rectangles: {0}")
     @MethodSource("rectangleProvider")
-    void getPredicateTest(@NotNull Rectangle2D input, Boolean[] expected) {
+    void getPredicateTest(@NotNull Rectangle2D input, @NotNull Boolean[] expected) {
         var predIntersect = MarkCriterion.INTERSECT.getPredicate(rect);
         var predContain = MarkCriterion.CONTAIN.getPredicate(rect);
         assertEquals(expected[0], predIntersect.test(input));  //checks if output Criteria is {@link Rectangle2D#intersects}
