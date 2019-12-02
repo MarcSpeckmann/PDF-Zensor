@@ -15,7 +15,7 @@ public final class VersionProvider implements CommandLine.IVersionProvider {
 	 * Returns the text-lines that should be shown when the version is requested.
 	 *
 	 * @return a String[] containing the lines that should be printed and contain at least the version information.
-	 * @throws IOException if project.properties can not be loaded because of an IO error.
+	 * @throws IOException if project.properties can not be loaded because of an I/O error.
 	 */
 	@NotNull
 	@Contract(value = " -> new", pure = true)
