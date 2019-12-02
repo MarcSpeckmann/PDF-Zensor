@@ -159,7 +159,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * which is about to be processed and adding said PDStream to the top of the stack.
 	 *
 	 * @param page The page which will be processed. May not be <code>null</code>.
-	 * @throws IOException          if an IO error occurs.
+	 * @throws IOException          if an I/O error occurs.
 	 * @throws NullPointerException if page is <code>null</code>.
 	 */
 	@Override
