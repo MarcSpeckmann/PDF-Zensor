@@ -14,8 +14,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 /**
- * PDFUtils is a utility class for the censor package and only provides {@link #transformTextPosition(TextPosition)} to
- * the outside of the package
+ * PDFUtils is a utility class for the censor package
  */
 final class PDFUtils {
 	
