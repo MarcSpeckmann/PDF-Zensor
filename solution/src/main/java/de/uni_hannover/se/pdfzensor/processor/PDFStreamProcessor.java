@@ -136,7 +136,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Appends PDFTextStripper's {@link PDFTextStripper#endDocument(PDDocument)} by deinitializing the stream stack.
 	 *
 	 * @param document The PDF document that has been processed. May not be <code>null</code>.
-	 * @throws IOException          if an IO error occurs.
+	 * @throws IOException          if an I/O error occurs.
 	 * @throws NullPointerException if document is <code>null</code>
 	 */
 	@Override
