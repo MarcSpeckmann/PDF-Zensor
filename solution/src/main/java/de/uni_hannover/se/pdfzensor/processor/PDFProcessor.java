@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- * PDFProcessor is a class that runs a TextProcessor with a PDFHandler
+ * PDFProcessor is a class that runs a {@link TextProcessor}  with a {@link PDFHandler}
  */
 public class PDFProcessor {
 	private static final Logger LOGGER = Logging.getLogger();
