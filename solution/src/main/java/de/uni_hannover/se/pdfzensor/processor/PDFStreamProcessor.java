@@ -212,7 +212,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 *
 	 * @param form form XObject. May not be <code>null</code>.
 	 * @throws IOException          if the form cannot be processed.
-	 * @throws NullPointerException if form is <code>null</code>.
+	 * @throws NullPointerException if <code>form</code> is <code>null</code>.
 	 */
 	@Override
 	public void showForm(@NotNull final PDFormXObject form) throws IOException {
