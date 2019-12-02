@@ -17,11 +17,11 @@ import java.util.function.Predicate;
 enum MarkCriterion {
 	
 	/**
-	 * INTERSECT is used when checking if rectangles intersect
+	 * INTERSECT is used when checking if a rectangle intersects with another rectangle
 	 */
 	INTERSECT(Rectangle2D::intersects),
 	/**
-	 * CONTAIN INTERSECT is used when checking if rectangle entirely contains one another
+	 * CONTAIN is used when checking if rectangle entirely contains one another
 	 */
 	CONTAIN(Rectangle2D::contains);
 	
