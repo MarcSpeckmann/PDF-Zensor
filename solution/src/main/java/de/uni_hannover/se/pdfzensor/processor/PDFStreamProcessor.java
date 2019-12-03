@@ -35,13 +35,17 @@ import java.util.*;
  * #getText(PDDocument)} to process the given document.
  */
 class PDFStreamProcessor extends PDFTextStripper {
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
 	/** Whenever a stream is entered it gets added to the top of the stack... and taken off when the stream is closed. */
 	@Nullable
 	private Deque<DoubleBufferedStream> currentStream = null;
 	
 	/**
+	 * Creates a new instance of the PDFStreamProcessor.
+	 *
 	 * @throws IOException If there is an error loading the properties.
+	 * @see PDFTextStripper#PDFTextStripper()
 	 */
 	PDFStreamProcessor() throws IOException {
 		super();
@@ -49,16 +53,19 @@ class PDFStreamProcessor extends PDFTextStripper {
 	}
 	
 	/**
-	 * Gets a {@link ContentStreamWriter} that writes to the stream on top of the stream-stack.
+	 * Gets a {@link ContentStreamWriter} that writes to the stream on top of the stream-stack. Returns
+	 * <code>null</code> if no stack is currently initialized.
 	 *
 	 * @return a {@link ContentStreamWriter} that writes to the stream on top of the stream-stack.
 	 */
 	@Nullable
 	protected ContentStreamWriter getCurrentContentStream() {
-		if (currentStream == null)
-			return null;
-		var currentOS = Objects.requireNonNull(currentStream.peek()).getOutputStream();
-		return new ContentStreamWriter(currentOS);
+		ContentStreamWriter result = null;
+		if (currentStream != null) {
+			var currentOS = Objects.requireNonNull(currentStream.peek()).getOutputStream();
+			result = new ContentStreamWriter(currentOS);
+		}
+		return result;
 	}
 	
 	/**
@@ -85,8 +92,8 @@ class PDFStreamProcessor extends PDFTextStripper {
 		Objects.requireNonNull(ret);
 		try {
 			ret.close();
-		} catch (Exception e) {
-			LOGGER.log(Level.ERROR, "Failed to close the PDFStreamProcessor-instance's current output stream.", e);
+		} catch (IOException e) {
+			LOGGER.log(Level.ERROR, "Failed to close the PDFStreamProcessor-instance's current input stream.", e);
 		}
 		return ret;
 	}
@@ -111,8 +118,9 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Prepends PDFTextStripper's {@link PDFTextStripper#startDocument(PDDocument)} by initializing a new empty
 	 * DoubleBufferedStream-stack.
 	 *
-	 * @param document The PDF document that is about to be processed.
-	 * @throws IOException if an IO error occurs.
+	 * @param document The PDF document that is about to be processed. May not be <code>null</code>.
+	 * @throws IOException          if an I/O error occurs.
+	 * @throws NullPointerException if <code>document</code> is <code>null</code>.
 	 */
 	@Override
 	protected void startDocument(@NotNull final PDDocument document) throws IOException {
@@ -127,8 +135,9 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * <i><b>Do not call this method directly</b></i><br>
 	 * Appends PDFTextStripper's {@link PDFTextStripper#endDocument(PDDocument)} by deinitializing the stream stack.
 	 *
-	 * @param document The PDF document that has been processed.
-	 * @throws IOException if an IO error occurs.
+	 * @param document The PDF document that has been processed. May not be <code>null</code>.
+	 * @throws IOException          if an I/O error occurs.
+	 * @throws NullPointerException if document is <code>null</code>
 	 */
 	@Override
 	protected void endDocument(PDDocument document) throws IOException {
@@ -149,8 +158,9 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Prepends PDFTextStripper's {@link PDFTextStripper#startPage(PDPage)} by creating a new PDStream for the page
 	 * which is about to be processed and adding said PDStream to the top of the stack.
 	 *
-	 * @param page The page which will be processed.
-	 * @throws IOException if an IO error occurs.
+	 * @param page The page which will be processed. May not be <code>null</code>.
+	 * @throws IOException          if an I/O error occurs.
+	 * @throws NullPointerException if page is <code>null</code>.
 	 */
 	@Override
 	protected void startPage(@NotNull final PDPage page) throws IOException {
@@ -166,13 +176,14 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Appends PDFTextStripper's {@link PDFTextStripper#endPage(PDPage)} by removing the top stream from the stack and
 	 * replacing the data of the page that was read by the contents of the popped stream.
 	 *
-	 * @param page The page which just got processed.
-	 * @throws IOException if an IO error occurs.
+	 * @param page The page which just got processed. May not be <code>null</code>.
+	 * @throws IOException          if an I/O error occurs.
+	 * @throws NullPointerException if page is <code>null</code>.
 	 */
 	@Override
 	protected void endPage(PDPage page) throws IOException {
 		super.endPage(page);
-		page.setContents(popStream().getStream());
+		Objects.requireNonNull(page).setContents(popStream().getStream());
 	}
 	
 	/**
@@ -180,8 +191,9 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Appends PDFTextStripper's {@link PDFTextStripper#showTransparencyGroup(PDTransparencyGroup)} by pushing and
 	 * popping the stream-stack accordingly.
 	 *
-	 * @param form transparency group (form) XObject
-	 * @throws IOException if the transparency group cannot be processed
+	 * @param form transparency group (form) XObject. May not be <code>null</code>.
+	 * @throws IOException          if the transparency group cannot be processed.
+	 * @throws NullPointerException if <code>form</code> is <code>null</code>.
 	 */
 	@Override
 	public void showTransparencyGroup(@NotNull final PDTransparencyGroup form) throws IOException {
@@ -198,16 +210,17 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Appends PDFTextStripper's {@link PDFTextStripper#showForm(PDFormXObject)} by pushing and popping the stream-stack
 	 * accordingly.
 	 *
-	 * @param form form XObject
-	 * @throws IOException if the form cannot be processed
+	 * @param form form XObject. May not be <code>null</code>.
+	 * @throws IOException          if the form cannot be processed.
+	 * @throws NullPointerException if <code>form</code> is <code>null</code>.
 	 */
 	@Override
 	public void showForm(@NotNull final PDFormXObject form) throws IOException {
 		Objects.requireNonNull(form);
-		LOGGER.log(Level.DEBUG, "Entering formxobject");
+		LOGGER.log(Level.DEBUG, "Entering FormXObject");
 		pushStream(new DoubleBufferedStream(form.getContentStream(), form.getContents()));
 		super.showForm(form);
 		popStream();
-		LOGGER.log(Level.DEBUG, "Exiting formxobject");
+		LOGGER.log(Level.DEBUG, "Exiting FormXObject");
 	}
 }
