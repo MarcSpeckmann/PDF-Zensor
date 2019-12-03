@@ -120,7 +120,7 @@ public final class Annotations {
 	 * @return true if at least one rect of {@link #highlights} matches the criteria with the given
 	 * 			rect otherwise false
 	 */
-	boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria){
+	public boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria){
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
 		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
@@ -134,7 +134,7 @@ public final class Annotations {
 	 * @param rect the rectangle to be checked
 	 * @return true if the given rect entirely fits into at least one rect of {@link #links} otherwise false
 	 */
-	boolean isLinked(@NotNull Rectangle2D rect){
+	public boolean isLinked(@NotNull Rectangle2D rect){
 		return isLinked(rect, MarkCriterion.CONTAIN);
 	}
 
@@ -147,7 +147,7 @@ public final class Annotations {
 	 * @return true if at least one rect of {@link #links} matches the criteria with the given
 	 * 			rect otherwise false
 	 */
-	boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria){
+	public boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria){
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
 		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
