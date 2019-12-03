@@ -1,6 +1,6 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
-import de.uni_hannover.se.pdfzensor.TestUtility;
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
@@ -92,7 +92,7 @@ class PDFProcessorTest {
 	 */
 	private static Stream<Arguments> testForFile() throws IOException {
 		return Files.walk(Paths.get(TestUtility.getResource(PDF_PATH).getAbsolutePath())).map(Path::toFile)
-				.filter(File::isFile).map(Arguments::of);
+					.filter(File::isFile).map(Arguments::of);
 	}
 
 	/**

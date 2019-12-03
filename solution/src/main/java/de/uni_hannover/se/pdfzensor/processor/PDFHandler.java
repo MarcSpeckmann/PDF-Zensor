@@ -4,9 +4,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
 
-/**
- * An abstraction of the {@code PDFTextStripper} to simplify and hide information by the API.
- */
+/** An abstraction of the {@code PDFTextStripper} to simplify and hide information by the API. */
 public interface PDFHandler {
 	/**
 	 * A callback for when work on a new document starts.

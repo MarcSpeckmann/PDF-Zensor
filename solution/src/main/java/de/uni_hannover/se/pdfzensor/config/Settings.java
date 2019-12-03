@@ -16,76 +16,108 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
-import static de.uni_hannover.se.pdfzensor.utils.Utils.colorToString;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 
 /**
- * The class which holds all the settings from the parsed configuration file and commandline arguments, validated and
- * prioritized correctly.
+ * The Settings class constitutes an abstraction and unification of the configuration file ({@link Config}) and the
+ * command line arguments ({@link CLArgs}). Instead of accessing each configuration entity separately, they should be
+ * unified via settings and passed to the outside from there. Upon construction settings passes the command line
+ * arguments to {@link CLArgs}, loads the corresponding configuration file via {@link Config} and takes their parameters
+ * according to the following rules:<br>
+ * <ol>
+ *     <li><b>CLArgs</b> overrides <b>Config</b> overrides <b>Default values</b><br></li>
+ *     <li>No value will be set to null (for this purpose the default values exist)<br></li>
+ *     <li><b>input</b> may only be specified in the CLArgs</li>
+ * </ol>
  */
 public final class Settings {
-	private static final String DEFAULT_CENSOR_COLOR = "#000000";
+	/** The color that text should be censored in if it does not match any other specified expression. */
+	static final Color DEFAULT_CENSOR_COLOR = Color.BLACK;
+	/** The color links should be censored in if nothing else was specified. */
+	private static final Color DEFAULT_LINK_COLOR = Color.BLUE;
 	
+	/** The path at which the pdf-file that should be censored is located. */
 	@NotNull
 	private final File input;
+	/** The path into which the censored pdf-file should be written. */
 	@NotNull
 	private final File output;
+	/** The color with which to censor links. */
 	@NotNull
 	private final Color linkColor;
+	/**
+	 * A set of regex-color-tuples to identify with what color to censor which text. Should at least contain the tuple
+	 * (".", {@link #DEFAULT_CENSOR_COLOR}).
+	 */
 	@NotNull
 	private final Expression[] expressions;
 	
 	/**
-	 * Constructs the settings object from the configuration file and the commandline arguments. The settings of this
-	 * object will be logged at {@link Level#DEBUG}.
+	 * Constructs the settings object from the configuration file and the commandline arguments.
 	 *
 	 * @param configPath the path to the config file (SHOULD BE REMOVED LATER)
-	 * @param args The commandline arguments.
+	 * @param args       The commandline arguments.
 	 * @throws IOException If the configuration file could not be parsed.
 	 */
-	public Settings(@NotNull String configPath,@NotNull final String... args) throws IOException {
-		final var clargs = CLArgs.fromStringArray(args);
-		final var config = getDefaultConfig(configPath);
-		final var configParser = ConfigParser.fromFile(config);
-		final var verbose = ObjectUtils.firstNonNull(clargs.getVerbosity(), configParser.getVerbosity(), Level.OFF);
+	public Settings(@Nullable String configPath, @NotNull final String... args) throws IOException {
+		final var clArgs = CLArgs.fromStringArray(args);
+		final var config = getConfig(configPath);
+		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.OFF);
 		Logging.init(verbose);
 		
-		input = clargs.getInput();
-		output = ObjectUtils.firstNonNull(checkOutput(clargs.getOutput()), checkOutput(configParser.getOutput()), getDefaultOutput(
-				input.getParent()));
-		linkColor = Color.BLUE;
+		input = clArgs.getInput();
+		output = checkOutput(
+				ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getParentFile()));
+		linkColor = DEFAULT_LINK_COLOR;
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
 		logger.log(Level.DEBUG, "Finished parsing the settings:");
 		logger.log(Level.DEBUG, "\tInput-file: {}", input);
-		logger.log(Level.DEBUG, "\tConfig-file: {}", config);
+		logger.log(Level.DEBUG, "\tConfig-file: {}", configPath);
 		logger.log(Level.DEBUG, "\tOutput-file: {}", output);
 		logger.log(Level.DEBUG, "\tLogger verbosity: {}", verbose);
 		logger.log(Level.DEBUG, "\tLink-Color: {}", () -> colorToString(linkColor));
-		logger.log(Level.DEBUG, "\tDefined-Expressions");
+		logger.log(Level.DEBUG, "\tExpressions");
 		for (var exp : expressions)
 			logger.log(Level.DEBUG, "\t\t{}", exp);
 	}
 	
+	/**
+	 * Tries to load the configuration file from the provided path. If the path is <code>null</code> the empty
+	 * configuration (everything <code>null</code>) will be used.
+	 *
+	 * @return The configuration file that was loaded from the specified path.
+	 * @throws IOException if the configuration file could not be found or read.
+	 */
+	@NotNull
+	private static Config getConfig(@Nullable String configPath) throws IOException {
+		return Config.fromFile(Optional.ofNullable(configPath).map(File::new).orElse(null));
+	}
+	
+	/** Returns the input file as it was specified in the command-line arguments. */
 	@NotNull
 	@Contract(pure = true)
 	public File getInput() {
 		return input;
 	}
 	
+	/** Returns the output file as it was specified in the command-line arguments and config. */
 	@NotNull
 	@Contract(pure = true)
 	public File getOutput() {
 		return output;
 	}
 	
+	/** Returns the color links should be censored in as it was specified in the command-line arguments and config. */
 	@NotNull
 	@Contract(pure = true)
 	public Color getLinkColor() {
 		return linkColor;
 	}
 	
+	/** Returns the expressions as they were specified in the command-line arguments and config. */
 	@NotNull
 	@Contract(pure = true)
 	public Expression[] getExpressions() {
@@ -93,16 +125,20 @@ public final class Settings {
 	}
 	
 	/**
-	 * @param out The output file which will be validated.
-	 * @return null if the output to check was null or was invalid, a valid output file otherwise.
+	 * Validates the provided output file. If it is a file it itself will be returned. If it is a folder (or does not
+	 * exist and has no suffix) a path to <code>{out}/{input name}_cens.pdf</code> is returned.
+	 *
+	 * @param out The output file that should be validated. May not be null.
+	 * @return the validated output file the censored PDF should be written into.
+	 * @throws NullPointerException if out is null
+	 * @see #getDefaultOutput(String)
 	 */
-	@Contract("null -> null")
-	@Nullable
-	private File checkOutput(@Nullable final File out) {
-		if (out == null) return null;
-		if ("pdf".equals(FileUtils.getFileExtension(out))) return out.getAbsoluteFile();
-		if (out.isDirectory() || StringUtils.isEmpty(FileUtils.getFileExtension(out))) return getDefaultOutput(out.getPath());
-		return null;
+	@NotNull
+	private File checkOutput(@NotNull final File out) {
+		var result = Objects.requireNonNull(out);
+		if (!out.isFile() && StringUtils.isEmpty(FileUtils.getFileExtension(out)))
+			result = getDefaultOutput(out.getPath());
+		return result;
 	}
 	
 	/**
@@ -116,18 +152,5 @@ public final class Settings {
 	private File getDefaultOutput(@NotNull final String path) {
 		final var inName = FilenameUtils.removeExtension(input.getName());
 		return new File(Objects.requireNonNull(path) + File.separatorChar + inName + "_cens.pdf").getAbsoluteFile();
-	}
-	
-	/**
-	 * @return The absolute default configuration file or null if it did not exist.
-	 */
-	@Nullable
-	private File getDefaultConfig(String configPath) {
-		final var c = new File(configPath);
-		return Optional.of(c)
-				.filter(File::isFile)
-				.filter(f -> "json".equals(FileUtils.getFileExtension(f)))
-				.map(File::getAbsoluteFile)
-				.orElse(null);
 	}
 }

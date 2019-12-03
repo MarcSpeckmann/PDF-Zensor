@@ -1,18 +1,19 @@
-package de.uni_hannover.se.pdfzensor;
+package de.uni_hannover.se.pdfzensor.testing;
 
-import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -86,17 +87,34 @@ public final class TestUtility {
 		return URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8);
 	}
 	
-	@NotNull
-	@SuppressWarnings("unchecked")
-	public static Optional<org.apache.logging.log4j.core.Logger> getRootLogger() {
+	/**
+	 * Performs a join on the two streams. That means that for each value-combinations of the both streams the joiner is
+	 * called. The results are given in the resulting stream.
+	 *
+	 * @param s1     the stream with the first values of the join.
+	 * @param s2     a collection of values the first stream is joined with.
+	 * @param joiner a function that maps combinations of the values of s1 and s2 into one result instance.
+	 * @param <T>    the content type of the first stream.
+	 * @param <K>    the content type of the second value collection.
+	 * @param <R>    the return-type.
+	 * @return a stream consisting of the mapped combinations of s1's and s2's values.
+	 */
+	public static <T, K, R> Stream<R> crossJoin(@NotNull Stream<T> s1,
+												@NotNull Collection<K> s2,
+												@NotNull BiFunction<T, K, R> joiner) {
+		Objects.requireNonNull(s1);
+		Objects.requireNonNull(s2);
+		Objects.requireNonNull(joiner);
+		return s1.flatMap(t -> s2.stream().map(k -> joiner.apply(t, k)));
+	}
+	
+	public static Method getPrivateMethod(@NotNull Class<?> cls, @NotNull String methodName, Class<?>... paramTypes) {
 		try {
-			var method = Logging.class.getDeclaredMethod("getRootLogger");
+			var method = cls.getDeclaredMethod(methodName, paramTypes);
 			method.setAccessible(true);
-			var logger = method.invoke(Logger.class);
-			return (Optional<org.apache.logging.log4j.core.Logger>) logger;
-		} catch (Exception e) {
-			Assertions.fail("Could not retrieve the RootLogger.", e);
+			return method;
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
 		}
-		return Optional.empty();
 	}
 }
