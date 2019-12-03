@@ -15,6 +15,8 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * AnnotationsTest should contain all unit-tests related to {@link Annotations}.
  */
@@ -49,6 +51,7 @@ public class AnnotationsTest {
 			contentStream.close();
 			
 		} catch (Exception e) {
+			fail();
 		}
         return testDocument;
 	}
@@ -96,7 +99,9 @@ public class AnnotationsTest {
             markup.setRectangle(new PDRectangle(0, 0, 100, 200));
             markup.setQuadPoints(new float[]{0, 0, 100, 0, 100, 200, 0, 200});
             annotationList.add(markup);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+			fail();
+		}
         Annotations annotations = new Annotations();
         annotations.cachePage(testPage);
         
@@ -139,7 +144,9 @@ public class AnnotationsTest {
 			contentStream.close();
 			
 			
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			fail();
+		}
         return testDocument;
 	}
 	
@@ -196,7 +203,9 @@ public class AnnotationsTest {
 			link.setQuadPoints(new float[]{0, 0, 100, 0, 100, 200, 0, 200});
 			annotationList.add(link);
 			
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			fail();
+		}
         Annotations annotations = new Annotations();
 		annotations.cachePage(testPage);
 		Assertions.assertTrue(annotations.isLinked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
@@ -211,8 +220,16 @@ public class AnnotationsTest {
 		// argument rect is null
 		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null));
 		
+		
 		PDDocument testDocument = createLinkedDocument();
 		PDPage testPage = testDocument.getPage(0);
+		// creating custom annotation
+		List<PDAnnotation> annotationList = testPage.getAnnotations();
+		PDAnnotationLink link = new PDAnnotationLink();
+		link.setRectangle(new PDRectangle(0, 0, 100, 200));
+		link.setQuadPoints(new float[]{0, 0, 100, 0, 100, 200, 0, 200});
+		annotationList.add(link);
+		
 		Annotations annotations = new Annotations();
 		annotations.cachePage(testPage);
 		Assertions.assertTrue(annotations.isLinked(new Rectangle(0, 0, 50, 50)));

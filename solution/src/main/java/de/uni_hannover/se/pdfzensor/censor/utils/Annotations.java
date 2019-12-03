@@ -45,7 +45,22 @@ public final class Annotations {
 	 */
 	@NotNull
 	private static Rectangle2D getAnnotationRect(@NotNull PDAnnotation annotation) {
-		return PDFUtils.pdRectToRect2D(annotation.getRectangle());
+		var rectangle = annotation.getRectangle();
+		if (annotation instanceof PDAnnotationTextMarkup) {
+			var quads = ((PDAnnotationTextMarkup)annotation).getQuadPoints();
+			float topLeftX = Float.POSITIVE_INFINITY;
+			float topLeftY = Float.POSITIVE_INFINITY;
+			float bottomRightX = Float.NEGATIVE_INFINITY;
+			float bottomRightY = Float.NEGATIVE_INFINITY;
+			for (int i = 0; i < quads.length; i+=2) {
+				topLeftX = Math.min(quads[i], topLeftX);
+				topLeftY = Math.min(quads[i+1], topLeftY);
+				bottomRightX = Math.max(quads[i], bottomRightX);
+				bottomRightY = Math.max(quads[i+1], bottomRightY);
+			}
+			rectangle = new PDRectangle(topLeftX, topLeftY, bottomRightX-topLeftX, bottomRightY-topLeftY);
+		}
+		return PDFUtils.pdRectToRect2D(rectangle);
 	}
 
 	/**
