@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.censor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import de.uni_hannover.se.pdfzensor.censor.utils.Annotations;
 import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
@@ -39,6 +40,8 @@ public final class PDFCensor implements PDFHandler {
 	
 	private Predicate<Rectangle2D> removePredicate;
 	
+	private Annotations annotations = new Annotations();
+	
 	private static final Logger LOGGER = Logging.getLogger();
 	
 	/**
@@ -69,6 +72,7 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void beginPage(PDDocument doc, PDPage page, int pageNum) {
 		Objects.requireNonNull(boundingBoxes).clear();
+		annotations.cachePage(page);
 	}
 	
 	/**
@@ -82,6 +86,7 @@ public final class PDFCensor implements PDFHandler {
 	public void endPage(PDDocument doc, PDPage page, int pageNum) {
 		try {
 			drawCensorBars(doc, page);
+			page.getAnnotations().clear();
 		} catch (IOException e) {
 			LOGGER.log(Level.ERROR, "There was an error writing the page contents of page {}.", pageNum, e);
 		}
@@ -144,12 +149,19 @@ public final class PDFCensor implements PDFHandler {
 	private Optional<ImmutablePair<Rectangle2D, Color>> getTextPositionInfo(@NotNull TextPosition pos) {
 		var result = Optional.<ImmutablePair<Rectangle2D, Color>>empty();
 		try {
+			var transformed = PDFUtils.transformTextPosition(pos);
+			
+			var color = Color.DARK_GRAY;
+			//TODO: this is an example for censoring highlighted text yellow. It should be removed.
+			if (annotations.isMarked(transformed))
+				color = Color.yellow;
+			
 			var font = pos.getFont();
 			var s = new StringBuilder();
 			for (var i : pos.getCharacterCodes())
 				s.append(font.toUnicode(i));
 			if (StringUtils.isNotBlank(s))
-				result = Optional.of(new ImmutablePair<>(PDFUtils.transformTextPosition(pos), Color.DARK_GRAY));
+				result = Optional.of(new ImmutablePair<>(transformed, color));
 		} catch (IOException e) {
 			LOGGER.log(Level.ERROR, "There was an error handling the font.", e);
 		}
