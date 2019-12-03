@@ -4,6 +4,7 @@ import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
@@ -58,7 +59,7 @@ public final class Annotations {
 				bottomRightX = Math.max(quads[i], bottomRightX);
 				bottomRightY = Math.max(quads[i+1], bottomRightY);
 			}
-			rectangle = new PDRectangle(topLeftX, topLeftY, bottomRightX-topLeftX, bottomRightY-topLeftY);
+			rectangle = new PDRectangle(topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY);
 		}
 		return PDFUtils.pdRectToRect2D(rectangle);
 	}
