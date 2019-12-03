@@ -2,8 +2,10 @@ package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import de.uni_hannover.se.pdfzensor.TestUtility;
 
+import org.apache.fontbox.util.BoundingBox;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -36,27 +38,20 @@ class PDFUtilsTest extends PDFTextStripper {
 	}
 	
 	/**
-	 * Override the writeString function just to get a textPosition element.
-	 *
-	 * @param string
-	 * @param textPositions
+	 * 
 	 */
-	@Override
-	protected void writeString(String string, @NotNull List<TextPosition> textPositions) {
-		//TODO: what is the purpose of this? Since transformTextPosition now throws an error it can not be pipelined.
-		//textPositions.stream().map(PDFUtils::transformTextPosition).forEach(System.out::println);
-	}
-	
 	@Test
-	void transformTestPositionTest() throws IOException {
-		File file = new File(TestUtility.getResource("/pdf-files/sample.pdf").getAbsolutePath());
-		var doc = PDDocument.load(file);
-		PDFTextStripper stripper = new PDFUtilsTest();
-		stripper.setSortByPosition(true);
-		stripper.setStartPage(0);
-		stripper.setEndPage(doc.getNumberOfPages());
-		Writer dummey = new OutputStreamWriter(new ByteArrayOutputStream());
-		stripper.writeText(doc, dummey);
+	void transformTestPositionTest(){
+
+		TextPosition tp =  new TextPosition(0, 1f, 2f, new Matrix(3f, 4f, 5f, 6f, 7f, 8f),
+											9f, 10f, 11f, 12f, 13f, "Z", new int[]{90}, PDType1Font.TIMES_ROMAN,
+											14f, 15);
+		try {
+			Rectangle2D rect = PDFUtils.transformTextPosition(tp);
+			
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
 	}
 	
 	/**
