@@ -14,7 +14,7 @@ import java.util.function.Predicate;
  * <li>{@link #CONTAIN}</li>
  * </ul>
  */
-enum MarkCriterion {
+public enum MarkCriterion {
 	
 	/**
 	 * INTERSECT is used when checking if a rectangle intersects with another rectangle
