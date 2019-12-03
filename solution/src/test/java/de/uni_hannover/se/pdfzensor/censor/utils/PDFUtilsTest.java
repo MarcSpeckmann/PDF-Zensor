@@ -1,22 +1,62 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
-import org.jetbrains.annotations.NotNull;
+import de.uni_hannover.se.pdfzensor.TestUtility;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.TextPosition;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import java.awt.geom.Rectangle2D;
+import java.io.*;
+import java.util.List;
+import java.util.stream.Stream;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.util.Matrix;
+import org.jetbrains.annotations.NotNull;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PDFUtilsTest {
+class PDFUtilsTest extends PDFTextStripper {
+	
+	/**
+	 * Instantiate a new PDFTextStripper object.
+	 *
+	 * @throws IOException If there is an error loading the properties.
+	 */
+	PDFUtilsTest() throws IOException {
+	}
+	
+	/**
+	 * Override the writeString function just to get a textPosition element.
+	 *
+	 * @param string
+	 * @param textPositions
+	 */
+	@Override
+	protected void writeString(String string, @NotNull List<TextPosition> textPositions) {
+		textPositions.stream().map(PDFUtils::transformTextPosition).forEach(System.out::println);
+	}
+	
+	@Test
+	void transformTestPositionTest() throws IOException {
+		File file = new File(TestUtility.getResource("/pdf-files/sample.pdf").getAbsolutePath());
+		var doc = PDDocument.load(file);
+		PDFTextStripper stripper = new PDFUtilsTest();
+		stripper.setSortByPosition(true);
+		stripper.setStartPage(0);
+		stripper.setEndPage(doc.getNumberOfPages());
+		Writer dummey = new OutputStreamWriter(new ByteArrayOutputStream());
+		stripper.writeText(doc, dummey);
+	}
 	
 	/**
 	 * Hash Map for 1: height,width and 2: position x, y
