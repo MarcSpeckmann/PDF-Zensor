@@ -152,9 +152,9 @@ public final class PDFCensor implements PDFHandler {
 			var transformed = PDFUtils.transformTextPosition(pos);
 			
 			var color = Color.DARK_GRAY;
-			//TODO: this is an example for censoring highlighted text yellow. It should be removed.
-			if (annotations.isMarked(transformed))
-				color = Color.yellow;
+			
+			if (annotations.isLinked(transformed))
+				color = Color.blue;
 			
 			var font = pos.getFont();
 			var s = new StringBuilder();
