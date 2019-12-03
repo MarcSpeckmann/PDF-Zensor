@@ -43,7 +43,8 @@ class PDFUtilsTest extends PDFTextStripper {
 	 */
 	@Override
 	protected void writeString(String string, @NotNull List<TextPosition> textPositions) {
-		textPositions.stream().map(PDFUtils::transformTextPosition).forEach(System.out::println);
+		//TODO: what is the purpose of this? Since transformTextPosition now throws an error it can not be pipelined.
+		//textPositions.stream().map(PDFUtils::transformTextPosition).forEach(System.out::println);
 	}
 	
 	@Test
