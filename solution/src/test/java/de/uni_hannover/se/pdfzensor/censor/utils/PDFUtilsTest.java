@@ -18,8 +18,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+/**
+ * Tests for {@link PDFUtils#transformTextPosition(TextPosition)} and {@link PDFUtils#pdRectToRect2D(PDRectangle)}
+ */
 class PDFUtilsTest {
 	
+	
+	/**
+	 * New data structure TextPositionValue to bundle the values for transformTextPosition
+	 */
 	static class TextPositionValue {
 		float endX;
 		float endY;
@@ -44,9 +52,12 @@ class PDFUtilsTest {
 		}
 	}
 	
-	private static TextPositionValue tpValue1 = new TextPositionValue(79.19946f, 800.769f, 10.9091f, 10, 7.51637f, 8.333466f, 3.0545478f, "D", new int[]{68});
-	
+	/**
+	 * A Hash Map containing bundled data as TextPosition objects and the corresponding expected output-rectangle
+	 */
 	private static final Map<Rectangle2D, TextPositionValue> TEXTPOSITION = new HashMap<>();
+	
+	private static TextPositionValue tpValue1 = new TextPositionValue(79.19946f, 800.769f, 10.9091f, 10, 7.51637f, 8.333466f, 3.0545478f, "D", new int[]{68});
 	
 	static {
 		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f), tpValue1);
@@ -54,13 +65,13 @@ class PDFUtilsTest {
 	
 	
 	/**
-	 * Provides a set of arguments for {@link } generated from {@link #TEXTPOSITION}.
+	 * Provides a set of arguments for {@link #transformTextPositionTest(TextPositionValue, Rectangle2D)} generated from {@link #TEXTPOSITION}.
 	 */
 	private static Stream<Arguments> textPositionProvider() {
 		return TEXTPOSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
-	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
+	@ParameterizedTest(name = "Run {index}: TextPosition: {0}")
 	@MethodSource("textPositionProvider")
 	void transformTextPositionTest(@NotNull TextPositionValue input, @NotNull Rectangle2D expected) {
 		TextPosition tp = new TextPosition(0, 595.276f, 841.89f, new Matrix(input.fontSize, 0f, 0f, input.fontSize, input.endX, input.endY), input.endX, input.endY, input.maxHeight, input.individualWidth, input.spaceWidth, input.unicode, input.charCodes, PDType1Font.TIMES_ROMAN, input.fontSize, input.fontSizeInPt);
