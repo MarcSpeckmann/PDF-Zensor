@@ -58,9 +58,11 @@ class PDFUtilsTest {
 	private static final Map<Rectangle2D, TextPositionValue> TEXTPOSITION = new HashMap<>();
 	
 	private static TextPositionValue tpValue1 = new TextPositionValue(79.19946f, 800.769f, 10.9091f, 10, 7.51637f, 8.333466f, 3.0545478f, "D", new int[]{68});
+	private static TextPositionValue tpValue2 = new TextPositionValue(23.1547f, 44.32212f, 11.95f, 11, 7.51637f, 8.333466f, 3.0545478f, "DE", new int[]{68, 69});
 	
 	static {
 		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f), tpValue1);
+		TEXTPOSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f), tpValue2);
 	}
 	
 	
