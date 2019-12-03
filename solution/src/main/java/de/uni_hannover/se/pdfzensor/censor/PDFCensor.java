@@ -1,15 +1,16 @@
 package de.uni_hannover.se.pdfzensor.censor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType3Font;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +29,7 @@ import java.util.function.Predicate;
  */
 public final class PDFCensor implements PDFHandler {
 	/** The maximum horizontal gap between two glyphs which would still be bridged by the censor bar. */
-	private static final float MAX_BRIDGED_WIDTH = 12f;
+	private static final float MAX_BRIDGED_WIDTH = 10;
 	
 	/** The maximum difference in the y-coordinate between two glyphs which would still be bridged by the censor bar. */
 	private static final float MAX_BRIDGED_HEIGHT = .5f;
@@ -102,8 +103,9 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	@Override
 	public boolean shouldCensorText(TextPosition pos) {
-		getTextPositionInfo(pos).ifPresent(this::addOrExtendBoundingBoxes);
-		return true;
+		var censoredPair = getTextPositionInfo(pos).filter(p -> removePredicate.test(p.getLeft()));
+		censoredPair.ifPresent(this::addOrExtendBoundingBoxes);
+		return censoredPair.isPresent();
 	}
 	
 	/**
@@ -118,17 +120,16 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final ImmutablePair<Rectangle2D, Color> pair) {
 		if (!boundingBoxes.isEmpty()) {
-			var bb = pair.getKey();
+			var bb = pair.getLeft();
 			var last = boundingBoxes.get(boundingBoxes.size() - 1);
-			var l = last.getKey();
-			if (last.getValue().equals(pair.getValue()) &&
+			var l = last.getLeft();
+			if (last.getRight().equals(pair.getRight()) &&
 				Math.abs(bb.getY() - l.getY()) <= MAX_BRIDGED_HEIGHT &&
 				Math.abs(bb.getX() - (l.getX() + l.getWidth())) <= MAX_BRIDGED_WIDTH) {
 				boundingBoxes.remove(last);
 				var width = Math.abs(bb.getX() + bb.getWidth() - l.getX());
-				bb.setRect(l.getX(), l.getY(), width, (l.getHeight() + bb.getHeight()) * .5f);
+				bb.setRect(l.getX(), l.getY(), width, l.getHeight());
 			}
-			pair.getKey().setRect(bb);
 		}
 		boundingBoxes.add(pair);
 	}
@@ -141,26 +142,18 @@ public final class PDFCensor implements PDFHandler {
 	 * @return An optional containing either the bounds-color pair or nothing, if an error occurred.
 	 */
 	private Optional<ImmutablePair<Rectangle2D, Color>> getTextPositionInfo(@NotNull TextPosition pos) {
+		var result = Optional.<ImmutablePair<Rectangle2D, Color>>empty();
 		try {
 			var font = pos.getFont();
-			var bb = font.getBoundingBox();
-			float height = bb.getHeight() + bb.getLowerLeftY();
-			float width = 0;
+			var s = new StringBuilder();
 			for (var i : pos.getCharacterCodes())
-				width += font.getWidth(i);
-			
-			var at = pos.getTextMatrix().createAffineTransform();
-			if (font instanceof PDType3Font)
-				at.concatenate(font.getFontMatrix().createAffineTransform());
-			else
-				at.scale(.001f, .001);
-			
-			var r = new Rectangle2D.Float(0, 0, width, height);
-			return Optional.of(new ImmutablePair<>(at.createTransformedShape(r).getBounds2D(), Color.DARK_GRAY));
+				s.append(font.toUnicode(i));
+			if (StringUtils.isNotBlank(s))
+				result = Optional.of(new ImmutablePair<>(PDFUtils.transformTextPosition(pos), Color.DARK_GRAY));
 		} catch (IOException e) {
 			LOGGER.log(Level.ERROR, "There was an error handling the font.", e);
 		}
-		return Optional.empty();
+		return result;
 	}
 	
 	/**
@@ -178,8 +171,8 @@ public final class PDFCensor implements PDFHandler {
 		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true)) {
 			pageContentStream.restoreGraphicsState();
 			for (var pair : boundingBoxes) {
-				pageContentStream.setNonStrokingColor(pair.getValue());
-				var r = pair.getKey();
+				pageContentStream.setNonStrokingColor(pair.getRight());
+				var r = pair.getLeft();
 				pageContentStream.addRect((float) r.getX(), (float) r.getY(), (float) r.getWidth(),
 										  (float) r.getHeight());
 				pageContentStream.fill();

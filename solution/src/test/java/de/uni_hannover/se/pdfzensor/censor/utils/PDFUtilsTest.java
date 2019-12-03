@@ -1,29 +1,24 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
-import de.uni_hannover.se.pdfzensor.TestUtility;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-
-import java.awt.geom.Rectangle2D;
-import java.io.*;
-import java.util.List;
-import java.util.stream.Stream;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.pdfbox.util.Matrix;
 import org.jetbrains.annotations.NotNull;
-
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.awt.geom.Rectangle2D;
+import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PDFUtilsTest extends PDFTextStripper {
 	
@@ -49,14 +44,14 @@ class PDFUtilsTest extends PDFTextStripper {
 	
 	@Test
 	void transformTestPositionTest() throws IOException {
-		File file = new File(TestUtility.getResource("/pdf-files/sample.pdf").getAbsolutePath());
+		File file = new File(getResource("/pdf-files/sample.pdf").getAbsolutePath());
 		var doc = PDDocument.load(file);
 		PDFTextStripper stripper = new PDFUtilsTest();
 		stripper.setSortByPosition(true);
 		stripper.setStartPage(0);
 		stripper.setEndPage(doc.getNumberOfPages());
-		Writer dummey = new OutputStreamWriter(new ByteArrayOutputStream());
-		stripper.writeText(doc, dummey);
+		Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
+		stripper.writeText(doc, dummy);
 	}
 	
 	/**
@@ -73,7 +68,8 @@ class PDFUtilsTest extends PDFTextStripper {
 	}
 	
 	/**
-	 * Provides a set of arguments for {@link #pdRectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link #DIMENSIONS}.
+	 * Provides a set of arguments for {@link #pdRectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link
+	 * #DIMENSIONS}.
 	 */
 	private static Stream<Arguments> dimensionsProvider() {
 		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));

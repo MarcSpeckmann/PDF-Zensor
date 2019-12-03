@@ -16,21 +16,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-
-import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT;
-import static org.apache.pdfbox.contentstream.operator.OperatorName.SHOW_TEXT_ADJUSTED;
+import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
 
 
-/** TextProcessor has two main purposes:
- * for one is it responsible to abstract {@link org.apache.pdfbox.text.PDFTextStripper}'s {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
- * and similar methods to the API outside of this package by forwarding these events to a {@link PDFHandler}.
- * For the other is it responsible to copy all read operators into {@link PDFStreamProcessor}'s builtin output-stream.
- * The latter has as only exception the Show-Text-Operators (TJ and Tj) as they should only be copied if the callback to
- * {@link PDFHandler#shouldCensorText(TextPosition)} had returned false. */
+/**
+ * TextProcessor has two main purposes: for one is it responsible to abstract {@link
+ * org.apache.pdfbox.text.PDFTextStripper}'s {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
+ * and similar methods to the API outside of this package by forwarding these events to a {@link PDFHandler}. For the
+ * other is it responsible to copy all read operators into {@link PDFStreamProcessor}'s builtin output-stream. The
+ * latter has as only exception the Show-Text-Operators (TJ and Tj) as they should only be copied if the callback to
+ * {@link PDFHandler#shouldCensorText(TextPosition)} had returned false.
+ */
 public class TextProcessor extends PDFStreamProcessor {
 	private static final Logger LOGGER = Logging.getLogger();
 	private PDFHandler handler;
 	private boolean shouldBeCensored = false;
+	
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
 	 *
@@ -42,7 +43,7 @@ public class TextProcessor extends PDFStreamProcessor {
 		if (handler == null)
 			LOGGER.log(Level.ERROR, "Handler is null");
 		this.handler = Objects.requireNonNull(handler);
-
+		
 	}
 	
 	/**
@@ -70,22 +71,21 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * Checks whether the current text should be censored.
-	 * If so, shouldBeCensored is set to true.
+	 * Checks whether the current text should be censored. If so, shouldBeCensored is set to true.
 	 *
 	 * @param text Text position to be processed.
 	 */
 	@Override
 	protected void processTextPosition(final TextPosition text) {
 		shouldBeCensored = handler.shouldCensorText(text);
-        super.processTextPosition(text);
+		super.processTextPosition(text);
 	}
 	
 	/**
 	 * End editing page and pass it to the handler.
 	 *
 	 * @param page The page we just got processed.
-	 * @throws IOException  If there is an error loading the properties.
+	 * @throws IOException If there is an error loading the properties.
 	 */
 	@Override
 	protected void endPage(final PDPage page) throws IOException {
@@ -106,24 +106,24 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * Used to handle an operation.
-	 * SHOW_TEXT_ADJUSTED and SHOW_TEXT are operators for text in the PDF structure.
-	 * The function copies everything that is not defined as text in the PDF structure.
-	 * Then the processOperator implemented in the {@link org.apache.pdfbox.text.PDFTextStripper} is called which calls shouldCensored to decide if text should be censored or not.
-	 * In shouldCensored a bool is stored to decide if text should be censored or not.
+	 * Used to handle an operation. SHOW_TEXT_ADJUSTED and SHOW_TEXT are operators for text in the PDF structure. The
+	 * function copies everything that is not defined as text in the PDF structure. Then the processOperator implemented
+	 * in the {@link org.apache.pdfbox.text.PDFTextStripper} is called which calls shouldCensored to decide if text
+	 * should be censored or not. In shouldCensored a bool is stored to decide if text should be censored or not.
+	 *
 	 * @param operator The operation to perform.
 	 * @param operands The list of arguments.
-	 * @throws IOException  If there is an error processing the operation.
+	 * @throws IOException If there is an error processing the operation.
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
 		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
-		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)){
+		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
 			writer.writeTokens(operands);
 			writer.writeToken(operator);
 		}
 		super.processOperator(operator, operands);
-		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored){
+		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored) {
 			writer.writeTokens(operands);
 			writer.writeToken(operator);
 		}
