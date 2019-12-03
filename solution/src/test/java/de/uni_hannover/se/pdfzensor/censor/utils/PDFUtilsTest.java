@@ -83,7 +83,7 @@ class PDFUtilsTest {
 			assertEquals(Math.round(expected.getX()), Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getX()));
 			assertEquals(Math.round(expected.getY()), Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getY()));
 		} catch (IOException e) {
-			fail();
+			fail("IOException: font of TextPosition object couldn't be loaded correctly");
 		}
 	}
 	
