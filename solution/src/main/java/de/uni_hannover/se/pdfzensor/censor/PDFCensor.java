@@ -28,18 +28,18 @@ import java.util.function.Predicate;
  * annotations and the mode
  */
 public final class PDFCensor implements PDFHandler {
-	/** The maximum horizontal gap between two glyphs which would still be bridged by the censor bar. */
+	/** The maximum horizontal gap between two glyphs to still combine their bounds. */
 	private static final float MAX_BRIDGED_WIDTH = 10;
 	
-	/** The maximum difference in the y-coordinate between two glyphs which would still be bridged by the censor bar. */
+	/** The maximum difference in the y-coordinate between two glyphs to still combine their bounds. */
 	private static final float MAX_BRIDGED_HEIGHT = .5f;
+	
+	private static final Logger LOGGER = Logging.getLogger();
 	
 	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
 	
 	private Predicate<Rectangle2D> removePredicate;
-	
-	private static final Logger LOGGER = Logging.getLogger();
 	
 	/**
 	 * @param settings Settings that contain information about the mode and expressions
@@ -127,8 +127,7 @@ public final class PDFCensor implements PDFHandler {
 				Math.abs(bb.getY() - l.getY()) <= MAX_BRIDGED_HEIGHT &&
 				Math.abs(bb.getX() - (l.getX() + l.getWidth())) <= MAX_BRIDGED_WIDTH) {
 				boundingBoxes.remove(last);
-				var width = Math.abs(bb.getX() + bb.getWidth() - l.getX());
-				bb.setRect(l.getX(), l.getY(), width, l.getHeight());
+				bb.setRect(l.createUnion(bb));
 			}
 		}
 		boundingBoxes.add(pair);
