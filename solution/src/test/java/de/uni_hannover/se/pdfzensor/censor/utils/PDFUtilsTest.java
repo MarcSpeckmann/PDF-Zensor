@@ -40,7 +40,8 @@ class PDFUtilsTest {
 		String unicode;
 		int[] charCodes;
 		
-		TextPositionValue(float endX, float endY, float fontSize, int fontSizeInPt, float maxHeight, float individualWidth, float spaceWidth, String unicode, int[] charCodes) {
+		TextPositionValue(float endX, float endY, float fontSize, int fontSizeInPt, float maxHeight,
+						  float individualWidth, float spaceWidth, String unicode, int[] charCodes) {
 			this.endX = endX;
 			this.endY = endY;
 			this.fontSize = fontSize;
@@ -58,12 +59,16 @@ class PDFUtilsTest {
 	 */
 	private static final Map<Rectangle2D, TextPositionValue> TEXTPOSITION = new HashMap<>();
 	
-	private static TextPositionValue tpValue1 = new TextPositionValue(79.19946f, 800.769f, 10.9091f, 10, 7.51637f, 8.333466f, 3.0545478f, "D", new int[]{68});
-	private static TextPositionValue tpValue2 = new TextPositionValue(23.1547f, 44.32212f, 11.95f, 11, 7.51637f, 8.333466f, 3.0545478f, "DE", new int[]{68, 69});
+	private static TextPositionValue tpValue1 = new TextPositionValue(79.19946f, 800.769f, 10.9091f, 10, 7.51637f,
+																	  8.333466f, 3.0545478f, "D", new int[]{68});
+	private static TextPositionValue tpValue2 = new TextPositionValue(23.1547f, 44.32212f, 11.95f, 11, 7.51637f,
+																	  8.333466f, 3.0545478f, "DE", new int[]{68, 69});
 	
 	static {
-		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f), tpValue1);
-		TEXTPOSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f), tpValue2);
+		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f),
+						 tpValue1);
+		TEXTPOSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f),
+						 tpValue2);
 		// TODO: tests for: empty position and PDType3Font
 	}
 	
@@ -85,12 +90,20 @@ class PDFUtilsTest {
 		// pageRotation = 0 is a standard value
 		// pageWidth = 595,276f and pageHeight=841,89f are height and width of a DIN-A4-PDF, but is irrelevant for this
 		// task
-		TextPosition tp = new TextPosition(0, 595.276f, 841.89f, new Matrix(input.fontSize, 0f, 0f, input.fontSize, input.endX, input.endY), input.endX, input.endY, input.maxHeight, input.individualWidth, input.spaceWidth, input.unicode, input.charCodes, PDType1Font.TIMES_ROMAN, input.fontSize, input.fontSizeInPt);
+		TextPosition tp = new TextPosition(0, 595.276f, 841.89f,
+										   new Matrix(input.fontSize, 0f, 0f, input.fontSize, input.endX, input.endY),
+										   input.endX, input.endY, input.maxHeight, input.individualWidth,
+										   input.spaceWidth, input.unicode, input.charCodes, PDType1Font.TIMES_ROMAN,
+										   input.fontSize, input.fontSizeInPt);
 		try {
-			assertEquals(Math.round(expected.getHeight()), Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getHeight()));
-			assertEquals(Math.round(expected.getWidth()), Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getWidth()));
-			assertEquals(Math.round(expected.getX()), Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getX()));
-			assertEquals(Math.round(expected.getY()), Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getY()));
+			assertEquals(Math.round(expected.getHeight()),
+						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getHeight()));
+			assertEquals(Math.round(expected.getWidth()),
+						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getWidth()));
+			assertEquals(Math.round(expected.getX()),
+						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getX()));
+			assertEquals(Math.round(expected.getY()),
+						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getY()));
 		} catch (IOException e) {
 			fail("IOException: font of TextPosition object couldn't be loaded correctly");
 		}
@@ -128,13 +141,15 @@ class PDFUtilsTest {
 	}
 	
 	/**
-	 * This test function tests the constructor and some null input tests for the functions
-	 * {@link PDFUtils#transformTextPosition(TextPosition)} and {@link PDFUtils#pdRectToRect2D(PDRectangle)}
+	 * This test function tests the constructor and some null input tests for the functions {@link
+	 * PDFUtils#transformTextPosition(TextPosition)} and {@link PDFUtils#pdRectToRect2D(PDRectangle)}
 	 */
 	@Test
 	void nullInputTest() {
 		TestUtility.assertIsUtilityClass(PDFUtils.class);
-		assertThrows(IllegalArgumentException.class, () -> PDFUtils.pdRectToRect2D(null)); // ignore SonarLint because we wan't that bad input
-		assertThrows(IllegalArgumentException.class, () -> PDFUtils.transformTextPosition(null)); // ignore SonarLint because we wan't that bad input
+		assertThrows(NullPointerException.class,
+					 () -> PDFUtils.pdRectToRect2D(null)); // ignore SonarLint because we wan't that bad input
+		assertThrows(NullPointerException.class,
+					 () -> PDFUtils.transformTextPosition(null)); // ignore SonarLint because we wan't that bad input
 	}
 }

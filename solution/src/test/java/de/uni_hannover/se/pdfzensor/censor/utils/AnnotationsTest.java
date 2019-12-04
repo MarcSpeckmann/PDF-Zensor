@@ -76,7 +76,8 @@ public class AnnotationsTest {
 		
 		
 		// rect is null, criteria is given
-		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isMarked(null, MarkCriterion.INTERSECT));
+		Assertions.assertThrows(NullPointerException.class,
+								() -> new Annotations().isMarked(null, MarkCriterion.INTERSECT));
 		
 		
 		// rect is given, criteria is null
@@ -159,7 +160,8 @@ public class AnnotationsTest {
 		
 		
 		// rect is null, criteria is given
-		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null, MarkCriterion.INTERSECT));
+		Assertions.assertThrows(NullPointerException.class,
+								() -> new Annotations().isLinked(null, MarkCriterion.INTERSECT));
 		
 		
 		// rect is given, criteria is null
