@@ -1,6 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
-import de.uni_hannover.se.pdfzensor.TestUtility;
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.jupiter.api.Test;
