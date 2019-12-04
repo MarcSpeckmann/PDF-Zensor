@@ -29,7 +29,10 @@ class PDFCensorTest implements PDFHandler {
 	 * The number of processed TextPositions. Does <b>not</b> equal the size of the bounds-color pair list, since
 	 * elements' bounds might get combined.
 	 */
-	private int element = 0;
+	private int element;
+	
+	/** The number of total elements the bounds-pair list should contain after all combinations. */
+	private int finalExpectedElements;
 	
 	/** The bounds of the individual elements of the PDF-file (not combined). */
 	private Rectangle2D.Double[] elements;
@@ -44,16 +47,21 @@ class PDFCensorTest implements PDFHandler {
 	 * Checks if the elements in the PDF-file equal the given elements and are added to the bounds-color-list
 	 * correctly.
 	 *
-	 * @param input    The input PDF-file to check.
-	 * @param elements The elements in the input PDF-file.
+	 * @param input                 The input PDF-file to check.
+	 * @param elements              The elements in the input PDF-file.
+	 * @param finalExpectedElements The expected length of the bounds-pair list at the end of a page after all
+	 *                              combinations have been applied.
 	 * @throws IOException If the document could not be loaded.
 	 */
-	@ParameterizedTest(name = "Run {index}: pdf: {0}, elements: {1}")
+	@ParameterizedTest(name = "Run {index}: pdf: {0}, elements: {1}, finalExpectedElements {2}")
 	@ArgumentsSource(PDFCensorBoundingBoxProvider.class)
-	void testPDFCensor(String input, Rectangle2D.Double[] elements) throws IOException {
+	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D.Double[] elements,
+					   int finalExpectedElements) throws IOException {
 		var dummySettings = new Settings(null, input);
 		this.properCensor = new PDFCensor(dummySettings);
 		this.elements = elements;
+		this.element = 0;
+		this.finalExpectedElements = finalExpectedElements;
 		
 		final var dummyProcessor = new PDFProcessor(this);
 		final var doc = PDDocument.load(dummySettings.getInput());
@@ -123,6 +131,11 @@ class PDFCensorTest implements PDFHandler {
 	@Override
 	public void endPage(final PDDocument doc, final PDPage page, final int pageNum) {
 		Objects.requireNonNull(properCensor);
+		Assertions.assertNotNull(getBoundingBoxes(properCensor));
+//		// Checks if the expected number of elements have been combined
+//		// (requires colors to be added because differently colored elements should not be combined)
+//		// TODO: enable test when Annotations / mark links blue are fixed / implemented.
+//		Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
 		
 		properCensor.endPage(doc, page, pageNum);
 	}
@@ -152,6 +165,11 @@ class PDFCensorTest implements PDFHandler {
 		var sizeAfter = listAfter.size();
 		Assertions.assertTrue(sizeAfter > 0);
 		var newLast = listAfter.get(sizeAfter - 1);
+
+//		// Colors differ, expect element to be added instead of combined.
+//		// TODO: enable test when Annotations / mark links blue are fixed / implemented.
+//		if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
+//			Assertions.assertEquals(sizeBefore + 1, sizeAfter);
 		
 		var expBounds = elements[element];
 		if (sizeBefore == sizeAfter) // element was extended
