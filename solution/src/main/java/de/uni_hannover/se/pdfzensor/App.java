@@ -23,7 +23,7 @@ public class App {
 				final var doc = PDDocument.load(settings.getInput());
 				processor.process(doc);
 				doc.save(settings.getOutput());
-				
+				doc.close();
 				
 			}
 		} catch (CommandLine.ParameterException ex) {
