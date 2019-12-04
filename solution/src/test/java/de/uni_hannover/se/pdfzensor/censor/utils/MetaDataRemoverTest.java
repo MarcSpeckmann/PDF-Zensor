@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.junit.jupiter.api.Test;
@@ -21,20 +22,18 @@ class MetaDataRemoverTest {
         File file = new File(path);
         PDDocument document = PDDocument.load(file);
         PDDocumentInformation docInfo = document.getDocumentInformation();
-        Calendar creationDate = docInfo.getCreationDate();
-        Calendar modificationDate = docInfo.getModificationDate();
 
         MetadataRemover.censorMetadata(document);
 
         docInfo = document.getDocumentInformation();
-        assertEquals("Censored Author", docInfo.getAuthor());
-        assertEquals("Censored Creator", docInfo.getCreator());
-        assertEquals("Censored Producer", docInfo.getProducer());
-        assertEquals("Censored Title", docInfo.getTitle());
-        assertEquals("Censored Subject", docInfo.getSubject());
-        assertEquals("Censored Keywords", docInfo.getKeywords());
-        assertNotEquals(creationDate, docInfo.getCreationDate());
-        assertNotEquals(modificationDate, docInfo.getModificationDate());
+        assertTrue(StringUtils.isEmpty(docInfo.getAuthor()));
+        assertTrue(StringUtils.isEmpty(docInfo.getCreator()));
+        assertTrue(StringUtils.isEmpty(docInfo.getProducer()));
+        assertTrue(StringUtils.isEmpty(docInfo.getTitle()));
+        assertTrue(StringUtils.isEmpty(docInfo.getSubject()));
+        assertTrue(StringUtils.isEmpty(docInfo.getKeywords()));
+        assertNull(docInfo.getCreationDate());
+        assertNull(docInfo.getModificationDate());
         document.close();
     }
 
@@ -42,8 +41,9 @@ class MetaDataRemoverTest {
      * Tests if the MetadateRemover does not throw an exception if it is unable
      * to retrieve the document information of the given file
      */
+    @SuppressWarnings("ConstantConditions")
     @Test
     void testCensorMetadataInvalidFile(){
-        assertDoesNotThrow(() -> MetadataRemover.censorMetadata(null));
+        assertThrows(NullPointerException.class, () -> MetadataRemover.censorMetadata(null));
     }
 }
