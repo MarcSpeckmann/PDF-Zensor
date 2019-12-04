@@ -6,8 +6,10 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import picocli.CommandLine;
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.io.File;
 import java.util.Objects;
@@ -29,7 +31,7 @@ final class CLArgs {
 	/** The input-file as it was specified. It's value <b>should not</b> be null. */
 	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
 	@Nullable
-	@CommandLine.Parameters(paramLabel = "\"in.pdf\"", arity = "1",
+	@Parameters(paramLabel = "\"in.pdf\"", arity = "1",
 			description = {"Set the input pdf-file that should be censored. Required."})
 	private File input = null;
 	
@@ -49,6 +51,22 @@ final class CLArgs {
 			description = {"Sets the logger's verbosity. Specify multiple -v options to increase verbosity."})
 	@Nullable
 	private boolean[] verbose = null;
+	
+	/** Container for the mode. */
+	@ArgGroup()
+	@NotNull
+	private final MarkedOptions modes = new MarkedOptions();
+	
+	/** Helper class to allow for exclusivity between the marked and unmarked mode. */
+	private static final class MarkedOptions {
+		/** A boolean indicating that the desired censor mode is {@link Mode#MARKED}. */
+		@Option(names = {"-m", "--censor-marked"}, arity = "0", required = true, description = {"Include only marked segments when censoring."})
+		private boolean marked = false;
+		
+		/** A boolean indicating that the desired censor mode is {@link Mode#UNMARKED}. */
+		@Option(names = {"-u", "--censor-unmarked"}, arity = "0", required = true, description = {"Exclude all marked segments when censoring."})
+		private boolean unmarked = false;
+	}
 	
 	/**
 	 * CLArgs' default constructor should be hidden to the public as {@link #fromStringArray(String...)} should be used
@@ -118,5 +136,22 @@ final class CLArgs {
 	@Nullable
 	Level getVerbosity() {
 		return verbose == null ? null : VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, verbose.length)];
+	}
+	
+	/**
+	 * Converts the boolean into the respective {@link Mode}. <b>Note:</b> both booleans being false does not result in
+	 * {@link Mode#ALL} but in <code>null</code>. This is the case to still allow for the configuration to set the
+	 * {@link Mode} ({@link Mode#ALL} is the default value of the setting, not the default value for the {@link CLArgs}
+	 * argument).
+	 *
+	 * @return null of the Mode representing the booleans specified by the arguments.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	Mode getMode() {
+		Mode desiredMode = null;
+		if (modes.marked) desiredMode = Mode.MARKED;
+		else if (modes.unmarked) desiredMode = Mode.UNMARKED;
+		return desiredMode;
 	}
 }

@@ -22,13 +22,14 @@ class CLArgsTest {
 		assertThrows(IllegalArgumentException.class, CLArgs::fromStringArray);
 	}
 	
-	/** Checks if the arguments are passed into the corresponding expected values. */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}")
+	/** Checks if the arguments are parsed into the corresponding expected values. */
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}")
 	@ArgumentsSource(CLArgumentProvider.class)
-	void testArgsParser(String[] args, File input, File output, Level verbosity) {
+	void testArgsParser(String[] args, File input, File output, Level verbosity, Mode mode) {
 		var clArgs = CLArgs.fromStringArray(args);
 		assertEquals(input, clArgs.getInput());
 		assertEquals(output, clArgs.getOutput());
 		assertEquals(verbosity, clArgs.getVerbosity());
+		assertEquals(mode, clArgs.getMode());
 	}
 }
