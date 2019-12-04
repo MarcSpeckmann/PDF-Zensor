@@ -11,7 +11,7 @@ import java.util.Objects;
  * MetadataRemover is used to censor all the metadata in a {@link PDDocument}. The dates (date of creation and date of
  * modification) will be set to the time the PDFZensor was used on the document.
  */
-final class MetadataRemover {
+public final class MetadataRemover {
 	
 	/**
 	 * MetadataRemover is a pure static utility-class. As such no instances of it should be created. Thus its
@@ -27,7 +27,7 @@ final class MetadataRemover {
 	 *
 	 * @param document The PDDocument that will be censored. May not be null.
 	 */
-	static void censorMetadata(@NotNull PDDocument document) {
+	public static void censorMetadata(@NotNull PDDocument document) {
 		Objects.requireNonNull(document);
 		document.setDocumentInformation(new PDDocumentInformation());
 		document.getDocumentCatalog().setMetadata(null);

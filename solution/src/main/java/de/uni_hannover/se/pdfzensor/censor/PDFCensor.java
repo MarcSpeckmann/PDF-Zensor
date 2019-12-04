@@ -2,6 +2,7 @@ package de.uni_hannover.se.pdfzensor.censor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.censor.utils.Annotations;
+import de.uni_hannover.se.pdfzensor.censor.utils.MetadataRemover;
 import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
@@ -100,6 +101,7 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void endDocument(PDDocument doc) {
 		boundingBoxes = null;
+		MetadataRemover.censorMetadata(doc);
 	}
 	
 	/**
