@@ -57,9 +57,6 @@ public class AnnotationsTest {
 			markup.setRectangle(new PDRectangle(0, 0, 100, 200));
 			markup.setQuadPoints(new float[]{0, 0, 100, 0, 100, 200, 0, 200});
 			annots.add(markup);
-			// uncomment for getting a generated sample
-			//testDocument.save(new File("src/test/resources/pdf-files/generated/markedTest.pdf"));
-			//testDocument.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,31 +71,21 @@ public class AnnotationsTest {
 		// both arguments are null
 		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isMarked(null, null));
 		
-		
 		// rect is null, criteria is given
 		Assertions.assertThrows(NullPointerException.class,
 								() -> new Annotations().isMarked(null, MarkCriterion.INTERSECT));
 		
-		
-		// rect is given, criteria is null
-		Assertions.assertThrows(NullPointerException.class, () -> {
-			PDDocument testDocument = createMarkedDocument();
-			PDPage testPage = testDocument.getPage(0);
-			Annotations anno = new Annotations();
-			anno.cachePage(testPage);
-			anno.isMarked(new Rectangle(50, 0, 100, 100), null);
-		});
-		
-		
-		// rect and criteria is given
 		PDDocument testDocument = createMarkedDocument();
 		PDPage testPage = testDocument.getPage(0);
 		Annotations anno = new Annotations();
 		anno.cachePage(testPage);
-		// given rectangle is intersecting the rectangle of the highlight
-		Assertions.assertTrue(anno.isMarked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
 		// given rectangle is outside the rectangle of the highlight respectively bordering so not intersecting
 		Assertions.assertFalse(anno.isMarked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
+		
+		Assertions.assertThrows(NullPointerException.class, () -> anno.isMarked(new Rectangle(50, 0, 100, 100), null));
+		
+		// given rectangle is intersecting the rectangle of the highlight
+		Assertions.assertTrue(anno.isMarked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
 	}
 	
 	/**
@@ -141,9 +128,6 @@ public class AnnotationsTest {
 			link.setRectangle(new PDRectangle(0, 0, 100, 200));
 			link.setQuadPoints(new float[]{0, 0, 100, 0, 100, 200, 0, 200});
 			annots.add(link);
-			//uncomment for getting a generated sample
-			//testDocument.save(new File("src/test/resources/pdf-files/generated/linkedTest.pdf"));
-			//testDocument.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -158,31 +142,20 @@ public class AnnotationsTest {
 		// both arguments are null
 		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null, null));
 		
-		
 		// rect is null, criteria is given
 		Assertions.assertThrows(NullPointerException.class,
 								() -> new Annotations().isLinked(null, MarkCriterion.INTERSECT));
 		
-		
-		// rect is given, criteria is null
-		Assertions.assertThrows(NullPointerException.class, () -> {
-			PDDocument testDocument = createLinkedDocument();
-			PDPage testPage = testDocument.getPage(0);
-			Annotations anno = new Annotations();
-			anno.cachePage(testPage);
-			anno.isLinked(new Rectangle(0, 0, 50, 50), null);
-		});
-		
-		
-		// rect and criteria is given
 		PDDocument testDocument = createLinkedDocument();
 		PDPage testPage = testDocument.getPage(0);
 		Annotations anno = new Annotations();
 		anno.cachePage(testPage);
-		// given rectangle is intersecting the rectangle of the link
-		Assertions.assertTrue(anno.isLinked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
 		// given rectangle is outside the rectangle of the link respectively bordering so not intersecting
 		Assertions.assertFalse(anno.isLinked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
+		// rect is given, criteria is null
+		Assertions.assertThrows(NullPointerException.class, () -> anno.isLinked(new Rectangle(0, 0, 50, 50), null));
+		
+		Assertions.assertTrue(anno.isLinked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
 	}
 	
 	/**
@@ -192,7 +165,6 @@ public class AnnotationsTest {
 	void testIsLinkedOnlyContain() {
 		// argument rect is null
 		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null));
-		
 		
 		// given rect in any of the links
 		PDDocument testDocument = createLinkedDocument();
