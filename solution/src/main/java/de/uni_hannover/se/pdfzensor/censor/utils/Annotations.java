@@ -4,13 +4,13 @@ import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.List;
@@ -46,22 +46,32 @@ public final class Annotations {
 	 */
 	@NotNull
 	private static Rectangle2D getAnnotationRect(@NotNull PDAnnotation annotation) {
-		var rectangle = annotation.getRectangle();
+		var rectangle = PDFUtils.pdRectToRect2D(annotation.getRectangle());
 		if (annotation instanceof PDAnnotationTextMarkup) {
-			var quads = ((PDAnnotationTextMarkup) annotation).getQuadPoints();
-			float topLeftX = Float.POSITIVE_INFINITY;
-			float topLeftY = Float.POSITIVE_INFINITY;
-			float bottomRightX = Float.NEGATIVE_INFINITY;
-			float bottomRightY = Float.NEGATIVE_INFINITY;
-			for (int i = 0; i < quads.length; i += 2) {
-				topLeftX = Math.min(quads[i], topLeftX);
-				topLeftY = Math.min(quads[i + 1], topLeftY);
-				bottomRightX = Math.max(quads[i], bottomRightX);
-				bottomRightY = Math.max(quads[i + 1], bottomRightY);
+			final var quads = ((PDAnnotationTextMarkup) annotation).getQuadPoints();
+			var path = new Path2D.Float();
+			int i = 0;
+			while (i < quads.length) {
+				path.moveTo(quads[i++], quads[i++]);
+				path.lineTo(quads[i++], quads[i++]);
 			}
-			rectangle = new PDRectangle(topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY);
+			rectangle = path.getBounds2D();
 		}
-		return PDFUtils.pdRectToRect2D(rectangle);
+		return rectangle;
+	}
+	
+	/**
+	 * Checks if given annotation is highlighted.
+	 *
+	 * @param annotation the annotation to be checked
+	 * @return true if the given annotation is highlighted otherwise false
+	 */
+	@Contract("null -> false")
+	private static boolean isHighlightAnnotation(PDAnnotation annotation) {
+		if (!(annotation instanceof PDAnnotationTextMarkup)) return false;
+		PDAnnotationTextMarkup tm = (PDAnnotationTextMarkup) annotation;
+		String subtype = tm.getSubtype();
+		return SUB_TYPE_HIGHLIGHT.equals(subtype);
 	}
 	
 	/**
@@ -161,19 +171,5 @@ public final class Annotations {
 		Objects.requireNonNull(criteria);
 		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
 		return links.stream().anyMatch(predicate);
-	}
-	
-	/**
-	 * Checks if given annotation is highlighted.
-	 *
-	 * @param annotation the annotation to be checked
-	 * @return true if the given annotation is highlighted otherwise false
-	 */
-	@Contract("null -> false")
-	private static boolean isHighlightAnnotation(PDAnnotation annotation) {
-		if (!(annotation instanceof PDAnnotationTextMarkup)) return false;
-		PDAnnotationTextMarkup tm = (PDAnnotationTextMarkup) annotation;
-		String subtype = tm.getSubtype();
-		return SUB_TYPE_HIGHLIGHT.equals(subtype);
 	}
 }
