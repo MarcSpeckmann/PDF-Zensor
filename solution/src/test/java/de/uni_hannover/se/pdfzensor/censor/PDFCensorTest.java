@@ -132,11 +132,18 @@ class PDFCensorTest implements PDFHandler {
 	public void endPage(final PDDocument doc, final PDPage page, final int pageNum) {
 		Objects.requireNonNull(properCensor);
 		Assertions.assertNotNull(getBoundingBoxes(properCensor));
-//		// Checks if the expected number of elements have been combined
-//		// (requires colors to be added because differently colored elements should not be combined)
+		// Checks if the expected number of elements have been combined
+		// (requires colors to be added because differently colored elements should not be combined)
+
 		Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
 		
 		properCensor.endPage(doc, page, pageNum);
+		try {
+			Assertions.assertTrue(page.getAnnotations().isEmpty());
+		} catch (IOException e){
+			Assertions.fail(e.getMessage());
+		}
+		
 	}
 	
 	@Override
@@ -165,7 +172,7 @@ class PDFCensorTest implements PDFHandler {
 		Assertions.assertTrue(sizeAfter > 0);
 		var newLast = listAfter.get(sizeAfter - 1);
 
-//		// Colors differ, expect element to be added instead of combined.
+		// Colors differ, expect element to be added instead of combined.
 		if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
 			Assertions.assertEquals(sizeBefore + 1, sizeAfter);
 		
