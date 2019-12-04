@@ -33,6 +33,10 @@ public class CLArgumentProvider implements ArgumentsProvider {
 	 * List of all possible verbosity levels.
 	 */
 	private static final int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1).toArray();
+	/**
+	 * List of all possible mode options.
+	 */
+	private static final Mode[] modeOptions = new Mode[]{Mode.MARKED, Mode.UNMARKED, null};
 	
 	/**
 	 * This method creates an Argument which contains a input file, output file and verbosity level depending on the
@@ -91,7 +95,7 @@ public class CLArgumentProvider implements ArgumentsProvider {
 		for (String in : inputFiles)
 			for (String out : outputFiles)
 				for (int lvl : verbosityLevels)
-					for (Mode mode : new Mode[]{Mode.MARKED, Mode.UNMARKED, null})
+					for (Mode mode : modeOptions)
 						list.add(createArgument(in, out, lvl, mode));
 		return list.stream();
 	}
