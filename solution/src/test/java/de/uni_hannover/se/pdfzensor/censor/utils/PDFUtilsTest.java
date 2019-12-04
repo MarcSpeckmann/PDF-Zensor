@@ -74,6 +74,9 @@ class PDFUtilsTest {
 		return TEXTPOSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
+	/**
+	 * tests for {@link PDFUtils#transformTextPosition(TextPosition)} function
+	 */
 	@ParameterizedTest(name = "Run {index}: TextPosition: {0}")
 	@MethodSource("textPositionProvider")
 	void transformTextPositionTest(@NotNull TextPositionValue input, @NotNull Rectangle2D expected) {
@@ -112,6 +115,9 @@ class PDFUtilsTest {
 		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
+	/**
+	 * tests for {@link PDFUtils#pdRectToRect2D(PDRectangle)} function
+	 */
 	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
 	@MethodSource("dimensionsProvider")
 	void pdRectToRect2DTest(@NotNull PDRectangle input, @NotNull Rectangle2D expected) {
