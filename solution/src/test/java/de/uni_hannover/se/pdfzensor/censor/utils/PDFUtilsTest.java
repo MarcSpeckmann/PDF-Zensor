@@ -1,23 +1,23 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import de.uni_hannover.se.pdfzensor.testing.TestUtility;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.text.TextPosition;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-
-import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Stream;
-
 import org.apache.pdfbox.util.Matrix;
 import org.jetbrains.annotations.NotNull;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,40 +27,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class PDFUtilsTest {
 	
 	/**
-	 * New data structure TextPositionValue to bundle the values for transformTextPosition
-	 */
-	static class TextPositionValue {
-		float endX;
-		float endY;
-		float fontSize;
-		int fontSizeInPt;
-		float maxHeight;
-		float individualWidth;
-		float spaceWidth;
-		String unicode;
-		int[] charCodes;
-		PDFont font;
-		
-		TextPositionValue(float endX, float endY, float fontSize, int fontSizeInPt, float maxHeight,
-						  float individualWidth, float spaceWidth, String unicode, int[] charCodes, PDFont font) {
-			this.endX = endX;
-			this.endY = endY;
-			this.fontSize = fontSize;
-			this.fontSizeInPt = fontSizeInPt;
-			this.maxHeight = maxHeight;
-			this.individualWidth = individualWidth;
-			this.spaceWidth = spaceWidth;
-			this.unicode = unicode;
-			this.charCodes = charCodes;
-			this.font = font;
-		}
-	}
-	
-	/**
 	 * A Hash Map containing bundled data as TextPosition objects and the corresponding expected output-rectangle
 	 */
 	private static final Map<Rectangle2D, TextPositionValue> TEXTPOSITION = new HashMap<>();
-	
+	/**
+	 * A Hash Map containing an input-rectangle from type PDRectangle and the corresponding expected output-rectangle
+	 * from type Rectangle2D
+	 */
+	private static final Map<Rectangle2D, PDRectangle> DIMENSIONS = new HashMap<>();
 	private static TextPositionValue tpValue1 = new TextPositionValue(79.19946f, 800.769f, 10.9091f, 10, 7.51637f,
 																	  8.333466f, 3.0545478f, "D", new int[]{68},
 																	  PDType1Font.TIMES_ROMAN);
@@ -77,6 +51,13 @@ class PDFUtilsTest {
 						 tpValue2);
 	}
 	
+	static {
+		// populates the DIMENSIONS-map with key-value pairs of tuples of input and expected output
+		DIMENSIONS.put(new Rectangle2D.Float(0f, 0f, 0f, 0f), new PDRectangle(0f, 0f, 0f, 0f));
+		DIMENSIONS.put(new Rectangle2D.Float(-1f, -2f, -3f, -4f), new PDRectangle(-1f, -2f, -3f, -4f));
+		DIMENSIONS.put(new Rectangle2D.Float(1f, 2f, 3f, 4f), new PDRectangle(1f, 2f, 3f, 4f));
+		DIMENSIONS.put(new Rectangle2D.Float(1.5f, 2.5f, 3.5f, 4.5f), new PDRectangle(1.5f, 2.5f, 3.5f, 4.5f));
+	}
 	
 	/**
 	 * Provides a set of arguments for {@link #transformTextPositionTest(TextPositionValue, Rectangle2D)} generated from
@@ -84,6 +65,14 @@ class PDFUtilsTest {
 	 */
 	private static Stream<Arguments> textPositionProvider() {
 		return TEXTPOSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
+	}
+	
+	/**
+	 * Provides a set of arguments for {@link #pdRectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link
+	 * #DIMENSIONS}.
+	 */
+	private static Stream<Arguments> dimensionsProvider() {
+		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
 	/**
@@ -114,28 +103,6 @@ class PDFUtilsTest {
 	}
 	
 	/**
-	 * A Hash Map containing an input-rectangle from type PDRectangle and the corresponding expected output-rectangle
-	 * from type Rectangle2D
-	 */
-	private static final Map<Rectangle2D, PDRectangle> DIMENSIONS = new HashMap<>();
-	
-	static {
-		// populates the DIMENSIONS-map with key-value pairs of tuples of input and expected output
-		DIMENSIONS.put(new Rectangle2D.Float(0f, 0f, 0f, 0f), new PDRectangle(0f, 0f, 0f, 0f));
-		DIMENSIONS.put(new Rectangle2D.Float(-1f, -2f, -3f, -4f), new PDRectangle(-1f, -2f, -3f, -4f));
-		DIMENSIONS.put(new Rectangle2D.Float(1f, 2f, 3f, 4f), new PDRectangle(1f, 2f, 3f, 4f));
-		DIMENSIONS.put(new Rectangle2D.Float(1.5f, 2.5f, 3.5f, 4.5f), new PDRectangle(1.5f, 2.5f, 3.5f, 4.5f));
-	}
-	
-	/**
-	 * Provides a set of arguments for {@link #pdRectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link
-	 * #DIMENSIONS}.
-	 */
-	private static Stream<Arguments> dimensionsProvider() {
-		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
-	}
-	
-	/**
 	 * tests for {@link PDFUtils#pdRectToRect2D(PDRectangle)} function
 	 */
 	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
@@ -148,6 +115,7 @@ class PDFUtilsTest {
 	 * This test function tests the constructor and some null input tests for the functions {@link
 	 * PDFUtils#transformTextPosition(TextPosition)} and {@link PDFUtils#pdRectToRect2D(PDRectangle)}
 	 */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void nullInputTest() {
 		TestUtility.assertIsUtilityClass(PDFUtils.class);
@@ -159,5 +127,35 @@ class PDFUtilsTest {
 		TextPosition tp = new TextPosition(0, 0f, 0f, new Matrix(0f, 0f, 0f, 0f, 0f, 0f), 0f, 0f, 0f, 0f, 0f, "",
 										   new int[]{}, null, 0f, 0);
 		assertThrows(NullPointerException.class, () -> PDFUtils.transformTextPosition(tp));
+	}
+	
+	/**
+	 * New data structure TextPositionValue to bundle the values for transformTextPosition
+	 */
+	static class TextPositionValue {
+		float endX;
+		float endY;
+		float fontSize;
+		int fontSizeInPt;
+		float maxHeight;
+		float individualWidth;
+		float spaceWidth;
+		String unicode;
+		int[] charCodes;
+		PDFont font;
+		
+		TextPositionValue(float endX, float endY, float fontSize, int fontSizeInPt, float maxHeight,
+						  float individualWidth, float spaceWidth, String unicode, int[] charCodes, PDFont font) {
+			this.endX = endX;
+			this.endY = endY;
+			this.fontSize = fontSize;
+			this.fontSizeInPt = fontSizeInPt;
+			this.maxHeight = maxHeight;
+			this.individualWidth = individualWidth;
+			this.spaceWidth = spaceWidth;
+			this.unicode = unicode;
+			this.charCodes = charCodes;
+			this.font = font;
+		}
 	}
 }
