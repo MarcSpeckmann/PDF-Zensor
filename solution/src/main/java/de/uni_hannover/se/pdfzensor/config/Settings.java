@@ -67,7 +67,7 @@ public final class Settings {
 		
 		input = clArgs.getInput();
 		output = checkOutput(
-				ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getParentFile()));
+				ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
 		
