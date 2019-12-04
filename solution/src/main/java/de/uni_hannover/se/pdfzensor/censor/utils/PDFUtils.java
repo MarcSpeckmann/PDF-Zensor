@@ -62,7 +62,7 @@ public final class PDFUtils {
 			at.concatenate(font.getFontMatrix().createAffineTransform());
 		else
 			at.scale(.001, .001);
-		Rectangle2D r = new Rectangle2D.Float(0, 0, totalWidth, bb.getHeight() + bb.getLowerLeftY());
+		Rectangle2D r = new Rectangle2D.Double(0, 0, totalWidth, bb.getHeight() + bb.getLowerLeftY());
 		Shape s = at.createTransformedShape(r);
 		return s.getBounds2D();
 	}
