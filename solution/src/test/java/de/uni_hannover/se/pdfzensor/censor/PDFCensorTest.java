@@ -125,6 +125,12 @@ class PDFCensorTest implements PDFHandler {
 		Objects.requireNonNull(properCensor);
 		
 		properCensor.endPage(doc, page, pageNum);
+		try {
+			Assertions.assertTrue(page.getAnnotations().isEmpty());
+		} catch (IOException e){
+			Assertions.fail(e.getMessage());
+		}
+		
 	}
 	
 	@Override
