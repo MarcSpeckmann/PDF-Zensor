@@ -1,3 +1,19 @@
+Picocli
+
+FasterXML/jackson
+
+JetBrains/java-annotations
+Copyright 2000-2016 JetBrains s.r.o.
+
+Apache Commons IO
+Copyright 2002-2019 The Apache Software Foundation
+
+Apache Commons Lang
+Copyright 2001-2019 The Apache Software Foundation
+
+Apache log4j
+Copyright 2010 The Apache Software Foundation
+
 Apache PDFBox
 Copyright 2014 The Apache Software Foundation
 
