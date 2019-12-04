@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.testing.LoggingUtility.getRootLogger;
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
@@ -29,10 +30,10 @@ class SettingsTest {
 		assertThrows(IllegalArgumentException.class, () -> new Settings(null));
 	}
 	
-	/** Checks if the arguments are passed into the corresponding expected values. */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}")
+	/** Checks if the arguments are parsed into the corresponding expected values. */
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}")
 	@ArgumentsSource(CLArgumentProvider.class)
-	void testSettingsNoConfig(String[] args, File input, File output, Level verbosity) throws IOException {
+	void testSettingsNoConfig(String[] args, File input, File output, Level verbosity, Mode mode) throws IOException {
 		Logging.deinit();
 		final var settings = new Settings(null, args);
 		assertEquals(input, settings.getInput());
@@ -46,6 +47,7 @@ class SettingsTest {
 			assertEquals(verbosity, rootLogger.get().getLevel());
 		else
 			assertNotNull(rootLogger.get().getLevel());
+		assertEquals(Objects.requireNonNullElse(mode, Mode.ALL), settings.getMode());
 	}
 	
 	/** Checks if it works correctly when both of config and arguments are Passed. */

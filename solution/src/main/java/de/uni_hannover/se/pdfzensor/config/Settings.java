@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
-import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.colorToString;
 
 /**
  * The Settings class constitutes an abstraction and unification of the configuration file ({@link Config}) and the
@@ -45,6 +45,9 @@ public final class Settings {
 	/** The color with which to censor links. */
 	@NotNull
 	private final Color linkColor;
+	/** The mode to use for censoring. See {@link Mode} for more information. */
+	@NotNull
+	private final Mode mode;
 	/**
 	 * A set of regex-color-tuples to identify with what color to censor which text. Should at least contain the tuple
 	 * (".", {@link #DEFAULT_CENSOR_COLOR}).
@@ -67,8 +70,10 @@ public final class Settings {
 		
 		input = clArgs.getInput();
 		output = checkOutput(
-				ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
+				ObjectUtils
+						.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
+		mode = ObjectUtils.firstNonNull(clArgs.getMode(), Mode.ALL);
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
 		
 		//Dump to log
@@ -115,6 +120,13 @@ public final class Settings {
 	@Contract(pure = true)
 	public Color getLinkColor() {
 		return linkColor;
+	}
+	
+	/** Returns the censor mode which should be used when censoring PDF-files. */
+	@NotNull
+	@Contract(pure = true)
+	public Mode getMode() {
+		return mode;
 	}
 	
 	/** Returns the expressions as they were specified in the command-line arguments and config. */
