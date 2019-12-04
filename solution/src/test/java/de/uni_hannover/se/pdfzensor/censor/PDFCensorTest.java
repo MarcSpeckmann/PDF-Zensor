@@ -134,8 +134,7 @@ class PDFCensorTest implements PDFHandler {
 		Assertions.assertNotNull(getBoundingBoxes(properCensor));
 //		// Checks if the expected number of elements have been combined
 //		// (requires colors to be added because differently colored elements should not be combined)
-//		// TODO: enable test when Annotations / mark links blue are fixed / implemented.
-//		Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
+		Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
 		
 		properCensor.endPage(doc, page, pageNum);
 	}
@@ -167,9 +166,8 @@ class PDFCensorTest implements PDFHandler {
 		var newLast = listAfter.get(sizeAfter - 1);
 
 //		// Colors differ, expect element to be added instead of combined.
-//		// TODO: enable test when Annotations / mark links blue are fixed / implemented.
-//		if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
-//			Assertions.assertEquals(sizeBefore + 1, sizeAfter);
+		if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
+			Assertions.assertEquals(sizeBefore + 1, sizeAfter);
 		
 		var expBounds = elements[element];
 		if (sizeBefore == sizeAfter) // element was extended
