@@ -63,6 +63,10 @@ class PDFUtilsTest {
 	static {
 		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f), tpValue1);
 		TEXTPOSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f), tpValue2);
+		// TODO: tests for:
+		// null input
+		// empty position
+		// PDType3Font
 	}
 	
 	
@@ -95,7 +99,8 @@ class PDFUtilsTest {
 	}
 	
 	/**
-	 * Hash Map for 1: height,width and 2: position x, y
+	 * A Hash Map containing an input-rectangle from type PDRectangle and the corresponding expected output-rectangle
+	 * from type Rectangle2D
 	 */
 	private static final Map<Rectangle2D, PDRectangle> DIMENSIONS = new HashMap<>();
 	
