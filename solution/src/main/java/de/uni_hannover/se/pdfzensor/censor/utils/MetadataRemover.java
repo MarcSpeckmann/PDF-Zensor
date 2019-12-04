@@ -4,42 +4,49 @@ import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.logging.log4j.Level;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 /**
- * MetadataRemover is used to censor all the metadata in a {@link PDDocument}.
- * The dates (date of creation and date of modification) will be set to the time the PDFZensor was used on the document.
+ * MetadataRemover is used to censor all the metadata in a {@link PDDocument}. The dates (date of creation and date of
+ * modification) will be set to the time the PDFZensor was used on the document.
  */
 final class MetadataRemover {
-    /**
-     * Constructor is not supposed to be called!
-     */
-    private MetadataRemover(){
-        throw new UnsupportedOperationException("private MetadataRemover() called. This is not supported.");
-    }
-    /**
-     * Receives a {@link PDDocument} and censors all the metadata.
-     * @param document The PDDocument that will be censored. May not be null.
-     */
-    static void censorMetadata(@NotNull PDDocument document){
-        PDDocumentInformation docinfo = null;
-        try {
-            docinfo = document.getDocumentInformation();
-        }catch (Exception e){
-            Logging.getLogger().log(Level.ERROR, "Could not remove metadata - unable to retrieve document information");
-        }
-        if(docinfo != null){
-            docinfo.setAuthor("Censored Author");
-            docinfo.setCreator("Censored Creator");
-            docinfo.setTitle("Censored Title");
-            docinfo.setSubject("Censored Subject");
-            docinfo.setProducer("Censored Producer");
-            docinfo.setKeywords("Censored Keywords");
-            Calendar date = new GregorianCalendar();
-            docinfo.setCreationDate(date);
-            docinfo.setModificationDate(date);
-        }
-    }
+	
+	/**
+	 * MetadataRemover is a pure static utility-class. As such no instances of it should be created. Thus its
+	 * constructor may not be called and always throws an exception if it is tried.
+	 */
+	@Contract(value = " -> fail", pure = true)
+    private MetadataRemover() {
+		throw new UnsupportedOperationException("private MetadataRemover() called. This is not supported.");
+	}
+	
+	/**
+	 * Receives a {@link PDDocument} and censors all the metadata.
+	 *
+	 * @param document The PDDocument that will be censored. May not be null.
+	 */
+	static void censorMetadata(@NotNull PDDocument document) {
+		PDDocumentInformation docinfo = null;
+		try {
+			docinfo = document.getDocumentInformation();
+		} catch (Exception e) {
+			Logging.getLogger().log(Level.ERROR, "Could not remove metadata - unable to retrieve document information");
+		}
+		if (docinfo != null) {
+			docinfo.setAuthor("Censored Author");
+			docinfo.setCreator("Censored Creator");
+			docinfo.setTitle("Censored Title");
+			docinfo.setSubject("Censored Subject");
+			docinfo.setProducer("Censored Producer");
+			docinfo.setKeywords("Censored Keywords");
+			Calendar date = new GregorianCalendar();
+			docinfo.setCreationDate(date);
+			docinfo.setModificationDate(date);
+		}
+	}
 }
