@@ -6,11 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.platform.commons.util.StringUtils;
+import picocli.CommandLine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * CLHelpTest should contain all unit-tests related to {@link CLHelp}.
@@ -38,8 +39,12 @@ class CLHelpTest {
 		try (final var printStream = new PrintStream(outContent)) {
 			System.setOut(printStream);
 			boolean shouldPrint = help || version;
-			assertEquals(shouldPrint, CLHelp.printStandardHelpOptionsIfRequested(args));
-			assertEquals(shouldPrint, StringUtils.isNotBlank(outContent.toString()));
+			if (shouldPrint){
+				assertEquals(shouldPrint, CLHelp.printStandardHelpOptionsIfRequested(args));
+				assertEquals(shouldPrint, StringUtils.isNotBlank(outContent.toString()));
+			}else {
+				assertThrows(CommandLine.MissingParameterException.class, () -> CLHelp.printStandardHelpOptionsIfRequested(args));
+			}
 		} finally {
 			System.setOut(originalOut);
 		}

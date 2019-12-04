@@ -32,20 +32,12 @@ public final class CLHelp {
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stdout here instead of logging
 	public static boolean printStandardHelpOptionsIfRequested(@NotNull String... args) {
 		final var cmd = new CommandLine(CLArgs.class);
-		final var parsedHelp = new CommandLine(HelpCommand.class).parseArgs(Validate.noNullElements(args));
+		final var parsedHelp = new CommandLine(CLArgs.class).parseArgs(Validate.noNullElements(args));
 		if (parsedHelp.isUsageHelpRequested())
 			cmd.usage(System.out);
 		else if (parsedHelp.isVersionHelpRequested())
 			cmd.printVersionHelp(System.out);
 		else return false;
 		return true;
-	}
-	
-	/**
-	 * The HelpCommand class should not have any implementation. Its sole purpose is to be used by {@link CLHelp} to
-	 * check if usage-help or version-help are requested.
-	 */
-	@CommandLine.Command(separator = " ", mixinStandardHelpOptions = true)
-	private static final class HelpCommand {
 	}
 }
