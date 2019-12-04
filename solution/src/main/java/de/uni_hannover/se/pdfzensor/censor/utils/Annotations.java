@@ -24,6 +24,7 @@ import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextM
  * This Annotations class caches links and highlighted annotations. It also allows to test annotations for being links
  * or highlights.
  */
+@SuppressWarnings("WeakerAccess") // this class is member of the public API
 public final class Annotations {
 	private static final Logger LOGGER = Logging.getLogger();
 	
@@ -155,7 +156,7 @@ public final class Annotations {
 	 * @return true if the given rect entirely fits into at least one rect of {@link #links} otherwise false
 	 */
 	public boolean isLinked(@NotNull Rectangle2D rect) {
-		return isLinked(rect, MarkCriterion.CONTAIN);
+		return isLinked(rect, MarkCriterion.INTERSECT);
 	}
 	
 	/**

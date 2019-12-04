@@ -12,14 +12,13 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 /**
  * AnnotationsTest should contain all unit-tests related to {@link Annotations}.
  */
-public class AnnotationsTest {
+class AnnotationsTest {
 	
 	/**
 	 * tests for {@link Annotations} constructor
@@ -32,6 +31,7 @@ public class AnnotationsTest {
 	/**
 	 * test for {@link Annotations#cachePage}
 	 */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void testCachePage() {
 		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().cachePage(null));
@@ -66,6 +66,7 @@ public class AnnotationsTest {
 	/**
 	 * test for {@link Annotations#isMarked(Rectangle2D, MarkCriterion)}
 	 */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void testIsMarked() {
 		// both arguments are null
@@ -91,6 +92,7 @@ public class AnnotationsTest {
 	/**
 	 * test for {@link Annotations#isMarked(Rectangle2D)}
 	 */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void testIsMarkedOnlyContain() {
 		// argument rect is null
@@ -137,6 +139,7 @@ public class AnnotationsTest {
 	/**
 	 * test for {@link Annotations#isLinked(Rectangle2D, MarkCriterion)}
 	 */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void testIsLinked() {
 		// both arguments are null
@@ -161,8 +164,9 @@ public class AnnotationsTest {
 	/**
 	 * test for {@link Annotations#isLinked(Rectangle2D)}
 	 */
+	@SuppressWarnings("ConstantConditions")
 	@Test
-	void testIsLinkedOnlyContain() {
+	void testIsLinkedOnlyIntersect() {
 		// argument rect is null
 		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null));
 		
@@ -174,6 +178,6 @@ public class AnnotationsTest {
 		// given rectangle fully fits into the rectangle of the link
 		Assertions.assertTrue(anno.isLinked(new Rectangle(0, 0, 50, 50)));
 		// given rectangle is wider than the rectangle of the link so does not fully fit into it
-		Assertions.assertFalse(anno.isLinked(new Rectangle(0, 0, 200, 50)));
+		Assertions.assertTrue(anno.isLinked(new Rectangle(0, 0, 200, 50)));
 	}
 }
