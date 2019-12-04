@@ -149,19 +149,20 @@ public final class PDFCensor implements PDFHandler {
 	private Optional<ImmutablePair<Rectangle2D, Color>> getTextPositionInfo(@NotNull TextPosition pos) {
 		var result = Optional.<ImmutablePair<Rectangle2D, Color>>empty();
 		try {
-			var transformed = PDFUtils.transformTextPosition(pos);
-			
-			var color = Color.DARK_GRAY;
-			
-			if (annotations.isLinked(transformed))
-				color = Color.blue;
-			
 			var font = pos.getFont();
 			var s = new StringBuilder();
 			for (var i : pos.getCharacterCodes())
 				s.append(font.toUnicode(i));
-			if (StringUtils.isNotBlank(s))
+			
+			if (StringUtils.isNotBlank(s)) {
+				var transformed = PDFUtils.transformTextPosition(pos);
+				var color = Color.DARK_GRAY;
+				
+				if (annotations.isLinked(transformed))
+					color = Color.BLUE;
+				
 				result = Optional.of(new ImmutablePair<>(transformed, color));
+			}
 		} catch (IOException e) {
 			LOGGER.log(Level.ERROR, "There was an error handling the font.", e);
 		}
