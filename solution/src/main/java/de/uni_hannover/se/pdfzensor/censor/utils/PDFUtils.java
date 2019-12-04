@@ -35,10 +35,10 @@ public final class PDFUtils {
 	 * @param rect A rectangle from type PDRectangle with height, width and position
 	 * @return A rectangle from type Rectangle2D with the properties of the input rectangle
 	 */
-	//TODO: the provided rect technically is shifted. It remains to be seen if we should negate that to work best with transformTextPosition.
 	@NotNull
 	@Contract("_ -> new")
 	static Rectangle2D pdRectToRect2D(@NotNull PDRectangle rect) {
+		Objects.requireNonNull(rect);
 		return new Rectangle2D.Float(rect.getLowerLeftX(), rect.getLowerLeftY(), rect.getWidth(), rect.getHeight());
 	}
 	
