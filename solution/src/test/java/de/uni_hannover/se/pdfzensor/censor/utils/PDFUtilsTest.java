@@ -77,6 +77,9 @@ class PDFUtilsTest {
 	@ParameterizedTest(name = "Run {index}: TextPosition: {0}")
 	@MethodSource("textPositionProvider")
 	void transformTextPositionTest(@NotNull TextPositionValue input, @NotNull Rectangle2D expected) {
+		// pageRotation = 0 is a standard value
+		// pageWidth = 595,276f and pageHeight=841,89f are height and width of a DIN-A4-PDF, but is irrelevant for this
+		// task
 		TextPosition tp = new TextPosition(0, 595.276f, 841.89f, new Matrix(input.fontSize, 0f, 0f, input.fontSize, input.endX, input.endY), input.endX, input.endY, input.maxHeight, input.individualWidth, input.spaceWidth, input.unicode, input.charCodes, PDType1Font.TIMES_ROMAN, input.fontSize, input.fontSizeInPt);
 		try {
 			assertEquals(Math.round(expected.getHeight()), Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getHeight()));
