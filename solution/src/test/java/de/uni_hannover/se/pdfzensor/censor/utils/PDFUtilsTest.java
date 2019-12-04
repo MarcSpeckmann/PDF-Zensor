@@ -150,7 +150,6 @@ class PDFUtilsTest {
 		assertThrows(IllegalArgumentException.class, () -> PDFUtils.pdRectToRect2D(null)); // ignore SonarLint because we wan't that bad input
 		assertThrows(IllegalArgumentException.class, () -> PDFUtils.transformTextPosition(null)); // ignore SonarLint because we wan't that bad input
 		
-		Rectangle2D rect = new Rectangle2D.Float(0f, 0f, 0f, 0f);
 		TextPosition tp = new TextPosition(0, 0f, 0f, new Matrix(0f, 0f, 0f, 0f, 0f, 0f), 0f, 0f, 0f, 0f, 0f, "", new int[]{}, null, 0f, 0);
 		assertThrows(NullPointerException.class, () -> PDFUtils.transformTextPosition(tp));
 	}
