@@ -145,7 +145,7 @@ public final class Annotations {
 	 * @return true if the given rect entirely fits into at least one rect of {@link #links} otherwise false
 	 */
 	public boolean isLinked(@NotNull Rectangle2D rect) {
-		return isLinked(rect, MarkCriterion.CONTAIN);
+		return isLinked(rect, MarkCriterion.INTERSECT);
 	}
 	
 	/**
