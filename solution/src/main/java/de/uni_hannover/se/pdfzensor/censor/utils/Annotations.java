@@ -85,13 +85,10 @@ public final class Annotations {
 		Objects.requireNonNull(page);
 		try {
 			LOGGER.log(Level.DEBUG, "Starting to cache the Links of page: {}", page);
-			links = page.getAnnotations(PDAnnotationLink.class::isInstance).stream()
-						.map(Annotations::getAnnotationRect)
-						.collect(Collectors.toUnmodifiableList());
+			links = page.getAnnotations(PDAnnotationLink.class::isInstance).stream().map(Annotations::getAnnotationRect).collect(Collectors.toUnmodifiableList());
 		} catch (IOException e) {
 			links = List.of();
-			LOGGER.log(Level.ERROR,
-					   "Failed to cache the Links of page: {}", page, e);
+			LOGGER.log(Level.ERROR, "Failed to cache the Links of page: {}", page, e);
 		}
 	}
 	
@@ -105,13 +102,10 @@ public final class Annotations {
 		Objects.requireNonNull(page);
 		try {
 			LOGGER.log(Level.DEBUG, "Starting to cache the Links of page: {}", page);
-			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream()
-							 .map(Annotations::getAnnotationRect)
-							 .collect(Collectors.toUnmodifiableList());
+			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream().map(Annotations::getAnnotationRect).collect(Collectors.toUnmodifiableList());
 		} catch (IOException e) {
 			highlights = List.of();
-			LOGGER.log(Level.ERROR,
-					   "Failed to cache the highlighted annotations of page: {}", page, e);
+			LOGGER.log(Level.ERROR, "Failed to cache the highlighted annotations of page: {}", page, e);
 		}
 	}
 	
@@ -175,8 +169,7 @@ public final class Annotations {
 	 */
 	@Contract("null -> false")
 	private static boolean isHighlightAnnotation(PDAnnotation annotation) {
-		if (!(annotation instanceof PDAnnotationTextMarkup))
-			return false;
+		if (!(annotation instanceof PDAnnotationTextMarkup)) return false;
 		PDAnnotationTextMarkup tm = (PDAnnotationTextMarkup) annotation;
 		String subtype = tm.getSubtype();
 		return SUB_TYPE_HIGHLIGHT.equals(subtype);
