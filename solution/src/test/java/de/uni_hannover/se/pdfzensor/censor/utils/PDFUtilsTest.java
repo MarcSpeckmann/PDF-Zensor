@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
+import de.uni_hannover.se.pdfzensor.TestUtility;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -12,12 +13,12 @@ import java.util.stream.Stream;
 import org.apache.pdfbox.util.Matrix;
 import org.jetbrains.annotations.NotNull;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 /**
  * Tests for {@link PDFUtils#transformTextPosition(TextPosition)} and {@link PDFUtils#pdRectToRect2D(PDRectangle)}
@@ -63,10 +64,7 @@ class PDFUtilsTest {
 	static {
 		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f), tpValue1);
 		TEXTPOSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f), tpValue2);
-		// TODO: tests for:
-		// null input
-		// empty position
-		// PDType3Font
+		// TODO: tests for: empty position and PDType3Font
 	}
 	
 	
@@ -127,5 +125,16 @@ class PDFUtilsTest {
 	@MethodSource("dimensionsProvider")
 	void pdRectToRect2DTest(@NotNull PDRectangle input, @NotNull Rectangle2D expected) {
 		assertEquals(expected, PDFUtils.pdRectToRect2D(input));
+	}
+	
+	/**
+	 * This test function tests the constructor and some null input tests for the functions
+	 * {@link PDFUtils#transformTextPosition(TextPosition)} and {@link PDFUtils#pdRectToRect2D(PDRectangle)}
+	 */
+	@Test
+	void nullInputTest() {
+		TestUtility.assertIsUtilityClass(PDFUtils.class);
+		assertThrows(IllegalArgumentException.class, () -> PDFUtils.pdRectToRect2D(null)); // ignore SonarLint because we wan't that bad input
+		assertThrows(IllegalArgumentException.class, () -> PDFUtils.transformTextPosition(null)); // ignore SonarLint because we wan't that bad input
 	}
 }
