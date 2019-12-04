@@ -102,7 +102,7 @@ public final class Annotations {
 	private void cacheHighlights(@NotNull PDPage page) {
 		Objects.requireNonNull(page);
 		try {
-			LOGGER.log(Level.DEBUG, "Starting to cache the Links of page: {}", page);
+			LOGGER.log(Level.DEBUG, "Starting to cache the highlighted annotations of page: {}", page);
 			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream()
 							 .map(Annotations::getAnnotationRect).collect(Collectors.toUnmodifiableList());
 		} catch (IOException e) {
