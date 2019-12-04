@@ -28,8 +28,7 @@ public class CLErrorMessageHandler implements CommandLine.IParameterExceptionHan
 		writer.println(ex.getMessage());
 		printSuggestions(ex, writer);
 		
-		writer.print(cmd.getHelp()
-						.fullSynopsis());
+		writer.print(cmd.getHelp().fullSynopsis());
 		
 		var spec = cmd.getCommandSpec();
 		writer.printf("%nTry '%s --help' for more information.%n", spec.qualifiedName());

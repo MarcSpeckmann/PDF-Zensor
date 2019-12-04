@@ -60,8 +60,9 @@ public final class PDFUtils {
 		AffineTransform at = pos.getTextMatrix().createAffineTransform();
 		if (font instanceof PDType3Font)    // specific type of font
 			at.concatenate(font.getFontMatrix().createAffineTransform());
-		else at.scale(1 / 1000f, 1 / 1000f);
-		Rectangle2D r = new Rectangle2D.Float(0, 0, totalWidth, bb.getHeight() + bb.getLowerLeftY());
+		else
+			at.scale(.001, .001);
+		Rectangle2D r = new Rectangle2D.Double(0, 0, totalWidth, bb.getHeight() + bb.getLowerLeftY());
 		Shape s = at.createTransformedShape(r);
 		return s.getBounds2D();
 	}
