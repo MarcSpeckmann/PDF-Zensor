@@ -25,10 +25,13 @@ final class Config {
 	/** The logging verbosity. Any log-message with a less specific level will not be logged. */
 	@Nullable
 	private final Level verbose;
+	/** The censor mode. See {@link Mode} for more information. */
+	@Nullable
+	private final Mode mode;
 	
 	/** The default constructor creates an empty ConfigurationParser. That is: all values are set to null. */
 	private Config() {
-		this(null, null);
+		this(null, null, null);
 	}
 	
 	/**
@@ -36,13 +39,17 @@ final class Config {
 	 *
 	 * @param output  the file where the censored file should be stored. Null if not specified.
 	 * @param verbose the level of logging verbosity (encoded as a String or int). Null if not specified.
+	 * @param mode    the mode to use when censoring as a string. Null if not specified.
 	 * @see #objectToLevel(Object)
+	 * @see Mode#stringToMode(String)
 	 */
 	@JsonCreator()
 	private Config(@Nullable @JsonProperty("output") final File output,
-				   @Nullable @JsonProperty("verbose") final Object verbose) {
+				   @Nullable @JsonProperty("verbose") final Object verbose,
+				   @Nullable @JsonProperty("censor") final String mode) {
 		this.output = output;
 		this.verbose = objectToLevel(verbose);
+		this.mode = Mode.stringToMode(mode);
 	}
 	
 	/**
@@ -108,5 +115,16 @@ final class Config {
 	@Nullable
 	Level getVerbosity() {
 		return this.verbose;
+	}
+	
+	/**
+	 * Returns the censor mode as specified in the loaded config.
+	 *
+	 * @return The censor mode as specified in the loaded config. Or null if none was specified.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	Mode getMode() {
+		return this.mode;
 	}
 }
