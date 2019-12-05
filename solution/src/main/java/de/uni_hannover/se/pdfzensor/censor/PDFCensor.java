@@ -5,6 +5,7 @@ import de.uni_hannover.se.pdfzensor.censor.utils.Annotations;
 import de.uni_hannover.se.pdfzensor.censor.utils.MetadataRemover;
 import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import de.uni_hannover.se.pdfzensor.config.Settings;
+import de.uni_hannover.se.pdfzensor.images.ImageReplacer;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -41,9 +42,14 @@ public final class PDFCensor implements PDFHandler {
 	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
 	
+	/** The list of picture bounding boxes will be censored. */
+	private List<Rectangle2D> pictureBoundingBoxes;
+	
 	private Predicate<Rectangle2D> removePredicate;
 	
 	private Annotations annotations = new Annotations();
+	
+	private ImageReplacer imageReplacer = new ImageReplacer();
 	
 	/**
 	 * @param settings Settings that contain information about the mode and expressions
@@ -61,6 +67,7 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void beginDocument(PDDocument doc) {
 		boundingBoxes = new ArrayList<>();
+		pictureBoundingBoxes = new ArrayList<>();
 	}
 	
 	/**
@@ -73,7 +80,13 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void beginPage(PDDocument doc, PDPage page, int pageNum) {
 		Objects.requireNonNull(boundingBoxes).clear();
+		Objects.requireNonNull(pictureBoundingBoxes).clear();
 		annotations.cachePage(page);
+		try {
+			this.pictureBoundingBoxes = imageReplacer.replaceImages(page);
+		} catch (IOException e) {
+			LOGGER.log(Level.ERROR, e);
+		}
 	}
 	
 	/**
@@ -86,6 +99,7 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void endPage(PDDocument doc, PDPage page, int pageNum) {
 		try {
+			drawPictureCensorBox(doc, page);
 			drawCensorBars(doc, page);
 			page.getAnnotations().clear();
 		} catch (IOException e) {
@@ -190,6 +204,35 @@ public final class PDFCensor implements PDFHandler {
 				pageContentStream.addRect((float) r.getX(), (float) r.getY(), (float) r.getWidth(),
 										  (float) r.getHeight());
 				pageContentStream.fill();
+			}
+		}
+	}
+	
+	/**
+	 * Draws the censor bars stored in {@link #pictureBoundingBoxes} in the given
+	 * <code>document</code> on the given <code>page</code>.
+	 *
+	 * @param doc  the document which is being worked on
+	 * @param page the PDPage (current pdf page) that is being worked on
+	 * @throws IOException If there was an I/O error writing the contents of the page.
+	 */
+	private void drawPictureCensorBox(PDDocument doc, PDPage page) throws IOException {
+		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, true)) {
+			pageContentStream.saveGraphicsState();
+		}
+		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true)) {
+			pageContentStream.restoreGraphicsState();
+			pageContentStream.setStrokingColor(Color.DARK_GRAY);
+			pageContentStream.setLineWidth(2);
+			for (var rect : pictureBoundingBoxes) {
+				pageContentStream.addRect((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(),
+										  (float) rect.getWidth());
+				pageContentStream.moveTo((float) rect.getX(), (float) rect.getY());
+				pageContentStream.lineTo((float) rect.getX() + (float) rect.getWidth(),
+										 (float) rect.getY() + (float) rect.getHeight());
+				pageContentStream.moveTo((float) rect.getX(), (float) rect.getY() + (float) rect.getHeight());
+				pageContentStream.lineTo((float) rect.getX() + (float) rect.getWidth(), (float) rect.getY());
+				pageContentStream.stroke();
 			}
 		}
 	}
