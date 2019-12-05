@@ -1,13 +1,16 @@
 package de.uni_hannover.se.pdfzensor.config;
 
+import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
@@ -20,32 +23,46 @@ class ConfigTest {
 		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(new File("/no/path")));
 	}
 	
+	/**
+	 * Tests whether an error while parsing throws an exception.
+	 *
+	 * @param path The path to an invalid JSON-file.
+	 */
 	@ParameterizedTest
-	@ValueSource(strings = {"invalid/invalid_json.json", "invalid/empty_config.json"})
+	@ValueSource(strings = {"invalid/invalid_json.json", "invalid/empty_config.json", "invalid/defaultColorsAllInvalid.json", "invalid/defaultColorsSomeInvalid.json"})
 	void testInvalidJson(String path) {
 		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(getResource(CONFIG_PATH + path)));
 	}
 	
 	/**
-	 * Tests if the values given in the configuration file are parsed correctly.
+	 * Tests whether or not parsing the given configuration file results in the expected settings.
 	 *
+	 * @param configFile The config file which will be used in this test.
+	 * @param output     The expected output file.
+	 * @param verbosity  The expected logger verbosity.
+	 * @param defColors  The default colors to assign to color-less expressions.
 	 * @throws IOException If the configuration file couldn't be found.
 	 */
-	@Test
-	void testValidConfigurations() throws IOException {
-		// Configuration file with verbosity specified as a string ("DEBUG") and output specified as "censoredFile.pdf"
-		var file = getResource(CONFIG_PATH + "testVerbosityAsStringValidConfig.json");
-		assertSame(Level.DEBUG, Config.fromFile(file).getVerbosity());
-		assertEquals("censoredFile.pdf", Objects.requireNonNull(Config.fromFile(file).getOutput()).getName());
+	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, defColors: {3}")
+	@ArgumentsSource(ConfigProvider.class)
+	void testValidConfigurations(@Nullable File configFile, @Nullable File output, @Nullable Level verbosity,
+								 @Nullable Color[] defColors) throws IOException {
+		var config = Config.fromFile(configFile);
+		if (output != null)
+			assertEquals(output, config.getOutput());
+		else
+			assertNull(config.getOutput());
+		assertEquals(verbosity, config.getVerbosity());
 		
-		// Configuration file with verbosity specified as an integer (5) and output specified as "censoredFile.pdf"
-		file = getResource(CONFIG_PATH + "testVerbosityAsIntegerValidConfig.json");
-		assertSame(Level.DEBUG, Config.fromFile(file).getVerbosity());
-		assertEquals("censoredFile.pdf", Objects.requireNonNull(Config.fromFile(file).getOutput()).getName());
-		
-		// null as file to retrieve the default config (everything set to null)
-		assertSame(null, Config.fromFile(null).getVerbosity());
-		assertSame(null, Config.fromFile(null).getOutput());
+		var actualDefColors = config.getDefaultColors();
+		if (defColors != null) {
+			assertNotNull(actualDefColors);
+			assertEquals(defColors.length, actualDefColors.length);
+			for (var i = 0; i < defColors.length; i++)
+				assertEquals(defColors[i], actualDefColors[i]);
+		} else {
+			assertNull(actualDefColors);
+		}
 	}
 	
 	/**

@@ -6,14 +6,18 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.uni_hannover.se.pdfzensor.Logging;
+import de.uni_hannover.se.pdfzensor.utils.Utils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
@@ -25,24 +29,33 @@ final class Config {
 	/** The logging verbosity. Any log-message with a less specific level will not be logged. */
 	@Nullable
 	private final Level verbose;
+	/**
+	 * A list of default colors which will be used to assign a color to regular expressions which were not given a color
+	 * by the user.
+	 */
+	@Nullable
+	private final Color[] defaultColors;
 	
 	/** The default constructor creates an empty ConfigurationParser. That is: all values are set to null. */
 	private Config() {
-		this(null, null);
+		this(null, null, null);
 	}
 	
 	/**
 	 * Initializes a new in-memory configuration from the provided values.
 	 *
-	 * @param output  the file where the censored file should be stored. Null if not specified.
-	 * @param verbose the level of logging verbosity (encoded as a String or int). Null if not specified.
+	 * @param output        the file where the censored file should be stored. Null if not specified.
+	 * @param verbose       the level of logging verbosity (encoded as a String or int). Null if not specified.
+	 * @param defaultColors a string array containing hexadecimal color codes. Null if not specified.
 	 * @see #objectToLevel(Object)
 	 */
 	@JsonCreator()
 	private Config(@Nullable @JsonProperty("output") final File output,
-				   @Nullable @JsonProperty("verbose") final Object verbose) {
+				   @Nullable @JsonProperty("verbose") final Object verbose,
+				   @Nullable @JsonProperty("defaultColors") final String[] defaultColors) {
 		this.output = output;
 		this.verbose = objectToLevel(verbose);
+		this.defaultColors = hexArrayToColorArray(defaultColors);
 	}
 	
 	/**
@@ -88,6 +101,23 @@ final class Config {
 	}
 	
 	/**
+	 * Converts an array containing hexadecimal representation of colors into a color array or null if the array was
+	 * empty or not present.
+	 *
+	 * @param hex The String array containing the colors in hexadecimal representation.
+	 * @return A color array representing the given hexadecimal color codes or null.
+	 */
+	@Nullable
+	@Contract("null -> null")
+	private Color[] hexArrayToColorArray(@Nullable final String[] hex) {
+		if (hex == null || hex.length == 0)
+			return null;
+		// filter should never be necessary
+		var stream = Arrays.stream(hex).map(Utils::getColorOrNull).filter(Objects::nonNull);
+		return stream.toArray(Color[]::new);
+	}
+	
+	/**
 	 * Returns the output-path as it was specified in the loaded config.
 	 *
 	 * @return The output-path as it was specified in the loaded config. Or null if none was specified.
@@ -108,5 +138,16 @@ final class Config {
 	@Nullable
 	Level getVerbosity() {
 		return this.verbose;
+	}
+	
+	/**
+	 * Returns the default colors as they were specified (in hexadecimal representation) in the loaded config.
+	 *
+	 * @return A color array containing the default colors as specified in the loaded config.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	Color[] getDefaultColors() {
+		return this.defaultColors;
 	}
 }
