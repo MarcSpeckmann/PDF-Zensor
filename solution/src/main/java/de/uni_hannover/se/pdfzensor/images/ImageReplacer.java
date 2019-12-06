@@ -23,28 +23,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
+
 /**
- * TODO: add JavaDoc
+ * This class is responsible for replacing pictures with a box. For finding picture inside the PDF {@link ImageReplacer}
+ * inherits from {@link PDFStreamEngine} and overrides the {@link PDFStreamEngine#processOperator(Operator, List)}
  */
 public class ImageReplacer extends PDFStreamEngine {
 	
-	/**
-	 * TODO: add JAvaDoc
-	 */
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
 	
 	/**
-	 * TODO: add JavaDoc
+	 * A {@link List} should contain all bounding boxes of the found pictures on the actual page
 	 */
 	final List<Rectangle2D> rects = new ArrayList<>();
 	
 	/**
-	 *
+	 * A {@link PDPageContentStream} contains the ContentStream of the actual page
 	 */
 	private PDPageContentStream pageContentStream;
 	
 	/**
-	 * TODO: add JavaDoc
+	 * The Constructor of {@link ImageReplacer}, which is responsible for preparing the {@link PDFStreamEngine}.
 	 */
 	public ImageReplacer() {
 		// preparing PDFStreamEngine
@@ -57,11 +58,12 @@ public class ImageReplacer extends PDFStreamEngine {
 	}
 	
 	/**
-	 * TODO: add JavaDoc
+	 * This method is provided to the outside of {@link ImageReplacer}.
 	 *
-	 * @param page
-	 * @return
-	 * @throws IOException
+	 * @param doc  the {@link PDDocument} which is being worked on
+	 * @param page the {@link PDPage} (current pdf page) that is being worked on
+	 * @return an Array with all bounding boxes of the pictures on the actual page as {@link Rectangle2D }
+	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
 	@NotNull
 	public List<Rectangle2D> replaceImages(PDDocument doc, PDPage page) throws IOException {
@@ -83,7 +85,8 @@ public class ImageReplacer extends PDFStreamEngine {
 	}
 	
 	/**
-	 * TODO: add JavaDoc
+	 * This method overwrites the {@link PDFStreamEngine#processOperator(Operator, List)}. This method checks if the
+	 * actual found operator is a {@link DrawObject} operator and adds it to the {@link #rects}.
 	 *
 	 * @param operator
 	 * @param operands
@@ -91,8 +94,7 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
-		String operation = operator.getName();
-		if ("Do".equals(operation)) {
+		if (DRAW_OBJECT.equals(operator.getName())) {
 			COSName objectName = (COSName) operands.get(0);
 			// get the PDF object
 			PDXObject xobject = getResources().getXObject(objectName);
@@ -109,7 +111,6 @@ public class ImageReplacer extends PDFStreamEngine {
 												ctmNew.getScalingFactorX(),
 												ctmNew.getScalingFactorY()));
 				//((PDImageXObject) xobject).setBitsPerComponent(0);
-				
 			} else if (xobject instanceof PDFormXObject) {
 				PDFormXObject form = (PDFormXObject) xobject;
 				showForm(form);
