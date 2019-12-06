@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigTest {
 	
+	/** Tests if trying to parse a non existing file throws the expected exception. */
 	@Test
 	void testErroneousConfigPath() {
 		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(new File("/no/path")));
@@ -35,24 +36,26 @@ class ConfigTest {
 	}
 	
 	/**
-	 * Tests whether or not parsing the given configuration file results in the expected settings.
+	 * Tests whether or not parsing the given configuration file results in the expected config.
 	 *
 	 * @param configFile The config file which will be used in this test.
 	 * @param output     The expected output file.
 	 * @param verbosity  The expected logger verbosity.
+	 * @param mode       The expected censor mode.
 	 * @param defColors  The default colors to assign to color-less expressions.
 	 * @throws IOException If the configuration file couldn't be found.
 	 */
-	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, defColors: {3}")
+	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, defColors: {4}")
 	@ArgumentsSource(ConfigProvider.class)
 	void testValidConfigurations(@Nullable File configFile, @Nullable File output, @Nullable Level verbosity,
-								 @Nullable Color[] defColors) throws IOException {
+								 @Nullable Mode mode, @Nullable Color[] defColors) throws IOException {
 		var config = Config.fromFile(configFile);
-		if (output != null)
-			assertEquals(output, config.getOutput());
-		else
-			assertNull(config.getOutput());
+		
+		assertEquals(output, config.getOutput());
+		
 		assertEquals(verbosity, config.getVerbosity());
+		
+		assertEquals(mode, config.getMode());
 		
 		var actualDefColors = config.getDefaultColors();
 		if (defColors != null) {
@@ -63,25 +66,5 @@ class ConfigTest {
 		} else {
 			assertNull(actualDefColors);
 		}
-	}
-	
-	/**
-	 * Tests if theoretically invalid values for verbosity are either clamped correctly or discarded.
-	 *
-	 * @throws IOException If the configuration file couldn't be found.
-	 */
-	@Test
-	void testInvalidValueFallbacks() throws IOException {
-		// Verbosity level as integer higher than the highest possible value (> 7)
-		var file = getResource(CONFIG_PATH + "valid/high_verbosity.json");
-		assertSame(Level.ALL, Config.fromFile(file).getVerbosity());
-		
-		// Verbosity level as integer below zero (negative value)
-		file = getResource(CONFIG_PATH + "valid/negative_verbosity.json");
-		assertSame(Level.OFF, Config.fromFile(file).getVerbosity());
-		
-		// False verbosity string in configurations json file
-		file = getResource(CONFIG_PATH + "valid/unknown_verbosity.json");
-		assertNull(Config.fromFile(file).getVerbosity());
 	}
 }

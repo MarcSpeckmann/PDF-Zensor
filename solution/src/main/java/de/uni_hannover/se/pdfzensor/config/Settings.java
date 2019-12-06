@@ -73,7 +73,7 @@ public final class Settings {
 				ObjectUtils
 						.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
-		mode = ObjectUtils.firstNonNull(clArgs.getMode(), Mode.ALL);
+		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
 		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
 		
 		//Dump to log

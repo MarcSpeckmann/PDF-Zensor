@@ -2,8 +2,6 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.utils.Utils;
@@ -29,6 +27,9 @@ final class Config {
 	/** The logging verbosity. Any log-message with a less specific level will not be logged. */
 	@Nullable
 	private final Level verbose;
+	/** The censor mode. See {@link Mode} for more information. */
+	@Nullable
+	private final Mode mode;
 	/**
 	 * A list of default colors which will be used to assign a color to regular expressions which were not given a color
 	 * by the user.
@@ -38,7 +39,7 @@ final class Config {
 	
 	/** The default constructor creates an empty ConfigurationParser. That is: all values are set to null. */
 	private Config() {
-		this(null, null, null);
+		this(null, null, null, null);
 	}
 	
 	/**
@@ -47,14 +48,18 @@ final class Config {
 	 * @param output        the file where the censored file should be stored. Null if not specified.
 	 * @param verbose       the level of logging verbosity (encoded as a String or int). Null if not specified.
 	 * @param defaultColors a string array containing hexadecimal color codes. Null if not specified.
+	 * @param mode          the mode to use when censoring as a string. Null if not specified.
 	 * @see #objectToLevel(Object)
+	 * @see Mode#stringToMode(String)
 	 */
 	@JsonCreator()
 	private Config(@Nullable @JsonProperty("output") final File output,
 				   @Nullable @JsonProperty("verbose") final Object verbose,
+				   @Nullable @JsonProperty("censor") final String mode,
 				   @Nullable @JsonProperty("defaultColors") final String[] defaultColors) {
 		this.output = output;
 		this.verbose = objectToLevel(verbose);
+		this.mode = Mode.stringToMode(mode);
 		this.defaultColors = hexArrayToColorArray(defaultColors);
 	}
 	
@@ -64,19 +69,20 @@ final class Config {
 	 * @param config The configuration file that should be parsed. If null the default configuration (everything null)
 	 *               will be returned.
 	 * @return An object which contains information about the parsed configuration file.
-	 * @throws IOException              If the configuration file couldn't be found.
-	 * @throws IllegalArgumentException If the passed config is not a file or does not contain a valid JSON string.
+	 * @throws IllegalArgumentException If the passed config is not a file or does not contain a valid JSON string (for
+	 *                                  this software).
 	 */
 	@Contract("_ -> new")
 	@NotNull
-	static Config fromFile(@Nullable final File config) throws IOException {
+	static Config fromFile(@Nullable final File config) {
 		if (config == null)
 			return new Config();
-		Validate.isTrue(config.isFile(), "The configuration file is not a valid JSON-file.");
+		Validate.isTrue(config.isFile(), "The given configuration file does not exist.");
 		try {
 			return new ObjectMapper().readValue(config, Config.class);
-		} catch (@NotNull JsonParseException | JsonMappingException e) {
-			throw new IllegalArgumentException("The configuration file does not contain a valid JSON-string.");
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+					"The configuration file could not be parsed because it is not a JSON string valid for this software.");
 		}
 	}
 	
@@ -138,6 +144,17 @@ final class Config {
 	@Nullable
 	Level getVerbosity() {
 		return this.verbose;
+	}
+	
+	/**
+	 * Returns the censor mode as specified in the loaded config.
+	 *
+	 * @return The censor mode as specified in the loaded config. Or null if none was specified.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	Mode getMode() {
+		return this.mode;
 	}
 	
 	/**
