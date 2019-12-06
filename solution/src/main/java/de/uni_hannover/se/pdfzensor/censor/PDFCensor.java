@@ -52,9 +52,11 @@ public final class PDFCensor implements PDFHandler {
 	public PDFCensor(@NotNull Settings settings) {
 		Objects.requireNonNull(settings);
 		this.removePredicate = rect -> true;
-		
-		/*to censor everything but segments marked beforehand with a different software */
-		if (Mode.UNMARKED.equals(settings.getMode())) {
+		// to censor only segments marked beforehand with a different software
+		if (Mode.MARKED.equals(settings.getMode()))
+			removePredicate = removePredicate.and(annotations::isMarked);
+		// to censor everything but segments marked beforehand with a different software
+		else if (Mode.UNMARKED.equals(settings.getMode())) {
 			removePredicate = removePredicate.and(Predicate.not(annotations::isMarked));
 		}
 	}
