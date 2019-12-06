@@ -4,6 +4,7 @@ import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.censor.utils.Annotations;
 import de.uni_hannover.se.pdfzensor.censor.utils.MetadataRemover;
 import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
+import de.uni_hannover.se.pdfzensor.config.Mode;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +52,11 @@ public final class PDFCensor implements PDFHandler {
 	public PDFCensor(@NotNull Settings settings) {
 		Objects.requireNonNull(settings);
 		this.removePredicate = rect -> true;
+		
+		/*to censor everything but segments marked beforehand with a different software */
+		if (Mode.UNMARKED.equals(settings.getMode())) {
+			removePredicate = removePredicate.and(Predicate.not(annotations::isMarked));
+		}
 	}
 	
 	/**
