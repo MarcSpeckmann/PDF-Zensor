@@ -79,7 +79,7 @@ class SettingsTest {
 	 */
 	@ParameterizedTest(name = "Run {index}: config: {0}, args: {1} => in: {2}, out: {3}, verbosity: {4}, mode: {5}, expressions: {6}, defColors: {7}")
 	@ArgumentsSource(SettingsProvider.class)
-	void testValidConfigurations(@Nullable String configName, @NotNull final String[] args, @NotNull File input,
+	void testSettingsValidConfig(@Nullable String configName, @NotNull final String[] args, @NotNull File input,
 								 @Nullable File output, @Nullable Level verbosity,
 								 @Nullable Mode mode,
 								 @NotNull ArrayList<ImmutablePair<String, String>> expressions,

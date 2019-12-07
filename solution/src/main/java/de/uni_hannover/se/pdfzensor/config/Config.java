@@ -30,6 +30,9 @@ final class Config {
 	/** The censor mode. See {@link Mode} for more information. */
 	@Nullable
 	private final Mode mode;
+	/** An array of {@link Expression}s to use when censoring. */
+	@Nullable
+	private final Expression[] expressions;
 	/**
 	 * A list of default colors which will be used to assign a color to regular expressions which were not given a color
 	 * by the user.
@@ -39,7 +42,7 @@ final class Config {
 	
 	/** The default constructor creates an empty ConfigurationParser. That is: all values are set to null. */
 	private Config() {
-		this(null, null, null, null);
+		this(null, null, null, null, null);
 	}
 	
 	/**
@@ -47,8 +50,9 @@ final class Config {
 	 *
 	 * @param output        the file where the censored file should be stored. Null if not specified.
 	 * @param verbose       the level of logging verbosity (encoded as a String or int). Null if not specified.
-	 * @param defaultColors a string array containing hexadecimal color codes. Null if not specified.
 	 * @param mode          the mode to use when censoring as a string. Null if not specified.
+	 * @param expressions   the expressions specified in the configuration file.
+	 * @param defaultColors a string array containing hexadecimal color codes. Null if not specified.
 	 * @see #objectToLevel(Object)
 	 * @see Mode#stringToMode(String)
 	 */
@@ -56,10 +60,12 @@ final class Config {
 	private Config(@Nullable @JsonProperty("output") final File output,
 				   @Nullable @JsonProperty("verbose") final Object verbose,
 				   @Nullable @JsonProperty("censor") final String mode,
+				   @Nullable @JsonProperty("expressions") final Expression[] expressions,
 				   @Nullable @JsonProperty("defaultColors") final String[] defaultColors) {
 		this.output = output;
 		this.verbose = objectToLevel(verbose);
 		this.mode = Mode.stringToMode(mode);
+		this.expressions = expressions;
 		this.defaultColors = hexArrayToColorArray(defaultColors);
 	}
 	
@@ -155,6 +161,17 @@ final class Config {
 	@Nullable
 	Mode getMode() {
 		return this.mode;
+	}
+	
+	/**
+	 * Returns the array of expressions as they were specified in the loaded config.
+	 *
+	 * @return An array containing the expressions as specified in the loaded config.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	Expression[] getExpressions() {
+		return this.expressions;
 	}
 	
 	/**
