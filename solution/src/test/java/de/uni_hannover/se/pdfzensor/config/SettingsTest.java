@@ -3,6 +3,7 @@ package de.uni_hannover.se.pdfzensor.config;
 import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.SettingsProvider;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +14,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.testing.LoggingUtility.getRootLogger;
@@ -63,11 +65,12 @@ class SettingsTest {
 	 * @param mode       The mode to use when censoring.
 	 * @throws IOException If the configuration file could not be parsed.
 	 */
-	@ParameterizedTest(name = "Run {index}: config: {0}, args: {1} => in: {2}, out: {3}, verbosity: {4}, mode: {5}")
+	@ParameterizedTest(name = "Run {index}: config: {0}, args: {1} => in: {2}, out: {3}, verbosity: {4}, mode: {5}, expressions: {6}")
 	@ArgumentsSource(SettingsProvider.class)
 	void testValidConfigurations(@Nullable String configName, @NotNull final String[] args, @NotNull File input,
 								 @Nullable File output, @Nullable Level verbosity,
-								 @Nullable Mode mode) throws IOException {
+								 @Nullable Mode mode,
+								 @NotNull ArrayList<ImmutablePair<String, String>> expressions) throws IOException {
 		Logging.deinit();
 		var configPath = configName == null ? null : getResourcePath(CONFIG_PATH + configName);
 		var settings = new Settings(configPath, args);
@@ -90,6 +93,19 @@ class SettingsTest {
 			assertEquals(mode, settings.getMode());
 		else
 			assertNotNull(settings.getMode());
+		
+		var actualExpressions = settings.getExpressions();
+		assertNotNull(actualExpressions);
+		assertEquals(expressions.size(), actualExpressions.length);
+		for (var i = 0; i < expressions.size() - 1; i++) {
+			var expectedExp = new Expression(expressions.get(i).getLeft(), expressions.get(i).getRight());
+			var actualExp = actualExpressions[i];
+			assertEquals(expectedExp.getRegex(), actualExp.getRegex());
+			assertEquals(expectedExp.getColor(), actualExp.getColor());
+		}
+		assertEquals(".", actualExpressions[actualExpressions.length - 1].getRegex());
+		assertNotNull(actualExpressions[actualExpressions.length - 1].getColor());
+		
 	}
 	
 	/** dummy Unit-tests for function getLinkColor */

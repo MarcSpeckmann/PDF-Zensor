@@ -2,6 +2,7 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
@@ -74,7 +75,7 @@ public final class Settings {
 						.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
-		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
+		expressions = combineExpressions(clArgs.getExpressions());
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
@@ -164,5 +165,17 @@ public final class Settings {
 	private File getDefaultOutput(@NotNull final String path) {
 		final var inName = FilenameUtils.removeExtension(input.getName());
 		return new File(Objects.requireNonNull(path) + File.separatorChar + inName + "_cens.pdf").getAbsoluteFile();
+	}
+	
+	/**
+	 * Prepends the fallback regex "." with the color {@link #DEFAULT_CENSOR_COLOR}.
+	 *
+	 * @param expressions1 The array of Expressions.
+	 * @return The Expression array with the fallback Expression added.
+	 */
+	@NotNull
+	private Expression[] combineExpressions(@Nullable final Expression[] expressions1) {
+		final var ret = ObjectUtils.cloneIfPossible(expressions1);
+		return ArrayUtils.addAll(ret, new Expression(".", DEFAULT_CENSOR_COLOR));
 	}
 }

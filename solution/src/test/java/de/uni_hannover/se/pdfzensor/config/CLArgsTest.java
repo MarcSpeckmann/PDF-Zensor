@@ -37,6 +37,7 @@ class CLArgsTest {
 		assertEquals(verbosity, clArgs.getVerbosity());
 		assertEquals(mode, clArgs.getMode());
 		var actualExpressions = clArgs.getExpressions();
+		assertNotNull(actualExpressions);
 		assertEquals(expressions.size(), actualExpressions.length);
 		for (var i = 0; i < expressions.size(); i++) {
 			var expectedExp = new Expression(expressions.get(i).getLeft(), expressions.get(i).getRight());

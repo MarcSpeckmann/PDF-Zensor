@@ -84,6 +84,16 @@ final class Expression {
 	}
 	
 	/**
+	 * Sets the color of this expression object iff it was previously null. Does nothing if the given color is null.
+	 *
+	 * @param color The new color of this expression object
+	 */
+	public void setColor(@Nullable Color color) {
+		if (this.color == null)
+			this.color = color;
+	}
+	
+	/**
 	 * Returns a string representation that represents this object.
 	 *
 	 * @return A string representation of this object's regular expression and its associated color.
