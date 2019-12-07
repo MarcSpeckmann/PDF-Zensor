@@ -87,7 +87,7 @@ class PDFCensorTest implements PDFHandler {
 		pdfprocessor.process(doc);
 		// uncomment to generate the processed/censored file
 		// TODO : does not work I dono why it doesn't save it
-		//doc.save(getResourcePath(PDF_RESOURCE_PATH) + "XsAtSetPosition_m.pdf");
+		doc.save(dummySettings.getInput().getAbsoluteFile().getParentFile() + "XsAtSetPosition_m.pdf");
 		PDPage censoredPage = doc.getPage(0);
 		//Assertions.assertEquals(doc.get);
 	}
