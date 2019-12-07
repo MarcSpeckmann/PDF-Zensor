@@ -23,35 +23,21 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
  * This class generates arguments for CLArgsTest for testing CLArgs and implements {@link ArgumentsProvider}.
  */
 public class CLArgumentProvider implements ArgumentsProvider {
-	/**
-	 * List of template input files.
-	 */
+	/** List of template input files. */
 	private static final String[] inputFiles = {"/pdf-files/sample.pdf", "/pdf-files/sample.bla.pdf"};
-	/**
-	 * List of template output files.
-	 */
+	/** List of template output files. */
 	private static final String[] outputFiles = {null, "file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
-	/**
-	 * List of all possible verbosity levels.
-	 */
+	/** List of all possible verbosity levels. */
 	private static final int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1).toArray();
-	/**
-	 * List of all possible mode options.
-	 */
+	/** List of all possible mode options. */
 	private static final Mode[] modeOptions = {Mode.MARKED, Mode.UNMARKED, null};
-	/**
-	 * A few strings to act as the regex part of Expressions. Multiple required to test the correct detection of the
-	 * positional parameters.
-	 */
-	private static final String[] expressionRegex = {"reg0", "reg1", "reg2"};
-	/**
-	 * Injects null values into a color list using a similar construction technique to {@link
-	 * ColorProvider#provideArguments(ExtensionContext)} to be able to test the correctness of the custom consumer for
-	 * the optional positional parameters.
-	 */
-	private static final List<String> colorsWithInjectedNull = new ArrayList<>();
+	/** List containing lists of pairs, the left element of the pair is a regex and the right element is a hex color */
+	static final ArrayList<ArrayList<ImmutablePair<String, String>>> expExpressions = new ArrayList<>();
 	
 	static {
+		final String[] expressionRegex = {"reg0", "reg1", "reg2", "reg3", "reg4"};
+		final List<String> colorsWithInjectedNull = new ArrayList<>();
+		
 		for (var cPrefix : ColorProvider.COLOR_PREFIXES) {
 			var i = 0;
 			for (var colors : ColorProvider.COLORS.values()) {
@@ -60,6 +46,16 @@ public class CLArgumentProvider implements ArgumentsProvider {
 				if (i % 2 == 0)
 					colorsWithInjectedNull.add(null);
 				i++;
+			}
+		}
+		
+		for (var i = 0; i < colorsWithInjectedNull.size(); i++) {
+			var expressions = new ArrayList<ImmutablePair<String, String>>();
+			for (String regex : expressionRegex) {
+				var color = i + 1 < colorsWithInjectedNull.size() ? colorsWithInjectedNull.get(i++) : null;
+				expressions.add(new ImmutablePair<>(regex, color));
+				// inside the loop to test for varying number of expressions
+				expExpressions.add(expressions);
 			}
 		}
 	}
@@ -123,8 +119,8 @@ public class CLArgumentProvider implements ArgumentsProvider {
 	 * {@link Mode} via the command line: {@link Mode#MARKED} for <code>-m</code>, {@link Mode#UNMARKED} for
 	 * <code>-u</code> or * <code>null</code> for neither (<code>-m</code> or <code>-u</code>).
 	 * <br>
-	 * Note: The tests for expressions is only disconnected from the input-output-verbosity-mode tests to reduce testing
-	 * time. The argument consumer and correctness of parsing optional positional parameters is still tested
+	 * Note: The tests for expressions are only disconnected from the input-output-verbosity-mode tests to reduce
+	 * testing time. The argument consumer and correctness of parsing optional positional parameters is still tested
 	 * thoroughly.
 	 *
 	 * @param extensionContext encapsulates the context in which the current test or container is being executed.
@@ -138,17 +134,9 @@ public class CLArgumentProvider implements ArgumentsProvider {
 				for (int lvl : verbosityLevels)
 					for (Mode mode : modeOptions)
 						list.add(createArgument(in, out, lvl, mode, null));
-		for (String in : inputFiles) {
-			for (var i = 0; i < colorsWithInjectedNull.size(); i++) {
-				var expressions = new ArrayList<ImmutablePair<String, String>>();
-				for (String regex : expressionRegex) {
-					var color = i + 1 < colorsWithInjectedNull.size() ? colorsWithInjectedNull.get(i++) : null;
-					expressions.add(new ImmutablePair<>(regex, color));
-					// inside the loop to test for varying number of expressions
-					list.add(createArgument(in, null, -1, null, new ArrayList<>(expressions)));
-				}
-			}
-		}
+		for (String in : inputFiles)
+			for (var expList : expExpressions)
+				list.add(createArgument(in, null, -1, null, new ArrayList<>(expList)));
 		return list.stream();
 	}
 }

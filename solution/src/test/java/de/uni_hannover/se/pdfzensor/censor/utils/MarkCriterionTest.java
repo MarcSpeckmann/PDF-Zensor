@@ -62,6 +62,8 @@ class MarkCriterionTest {
 	/**
 	 * Provides a set of arguments for {@link #getPredicateTest(Rectangle2D, Boolean[])} generated from {@link
 	 * #RECTANGLES}.
+	 *
+	 * @return An argument stream containing {@link Rectangle2D.Double}s and {@link Boolean}-arrays.
 	 */
 	private static Stream<Arguments> rectangleProvider() {
 		return RECTANGLES.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
@@ -69,6 +71,9 @@ class MarkCriterionTest {
 	
 	/**
 	 * tests for {@link MarkCriterion#getPredicate} function
+	 *
+	 * @param input    The input {@link Rectangle2D}
+	 * @param expected The expected predicate values for the given rectangle.
 	 */
 	@ParameterizedTest(name = "Run {index}: Rectangles: {0}")
 	@MethodSource("rectangleProvider")

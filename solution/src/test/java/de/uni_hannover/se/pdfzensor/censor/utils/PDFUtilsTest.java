@@ -62,6 +62,8 @@ class PDFUtilsTest {
 	/**
 	 * Provides a set of arguments for {@link #transformTextPositionTest(TextPositionValue, Rectangle2D)} generated from
 	 * {@link #TEXTPOSITION}.
+	 *
+	 * @return An argument stream containing {@link TextPositionValue}s and {@link Rectangle2D.Float}s.
 	 */
 	private static Stream<Arguments> textPositionProvider() {
 		return TEXTPOSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
@@ -70,13 +72,18 @@ class PDFUtilsTest {
 	/**
 	 * Provides a set of arguments for {@link #pdRectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link
 	 * #DIMENSIONS}.
+	 *
+	 * @return An argument stream containing {@link PDRectangle}s and {@link Rectangle2D.Float}s.
 	 */
 	private static Stream<Arguments> dimensionsProvider() {
 		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
 	/**
-	 * tests for {@link PDFUtils#transformTextPosition(TextPosition)} function
+	 * Tests for {@link PDFUtils#transformTextPosition(TextPosition)} function.
+	 *
+	 * @param input    The input {@link TextPositionValue}.
+	 * @param expected The expected {@link Rectangle2D} after the transformation.
 	 */
 	@ParameterizedTest(name = "Run {index}: TextPosition: {0}")
 	@MethodSource("textPositionProvider")
@@ -104,6 +111,9 @@ class PDFUtilsTest {
 	
 	/**
 	 * tests for {@link PDFUtils#pdRectToRect2D(PDRectangle)} function
+	 *
+	 * @param input    The input {@link PDRectangle}.
+	 * @param expected The expected {@link Rectangle2D} after the conversion.
 	 */
 	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
 	@MethodSource("dimensionsProvider")

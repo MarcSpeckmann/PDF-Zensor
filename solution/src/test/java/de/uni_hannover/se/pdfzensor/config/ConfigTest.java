@@ -43,12 +43,11 @@ class ConfigTest {
 	 * @param verbosity  The expected logger verbosity.
 	 * @param mode       The expected censor mode.
 	 * @param defColors  The default colors to assign to color-less expressions.
-	 * @throws IOException If the configuration file couldn't be found.
 	 */
 	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, defColors: {4}")
 	@ArgumentsSource(ConfigProvider.class)
 	void testValidConfigurations(@Nullable File configFile, @Nullable File output, @Nullable Level verbosity,
-								 @Nullable Mode mode, @Nullable Color[] defColors) throws IOException {
+								 @Nullable Mode mode, @Nullable Color[] defColors) {
 		var config = Config.fromFile(configFile);
 		
 		assertEquals(output, config.getOutput());

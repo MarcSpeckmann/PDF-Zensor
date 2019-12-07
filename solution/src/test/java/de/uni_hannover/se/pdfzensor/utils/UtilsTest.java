@@ -11,11 +11,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ColorProvider.COLOR_PREFIXES;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -127,22 +125,22 @@ public class UtilsTest {
 	 * The reverse direction is also tested by calling {@link Utils#colorToString(Color)} and checking if it returns any
 	 * of the color-codes when stripped of its prefix.
 	 *
-	 * @param colorCodes The color-codes that should correspond to the given color.
-	 * @param expected   The color that should be represented in hexadecimal notation by the color-codes.
+	 * @param colorCode A color-code that should correspond to the given color.
+	 * @param expected  The color that should be represented in hexadecimal notation by the color-code.
 	 */
-	@ParameterizedTest(name = "Run {index}: ColorCodes: {0}")
+	@ParameterizedTest(name = "Run {index}: colorCode: {0}")
 	@ArgumentsSource(ColorProvider.class)
-	void testColorCode(@NotNull String[] colorCodes, Color expected) {
+	void testColorCode(@NotNull String colorCode, @NotNull Color expected) {
 		//Check if getColorOrNull works correctly
-		for (String code : colorCodes)
-			for (String pre : COLOR_PREFIXES) {
-				assertEquals(expected, getColorOrNull(pre + code));
-				assertTrue(isHexColorCode(pre + code));
-			}
+		assertEquals(expected, getColorOrNull(colorCode));
+		assertTrue(isHexColorCode(colorCode));
 		//Check if colorToString works correctly
-		var actual = colorToString(expected).replaceFirst("(?i)0x|#", "");
-		assertTrue(Arrays.stream(colorCodes).anyMatch(actual::equalsIgnoreCase),
-				   "Expected one of: #" + Arrays.toString(colorCodes) + " but was: #" + actual);
+		var exp = colorCode.replaceFirst("(?i)0x|#", "");
+		if (exp.length() > 3) {
+			var actual = colorToString(expected).replaceFirst("(?i)0x|#", "");
+			assertTrue(exp.equalsIgnoreCase(actual),
+					   String.format("Expected %s to match the color %s, but was %s.", exp, expected, actual));
+		}
 	}
 	
 	/**

@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import java.io.File;
 import java.util.ArrayList;
 
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** CLArgsTest should contain all unit-tests related to {@link CLArgs}. */
@@ -26,7 +27,16 @@ class CLArgsTest {
 		assertThrows(IllegalArgumentException.class, CLArgs::fromStringArray);
 	}
 	
-	/** Checks if the arguments are parsed into the corresponding expected values. */
+	/**
+	 * Checks if the arguments are parsed into the corresponding expected values.
+	 *
+	 * @param args        The command-line arguments to parse.
+	 * @param input       The expected input file as specified in args.
+	 * @param output      The expected output file as specified in args.
+	 * @param verbosity   The expected logger verbosity as specified in args.
+	 * @param mode        The expected censoring mode as specified in args.
+	 * @param expressions The expected expressions as a list of string-string pairs as specified in args.
+	 */
 	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}")
 	@ArgumentsSource(CLArgumentProvider.class)
 	void testArgsParser(@NotNull String[] args, @NotNull File input, @Nullable File output, @Nullable Level verbosity,
@@ -45,5 +55,15 @@ class CLArgsTest {
 			assertEquals(expectedExp.getRegex(), actualExp.getRegex());
 			assertEquals(expectedExp.getColor(), actualExp.getColor());
 		}
+	}
+	
+	/**
+	 * Tests whether the helper class for parsing Expressions is a utility class.
+	 *
+	 * @throws ClassNotFoundException If the helper class could not be found.
+	 */
+	@Test
+	void testNestedHelperClasses() throws ClassNotFoundException {
+		assertIsUtilityClass(getSubclass(CLArgs.class, "ExpressionOption"));
 	}
 }

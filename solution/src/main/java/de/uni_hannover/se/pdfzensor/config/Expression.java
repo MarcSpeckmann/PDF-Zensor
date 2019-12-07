@@ -86,11 +86,14 @@ final class Expression {
 	/**
 	 * Sets the color of this expression object iff it was previously null. Does nothing if the given color is null.
 	 *
-	 * @param color The new color of this expression object
+	 * @param color The new color of this expression object.
+	 * @return True if a new color was set, false otherwise.
 	 */
-	public void setColor(@Nullable Color color) {
+	public boolean setColor(@Nullable Color color) {
+		var ret = this.color == null && color != null;
 		if (this.color == null)
 			this.color = color;
+		return ret;
 	}
 	
 	/**

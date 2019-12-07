@@ -88,10 +88,21 @@ final class CLArgs {
 	private static final class ExpressionOption {
 		@Parameters(arity = "1", paramLabel = "\"regex\"", hidden = true)
 		@Nullable
-		private String regex = null; // not used because it is read from the stack by a custom consumer
+		private static String regex = null; // not used, expressions are parsed by a custom consumer
 		@Parameters(arity = "0..1", paramLabel = "\"hex_color\"", hidden = true)
 		@Nullable
-		private String hexColor = null; // not used because it is read from the stack by a custom consumer
+		private static String hexColor = null; // not used, expressions are parsed by a custom consumer
+		
+		/**
+		 * This constructor should not be called as no instance of {@link ExpressionOption} shall be created because
+		 * this class and its fields only exist to integrate the Expressions into the PicoCLI parsing.
+		 *
+		 * @throws UnsupportedOperationException when being called
+		 */
+		@Contract(value = " -> fail", pure = true)
+		private ExpressionOption() {
+			throw new UnsupportedOperationException();
+		}
 		
 		/**
 		 * The top of the stack always contains the regex when <code>consumeParameters(Stack, ArgSpec,
