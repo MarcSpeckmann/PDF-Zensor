@@ -4,6 +4,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -11,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.Permission;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -127,6 +129,39 @@ public final class TestUtility {
 			return method;
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Asserts that the provided executable calls {@link System#exit(int)} with the expected error-code.
+	 *
+	 * @param code       the expected exit-code.
+	 * @param executable the executable to test for a call to {@link System#exit(int)} with the desired exit code.
+	 */
+	public static void assertExitCode(int code, Executable executable) {
+		var defaultSecManager = System.getSecurityManager();
+		try {
+			var manager = new SecurityManager() {
+				int actualCode;
+				
+				@Override
+				public void checkPermission(Permission perm) { /* allow anything. */ }
+				
+				@Override
+				public void checkPermission(Permission perm, Object context) { /* allow anything. */ }
+				
+				@Override
+				public void checkExit(final int status) {
+					super.checkExit(status);
+					actualCode = status;
+					throw new SecurityException("Aborting System.exit()");
+				}
+			};
+			System.setSecurityManager(manager);
+			assertThrows(SecurityException.class, executable, "System.exit was not called");
+			assertEquals(code, manager.actualCode, "Wrong exit code");
+		} finally {
+			System.setSecurityManager(defaultSecManager);
 		}
 	}
 }
