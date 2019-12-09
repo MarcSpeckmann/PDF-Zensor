@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.testing;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -108,9 +109,20 @@ public final class TestUtility {
 		return s1.flatMap(t -> s2.stream().map(k -> joiner.apply(t, k)));
 	}
 	
+	/**
+	 * Returns the private method of the given class that has the provided name and parameter-types. Throws a {@link
+	 * RuntimeException} if any error occurs.
+	 *
+	 * @param cls        the class of which to retrieve the private method. Not null.
+	 * @param methodName the name of the method that should be retrieved. Not null.
+	 * @param paramTypes the types of the parameters. Not null.
+	 * @return the accessible {@link Method}-object that represents the desired method.
+	 * @throws RuntimeException if the method could not be retrieved.
+	 */
+	@NotNull
 	public static Method getPrivateMethod(@NotNull Class<?> cls, @NotNull String methodName, Class<?>... paramTypes) {
 		try {
-			var method = cls.getDeclaredMethod(methodName, paramTypes);
+			var method = cls.getDeclaredMethod(methodName, Validate.noNullElements(paramTypes));
 			method.setAccessible(true);
 			return method;
 		} catch (NoSuchMethodException e) {
