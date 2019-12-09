@@ -95,7 +95,7 @@ final class CLArgs {
 		
 		/**
 		 * This constructor should not be called as no instance of {@link ExpressionOption} shall be created because
-		 * this class and its fields only exist to integrate the Expressions into the PicoCLI parsing.
+		 * this class and its fields only exist to integrate the {@link Expression}s into the PicoCLI parsing.
 		 *
 		 * @throws UnsupportedOperationException when being called
 		 */
@@ -105,9 +105,8 @@ final class CLArgs {
 		}
 		
 		/**
-		 * The top of the stack always contains the regex when <code>consumeParameters(Stack, ArgSpec,
-		 * CommandSpec)</code> is called, because this consumer follows <code>-e</code> or <code>--expression</code>
-		 * respectively.
+		 * The top of the stack always contains the regex when {@link #consumeParameters(Stack, ArgSpec, CommandSpec)}
+		 * is called, because this consumer follows <code>-e</code> or <code>--expression</code> respectively.
 		 * <br>
 		 * The argument on the stack after the call may be a color code that follows the regex or another argument, in
 		 * which case the regex is added to the expressions list without a color and the rest of the stack remains for
