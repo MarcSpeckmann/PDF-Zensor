@@ -22,7 +22,7 @@ import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
 public class ConfigProvider implements ArgumentsProvider {
 	
 	/** A map of the path to the config file and the colors which are expected to be parsed from that file. */
-	private static Map<String, Color[]> expectedColorsForConfig = new HashMap<>();
+	static final Map<String, Color[]> expectedColorsForConfig = new HashMap<>();
 	
 	static {
 		expectedColorsForConfig.put("valid/defaultColorsNone.json", null);
