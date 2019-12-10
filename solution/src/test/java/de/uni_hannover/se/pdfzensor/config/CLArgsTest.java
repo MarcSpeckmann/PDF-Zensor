@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import java.io.File;
 import java.util.ArrayList;
 
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** CLArgsTest should contain all unit-tests related to {@link CLArgs}. */
@@ -55,15 +54,5 @@ class CLArgsTest {
 			assertEquals(expectedExp.getRegex(), actualExp.getRegex());
 			assertEquals(expectedExp.getColor(), actualExp.getColor());
 		}
-	}
-	
-	/**
-	 * Tests whether the helper class for parsing Expressions is a utility class.
-	 *
-	 * @throws ClassNotFoundException If the helper class could not be found.
-	 */
-	@Test
-	void testNestedHelperClasses() throws ClassNotFoundException {
-		assertIsUtilityClass(getSubclass(CLArgs.class, "ExpressionOption"));
 	}
 }

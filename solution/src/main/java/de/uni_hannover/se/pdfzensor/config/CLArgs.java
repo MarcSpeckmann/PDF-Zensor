@@ -77,15 +77,16 @@ final class CLArgs {
 	 * from within th consumer.
 	 */
 	@Option(names = {"-e", "--expression"}, paramLabel = "\"regex\" [\"hex_color\"]", arity = "1",
-			description = {"Set additional regular expressions with optional colors to use when censoring."}, parameterConsumer = ExpressionOption.Consumer.class)
+			description = {"Set additional regular expressions with optional colors to use when censoring."}, parameterConsumer = ExpressionOption.class)
 	@NotNull
 	private static List<Expression> expressions = new ArrayList<>();
 	
 	/**
-	 * A helper class to allow the hexadecimal color codes to be optional. Uses a custom consumer to distinguish the
-	 * arguments and only remove those from the stack which are consumed when creating the Expression.
+	 * A helper class to allow the hexadecimal color codes to be optional. Uses a custom consumer ({@link
+	 * ExpressionOption#consumeParameters(Stack, ArgSpec, CommandSpec)}) to distinguish the arguments and only remove
+	 * those from the stack which are consumed when creating the {@link Expression}.
 	 */
-	private static final class ExpressionOption {
+	private static final class ExpressionOption implements IParameterConsumer {
 		@Parameters(arity = "1", paramLabel = "\"regex\"", hidden = true)
 		@Nullable
 		private static String regex = null; // not used, expressions are parsed by a custom consumer
@@ -94,37 +95,19 @@ final class CLArgs {
 		private static String hexColor = null; // not used, expressions are parsed by a custom consumer
 		
 		/**
-		 * This constructor should not be called as no instance of {@link ExpressionOption} shall be created because
-		 * this class and its fields only exist to integrate the {@link Expression}s into the PicoCLI parsing.
-		 *
-		 * @throws UnsupportedOperationException when being called
-		 */
-		@Contract(value = " -> fail", pure = true)
-		private ExpressionOption() {
-			throw new UnsupportedOperationException();
-		}
-		
-		/**
 		 * The top of the stack always contains the regex when {@link #consumeParameters(Stack, ArgSpec, CommandSpec)}
-		 * is called, because this consumer follows <code>-e</code> or <code>--expression</code> respectively.
+		 * is called because this consumer follows <code>-e</code> or <code>--expression</code> respectively.
 		 * <br>
 		 * The argument on the stack after the call may be a color code that follows the regex or another argument, in
 		 * which case the regex is added to the expressions list without a color and the rest of the stack remains for
 		 * PicoCLI to parse.
-		 * <br>
-		 * Note that this class needs to be static to be able to provide the consumer to PicoCLI. Therefore, to add new
-		 * expressions to the outside list, that list needs to be static as well. Because the content of the list is
-		 * copied into the expressions list in settings, this class does not need a non-static version of said list
-		 * which also allows for simply clearing the static list once a new CLArgs instance is created.
 		 */
-		private static final class Consumer implements IParameterConsumer {
-			public void consumeParameters(Stack<String> args, ArgSpec argSpec, CommandSpec commandSpec) {
-				var reg = args.pop();
-				if (!args.isEmpty() && Utils.isHexColorCode(args.peek()))
-					expressions.add(new Expression(reg, args.pop()));
-				else
-					expressions.add(new Expression(reg, (Color) null));
-			}
+		public void consumeParameters(Stack<String> args, ArgSpec argSpec, CommandSpec commandSpec) {
+			var reg = args.pop();
+			if (!args.isEmpty() && Utils.isHexColorCode(args.peek()))
+				expressions.add(new Expression(reg, args.pop()));
+			else
+				expressions.add(new Expression(reg, (Color) null));
 		}
 	}
 	

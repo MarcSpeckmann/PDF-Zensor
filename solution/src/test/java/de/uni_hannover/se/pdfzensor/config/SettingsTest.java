@@ -128,7 +128,7 @@ class SettingsTest {
 	 * not be an {@link Expression} array to preserve the null values for colors (to test the validity of
 	 * <code>defColors</code> which requires knowing when colors from <code>defColors</code> are expected to be used,
 	 * which is when the color equals null / none was given; {@link Expression#getColor()} never returns null and is
-	 * therefore no usable for this distinction).
+	 * therefore not usable for this distinction).
 	 * <br>
 	 * The color (of each actual {@link Expression}) can be one of the following:
 	 * <ul>

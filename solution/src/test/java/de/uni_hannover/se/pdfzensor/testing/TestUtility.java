@@ -13,7 +13,6 @@ import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Permission;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -164,31 +163,5 @@ public final class TestUtility {
 		} finally {
 			System.setSecurityManager(defaultSecManager);
 		}
-	}
-	
-	/**
-	 * Starts searching for the class with the given name starting from <code>cls</code>. The <code>subclassNames</code>
-	 * specify in what order to search the given class and allow to look for classes inside classes inside the given
-	 * class:
-	 * <code>getPrivateSubclass(Test.class, "sub1", "sub2")</code> will look for a class with the name
-	 * <code>"sub1"</code> in <code>Test.class</code> and <code>sub1.class</code> is then searched for a class by the
-	 * name <code>"sub2"</code>. If every class could be found, <code>sub2.class</code> will be returned.
-	 *
-	 * @param cls           The class where the search should be started.
-	 * @param subclassNames Names of classes which should be looked through/for.
-	 * @return The nested class with the given name that was found in the given class.
-	 * @throws ClassNotFoundException If no class with the name could be found in the given class.
-	 */
-	@NotNull
-	public static Class<?> getSubclass(@NotNull Class<?> cls,
-									   @NotNull String... subclassNames) throws ClassNotFoundException {
-		if (subclassNames.length == 0)
-			return cls;
-		for (var clazz : cls.getDeclaredClasses())
-			if (subclassNames[0].equals(clazz.getSimpleName()))
-				return getSubclass(clazz, Arrays.copyOfRange(subclassNames, 1, subclassNames.length));
-		throw new ClassNotFoundException(
-				String.format("No class with the name %s was found in the class %s.", subclassNames[0],
-							  cls.getSimpleName()));
 	}
 }
