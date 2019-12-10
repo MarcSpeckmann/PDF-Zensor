@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils.pdRectToRect2D;
 import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT;
 
 /**
@@ -33,12 +34,19 @@ public final class Annotations {
 	@NotNull
 	private List<Rectangle2D> links;
 	
+	//to make the annotations (especially microsoft edge annotations) larger so that the glyphs fit in
+	private final static double X_SHIFT = 0.1;
+	private final static double HEIGHT_INCREASE = 0.1;
+	private final static double WIDTH_INCREASE = 1.2;
+	
+	
 	public Annotations() {
 		LOGGER.log(Level.DEBUG, "Initialized a new Annotations-instance");
 		highlights = List.of();
 		links = List.of();
 	}
 	
+	//TODO: move to PDFUtils.java
 	/**
 	 * Translates the given PDF annotation into a bounding box {@link Rectangle2D}.
 	 *
@@ -47,7 +55,7 @@ public final class Annotations {
 	 */
 	@NotNull
 	private static Rectangle2D getAnnotationRect(@NotNull PDAnnotation annotation) {
-		var rectangle = PDFUtils.pdRectToRect2D(annotation.getRectangle());
+		var rectangle = pdRectToRect2D(annotation.getRectangle());
 		if (annotation instanceof PDAnnotationTextMarkup) {
 			final var quads = ((PDAnnotationTextMarkup) annotation).getQuadPoints();
 			var path = new Path2D.Float();
@@ -58,7 +66,9 @@ public final class Annotations {
 			}
 			rectangle = path.getBounds2D();
 		}
-		return rectangle;
+		return new Rectangle2D.Double(rectangle.getX() - X_SHIFT, rectangle.getY(),
+									  rectangle.getWidth() + WIDTH_INCREASE,
+									  rectangle.getHeight() + HEIGHT_INCREASE);
 	}
 	
 	/**

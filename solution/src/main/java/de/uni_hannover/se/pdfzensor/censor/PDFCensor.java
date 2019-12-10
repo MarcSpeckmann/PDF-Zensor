@@ -55,7 +55,7 @@ public final class PDFCensor implements PDFHandler {
 		// to censor only segments marked beforehand with a different software
 		if (Mode.MARKED.equals(settings.getMode()))
 			removePredicate = removePredicate.and(annotations::isMarked);
-		// to censor everything but segments marked beforehand with a different software
+			// to censor everything but segments marked beforehand with a different software
 		else if (Mode.UNMARKED.equals(settings.getMode())) {
 			removePredicate = removePredicate.and(Predicate.not(annotations::isMarked));
 		}
