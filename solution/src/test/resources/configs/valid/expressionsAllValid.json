@@ -1,0 +1,15 @@
+{
+	"expressions":[
+		{
+			"regex": "Author: [a-zA-Z]*",
+			"color": "0xF0F0F0"
+		},
+		{
+			"regex": "hello world"
+		},
+		{
+			"regex": "[A-Z]",
+			"color": "#00F"
+		}
+	]
+}

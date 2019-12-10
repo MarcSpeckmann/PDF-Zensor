@@ -2,6 +2,7 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.Logging;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
@@ -74,7 +75,7 @@ public final class Settings {
 						.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
-		expressions = new Expression[]{new Expression(".", DEFAULT_CENSOR_COLOR)};
+		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), config.getDefaultColors());
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
@@ -93,43 +94,53 @@ public final class Settings {
 	 * Tries to load the configuration file from the provided path. If the path is <code>null</code> the empty
 	 * configuration (everything <code>null</code>) will be used.
 	 *
+	 * @param configPath The path to the configuration file.
 	 * @return The configuration file that was loaded from the specified path.
-	 * @throws IOException if the configuration file could not be found or read.
 	 */
 	@NotNull
-	private static Config getConfig(@Nullable String configPath) throws IOException {
+	private static Config getConfig(@Nullable String configPath) {
 		return Config.fromFile(Optional.ofNullable(configPath).map(File::new).orElse(null));
 	}
 	
-	/** Returns the input file as it was specified in the command-line arguments. */
+	/**
+	 * @return The input file as it was specified in the command-line arguments.
+	 */
 	@NotNull
 	@Contract(pure = true)
 	public File getInput() {
 		return input;
 	}
 	
-	/** Returns the output file as it was specified in the command-line arguments and config. */
+	/**
+	 * @return The output file as it was specified in the command-line arguments and config.
+	 */
 	@NotNull
 	@Contract(pure = true)
 	public File getOutput() {
 		return output;
 	}
 	
-	/** Returns the color links should be censored in as it was specified in the command-line arguments and config. */
+	/**
+	 * @return The color links should be censored in as it was specified in the command-line arguments and config.
+	 */
 	@NotNull
 	@Contract(pure = true)
 	public Color getLinkColor() {
 		return linkColor;
 	}
 	
-	/** Returns the censor mode which should be used when censoring PDF-files. */
+	/**
+	 * @return The censor mode which should be used when censoring PDF-files.
+	 */
 	@NotNull
 	@Contract(pure = true)
 	public Mode getMode() {
 		return mode;
 	}
 	
-	/** Returns the expressions as they were specified in the command-line arguments and config. */
+	/**
+	 * @return The expressions as they were specified in the command-line arguments and config.
+	 */
 	@NotNull
 	@Contract(pure = true)
 	public Expression[] getExpressions() {
@@ -154,8 +165,8 @@ public final class Settings {
 	}
 	
 	/**
-	 * Will return the absolute default filename in directory {@param path}. The default filename is {@code
-	 * in_cens.pdf}, where {@code in} is the name of the input file.
+	 * Will return the absolute default filename in directory <code>path</code>. The default filename is
+	 * <code>in_cens.pdf</code>, where <code>in</code> is the name of the input file.
 	 *
 	 * @param path The path in which the output file with default naming should be located.
 	 * @return The absolute default output file.
@@ -164,5 +175,28 @@ public final class Settings {
 	private File getDefaultOutput(@NotNull final String path) {
 		final var inName = FilenameUtils.removeExtension(input.getName());
 		return new File(Objects.requireNonNull(path) + File.separatorChar + inName + "_cens.pdf").getAbsoluteFile();
+	}
+	
+	/**
+	 * Merges two Expression arrays together while keeping them in the given order (<code>expressions1</code> is in
+	 * front). Applies a color from the default color array (if it has unused colors remaining) to expressions which do
+	 * not yet have a color assigned. Finally appends the fallback regex "." with the {@link #DEFAULT_CENSOR_COLOR}.
+	 *
+	 * @param expressions1  The array of Expressions.
+	 * @param expressions2  The array of Expressions that is appended to <code>expressions1</code>.
+	 * @param defaultColors The array of default colors to use if an Expression does not yet have a color assigned.
+	 * @return The Expression array with the fallback Expression added.
+	 */
+	@NotNull
+	private Expression[] combineExpressions(@Nullable final Expression[] expressions1,
+											@Nullable final Expression[] expressions2,
+											@Nullable final Color[] defaultColors) {
+		final var ret = ArrayUtils.addAll(expressions1, expressions2);
+		if (defaultColors != null && ret != null) {
+			var cIndex = 0;
+			for (var i = 0; i < ret.length && cIndex < defaultColors.length; i++)
+				cIndex += ret[i].setColor(defaultColors[cIndex]) ? 1 : 0;
+		}
+		return ArrayUtils.addAll(ret, new Expression(".", DEFAULT_CENSOR_COLOR));
 	}
 }

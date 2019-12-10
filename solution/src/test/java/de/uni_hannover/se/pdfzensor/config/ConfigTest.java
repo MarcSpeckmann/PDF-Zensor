@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
@@ -30,7 +32,7 @@ class ConfigTest {
 	 * @param path The path to an invalid JSON-file.
 	 */
 	@ParameterizedTest
-	@ValueSource(strings = {"invalid/invalid_json.json", "invalid/empty_config.json", "invalid/defaultColorsAllInvalid.json", "invalid/defaultColorsSomeInvalid.json"})
+	@ValueSource(strings = {"invalid/invalid_json.json", "invalid/empty_config.json", "invalid/defaultColorsAllInvalid.json", "invalid/defaultColorsSomeInvalid.json", "invalid/expressionsInvalidColor.json", "invalid/expressionsInvalidSyntax.json"})
 	void testInvalidJson(String path) {
 		assertThrows(IllegalArgumentException.class, () -> Config.fromFile(getResource(CONFIG_PATH + path)));
 	}
@@ -38,17 +40,18 @@ class ConfigTest {
 	/**
 	 * Tests whether or not parsing the given configuration file results in the expected config.
 	 *
-	 * @param configFile The config file which will be used in this test.
-	 * @param output     The expected output file.
-	 * @param verbosity  The expected logger verbosity.
-	 * @param mode       The expected censor mode.
-	 * @param defColors  The default colors to assign to color-less expressions.
-	 * @throws IOException If the configuration file couldn't be found.
+	 * @param configFile  The config file which will be used in this test.
+	 * @param output      The expected output file.
+	 * @param verbosity   The expected logger verbosity.
+	 * @param mode        The expected censor mode.
+	 * @param expressions The expected expressions as a list of string-string pairs.
+	 * @param defColors   The expected default colors to assign to color-less expressions.
 	 */
-	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, defColors: {4}")
+	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, expressions: {4}, defColors: {5}")
 	@ArgumentsSource(ConfigProvider.class)
 	void testValidConfigurations(@Nullable File configFile, @Nullable File output, @Nullable Level verbosity,
-								 @Nullable Mode mode, @Nullable Color[] defColors) throws IOException {
+								 @Nullable Mode mode, @Nullable ArrayList<ImmutablePair<String, String>> expressions,
+								 @Nullable Color[] defColors) {
 		var config = Config.fromFile(configFile);
 		
 		assertEquals(output, config.getOutput());
@@ -56,6 +59,21 @@ class ConfigTest {
 		assertEquals(verbosity, config.getVerbosity());
 		
 		assertEquals(mode, config.getMode());
+		
+		var actualExpressions = config.getExpressions();
+		if (expressions != null) {
+			assertNotNull(actualExpressions);
+			assertEquals(expressions.size(), actualExpressions.length);
+			for (var i = 0; i < expressions.size(); i++) {
+				var expectedExp = new Expression(expressions.get(i).getLeft(), expressions.get(i).getRight());
+				var actualExp = actualExpressions[i];
+				assertEquals(expectedExp.getRegex(), actualExp.getRegex());
+				assertEquals(expectedExp.getColor(), actualExp.getColor());
+			}
+		} else {
+			System.out.println(Arrays.toString(actualExpressions));
+			assertNull(actualExpressions);
+		}
 		
 		var actualDefColors = config.getDefaultColors();
 		if (defColors != null) {
