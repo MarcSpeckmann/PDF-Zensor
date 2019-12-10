@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider.expExpressions;
-import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider.expectedColorsForConfig;
+import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider.*;
 
 /** This class generates arguments for SettingsTest and implements {@link ArgumentsProvider}. */
 public class SettingsProvider implements ArgumentsProvider {
@@ -106,9 +106,22 @@ public class SettingsProvider implements ArgumentsProvider {
 								  new ArrayList<>(expList), null));
 			// with default colors
 			for (var e : expectedColorsForConfig.entrySet()) {
+				var expExpressionsList = new ArrayList<>(expList);
+				var configList = expectedExpressionForConfig.get(e.getKey());
+				if (configList != null)
+					expExpressionsList.addAll(configList);
 				list.add(Arguments.of(e.getKey(),
 									  createCLArguments(null, -1, null, expList),
-									  "sample.pdf", null, null, null, new ArrayList<>(expList), e.getValue()));
+									  "sample.pdf", null, null, null, expExpressionsList, e.getValue()));
+			}
+			// with expressions in config
+			for (var e : expectedExpressionForConfig.entrySet()) {
+				var expExpressionsList = new ArrayList<>(expList);
+				expExpressionsList.addAll(e.getValue());
+				list.add(Arguments.of(e.getKey(),
+									  createCLArguments(null, -1, null, expList),
+									  "sample.pdf", null, null, null, expExpressionsList,
+									  expectedColorsForConfig.get(e.getKey())));
 			}
 		}
 		

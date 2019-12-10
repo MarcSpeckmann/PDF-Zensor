@@ -75,7 +75,7 @@ public final class Settings {
 						.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
-		expressions = combineExpressions(clArgs.getExpressions(), config.getDefaultColors());
+		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), config.getDefaultColors());
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
@@ -178,17 +178,20 @@ public final class Settings {
 	}
 	
 	/**
-	 * Applies a color from the default color array (if it has unused colors remaining) to expressions which do not yet
-	 * have a color assigned. Finally appends the fallback regex "." with the {@link #DEFAULT_CENSOR_COLOR}.
+	 * Merges two Expression arrays together while keeping them in the given order (<code>expressions1</code> is in
+	 * front). Applies a color from the default color array (if it has unused colors remaining) to expressions which do
+	 * not yet have a color assigned. Finally appends the fallback regex "." with the {@link #DEFAULT_CENSOR_COLOR}.
 	 *
 	 * @param expressions1  The array of Expressions.
+	 * @param expressions2  The array of Expressions that is appended to <code>expressions1</code>.
 	 * @param defaultColors The array of default colors to use if an Expression does not yet have a color assigned.
 	 * @return The Expression array with the fallback Expression added.
 	 */
 	@NotNull
 	private Expression[] combineExpressions(@Nullable final Expression[] expressions1,
+											@Nullable final Expression[] expressions2,
 											@Nullable final Color[] defaultColors) {
-		final var ret = ObjectUtils.cloneIfPossible(expressions1);
+		final var ret = ArrayUtils.addAll(expressions1, expressions2);
 		if (defaultColors != null && ret != null) {
 			var cIndex = 0;
 			for (var i = 0; i < ret.length && cIndex < defaultColors.length; i++)
