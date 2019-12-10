@@ -81,7 +81,7 @@ class AnnotationsTest {
 		Annotations anno = new Annotations();
 		anno.cachePage(testPage);
 		// given rectangle is outside the rectangle of the highlight respectively bordering so not intersecting
-		Assertions.assertFalse(anno.isMarked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
+		Assertions.assertFalse(anno.isMarked(new Rectangle(102, 0, 100, 100), MarkCriterion.INTERSECT));
 		
 		Assertions.assertThrows(NullPointerException.class, () -> anno.isMarked(new Rectangle(50, 0, 100, 100), null));
 		
@@ -154,7 +154,7 @@ class AnnotationsTest {
 		Annotations anno = new Annotations();
 		anno.cachePage(testPage);
 		// given rectangle is outside the rectangle of the link respectively bordering so not intersecting
-		Assertions.assertFalse(anno.isLinked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
+		Assertions.assertFalse(anno.isLinked(new Rectangle(102, 0, 100, 100), MarkCriterion.INTERSECT));
 		// rect is given, criteria is null
 		Assertions.assertThrows(NullPointerException.class, () -> anno.isLinked(new Rectangle(0, 0, 50, 50), null));
 		
