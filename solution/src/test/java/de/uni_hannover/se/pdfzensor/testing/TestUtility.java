@@ -1,8 +1,10 @@
 package de.uni_hannover.se.pdfzensor.testing;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -10,7 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.security.Permission;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -110,17 +112,19 @@ public final class TestUtility {
 	}
 	
 	/**
-	 * Retrieves a method with the given name and parameters from the given class via reflection.
+	 * Returns the private method of the given class that has the provided name and parameter-types. Throws a {@link
+	 * RuntimeException} if any error occurs.
 	 *
-	 * @param cls        The class from which to retrieve the method.
-	 * @param methodName The name of the method.
-	 * @param paramTypes The parameters of the method.
-	 * @return The method as specified by the arguments.
+	 * @param cls        the class of which to retrieve the private method. Not null.
+	 * @param methodName the name of the method that should be retrieved. Not null.
+	 * @param paramTypes the types of the parameters. Not null.
+	 * @return the accessible {@link Method}-object that represents the desired method.
+	 * @throws RuntimeException if the method could not be retrieved.
 	 */
 	@NotNull
 	public static Method getPrivateMethod(@NotNull Class<?> cls, @NotNull String methodName, Class<?>... paramTypes) {
 		try {
-			var method = cls.getDeclaredMethod(methodName, paramTypes);
+			var method = cls.getDeclaredMethod(methodName, Validate.noNullElements(paramTypes));
 			method.setAccessible(true);
 			return method;
 		} catch (NoSuchMethodException e) {
@@ -129,27 +133,35 @@ public final class TestUtility {
 	}
 	
 	/**
-	 * Starts searching for the class with the given name from <code>cls</code>. The <code>subclassNames</code> specify
-	 * in what order to search the given class and allow to look for classes inside classes inside the given class:
-	 * <code>getPrivateSubclass(Test.class, "sub1", "sub2")</code> will look for a class with the name
-	 * <code>"sub1"</code> in <code>Test.class</code> and <code>sub1.class</code> is then searched for a class by the
-	 * name <code>"sub2"</code>. If every class could be found, <code>sub2.class</code> will be returned.
+	 * Asserts that the provided executable calls {@link System#exit(int)} with the expected error-code.
 	 *
-	 * @param cls           The class from where the search should be started.
-	 * @param subclassNames Names of classes which should be looked through.
-	 * @return The nested class with the given name that was found in the given class.
-	 * @throws ClassNotFoundException If no class with the name could be found in the given class.
+	 * @param code       the expected exit-code.
+	 * @param executable the executable to test for a call to {@link System#exit(int)} with the desired exit code.
 	 */
-	@NotNull
-	public static Class<?> getSubclass(@NotNull Class<?> cls,
-											  @NotNull String... subclassNames) throws ClassNotFoundException {
-		if (subclassNames.length == 0)
-			return cls;
-		for (var clazz : cls.getDeclaredClasses())
-			if (subclassNames[0].equals(clazz.getSimpleName()))
-				return getSubclass(clazz, Arrays.copyOfRange(subclassNames, 1, subclassNames.length));
-		throw new ClassNotFoundException(
-				String.format("No class with the name %s was found in the class %s.", subclassNames[0],
-							  cls.getSimpleName()));
+	public static void assertExitCode(int code, Executable executable) {
+		var defaultSecManager = System.getSecurityManager();
+		try {
+			var manager = new SecurityManager() {
+				int actualCode;
+				
+				@Override
+				public void checkPermission(Permission perm) { /* allow anything. */ }
+				
+				@Override
+				public void checkPermission(Permission perm, Object context) { /* allow anything. */ }
+				
+				@Override
+				public void checkExit(final int status) {
+					super.checkExit(status);
+					actualCode = status;
+					throw new SecurityException("Aborting System.exit()");
+				}
+			};
+			System.setSecurityManager(manager);
+			assertThrows(SecurityException.class, executable, "System.exit was not called");
+			assertEquals(code, manager.actualCode, "Wrong exit code");
+		} finally {
+			System.setSecurityManager(defaultSecManager);
+		}
 	}
 }
