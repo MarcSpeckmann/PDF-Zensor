@@ -68,14 +68,10 @@ public class ImageReplacer extends PDFStreamEngine {
 	@NotNull
 	public List<Rectangle2D> replaceImages(PDDocument doc, PDPage page) throws IOException {
 		LOGGER.info("Starting to process Images of page{}", page);
-		pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, true);
-		pageContentStream.saveGraphicsState();
-		pageContentStream.close();
 		
 		this.processPage(page);
 		
 		pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true);
-		pageContentStream.restoreGraphicsState();
 		pageContentStream.setStrokingColor(Color.DARK_GRAY);
 		pageContentStream.setLineWidth(2);
 		drawPictureCensorBox();
@@ -129,7 +125,7 @@ public class ImageReplacer extends PDFStreamEngine {
 	private void drawPictureCensorBox() throws IOException {
 		for (var rect : this.rects) {
 			pageContentStream.addRect((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(),
-									  (float) rect.getWidth());
+									  (float) rect.getHeight());
 			pageContentStream.moveTo((float) rect.getX(), (float) rect.getY());
 			pageContentStream.lineTo((float) rect.getX() + (float) rect.getWidth(),
 									 (float) rect.getY() + (float) rect.getHeight());
