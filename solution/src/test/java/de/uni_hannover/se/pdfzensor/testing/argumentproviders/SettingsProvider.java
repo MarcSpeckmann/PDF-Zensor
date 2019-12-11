@@ -12,8 +12,11 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static de.uni_hannover.se.pdfzensor.config.Mode.*;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider.expExpressions;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider.*;
 
@@ -38,6 +41,7 @@ public class SettingsProvider implements ArgumentsProvider {
 	private static String[] createCLArguments(@Nullable String out, final int lvl, @Nullable Mode mode,
 											  @Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
 											  boolean quiet) {
+		Objects.requireNonNull(exp);
 		var arguments = new ArrayList<String>();
 		
 		arguments.add("sample.pdf");
@@ -45,25 +49,18 @@ public class SettingsProvider implements ArgumentsProvider {
 			arguments.add("-o");
 			arguments.add(out);
 		}
-		if (mode != null) {
-			switch (mode) {
-				case MARKED:
-					arguments.add("-m");
-					break;
-				case UNMARKED:
-					arguments.add("-u");
-					break;
-			}
-		}
+		
+		if (MARKED.equals(mode))
+			arguments.add("-m");
+		else if (UNMARKED.equals(mode))
+			arguments.add("-u");
+		
 		if (lvl > 0)
 			arguments.add("-" + "v".repeat(lvl));
-		if (exp != null) {
-			for (var pair : exp) {
-				arguments.add("-e");
-				arguments.add(pair.getLeft());
-				if (pair.getRight() != null)
-					arguments.add(pair.getRight());
-			}
+		for (var pair : exp) {
+			arguments.add("-e");
+			arguments.add(pair.getLeft());
+			Optional.ofNullable(pair.getRight()).ifPresent(arguments::add);
 		}
 		if (quiet)
 			arguments.add("-q");
@@ -88,8 +85,8 @@ public class SettingsProvider implements ArgumentsProvider {
 				
 				// Mode set by CLArgs
 				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-									  createCLArguments(null, -1, Mode.MARKED, expList, quiet), "sample.pdf",
-									  "censoredFile.pdf", Level.DEBUG, Mode.MARKED, new ArrayList<>(expList), null,
+									  createCLArguments(null, -1, MARKED, expList, quiet), "sample.pdf",
+									  "censoredFile.pdf", Level.DEBUG, MARKED, new ArrayList<>(expList), null,
 									  quiet));
 				// output overwritten by CLArgs
 				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
