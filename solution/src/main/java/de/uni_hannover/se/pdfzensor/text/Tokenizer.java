@@ -62,7 +62,8 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	public Tokenizer(@NotNull T... tokens) {
 		this.tokens = Validate.noNullElements(tokens);
 		final var regex = Arrays.stream(tokens).map(T::getRegex).collect(Collectors.joining(")|(", "(", ")"));
-		pattern = Pattern.compile(regex, Pattern.DOTALL);
+		pattern = Pattern.compile(String.format("(?:%s)(?=%s|$)", regex, regex), Pattern.DOTALL);
+		LOGGER.debug("Initialized tokenizer with the pattern: {}", pattern::pattern);
 		setupParser();
 	}
 	
