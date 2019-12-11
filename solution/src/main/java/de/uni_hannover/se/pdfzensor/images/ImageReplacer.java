@@ -39,10 +39,6 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	final List<Rectangle2D> rects = new ArrayList<>();
 	
-	/**
-	 * A {@link PDPageContentStream} contains the ContentStream of the actual page
-	 */
-	private PDPageContentStream pageContentStream;
 	
 	/**
 	 * The Constructor of {@link ImageReplacer}, which is responsible for preparing the {@link PDFStreamEngine}.
@@ -55,6 +51,7 @@ public class ImageReplacer extends PDFStreamEngine {
 		addOperator(new Save());
 		addOperator(new Restore());
 		addOperator(new SetMatrix());
+		addOperator(new Concatenate());
 	}
 	
 	/**
@@ -71,10 +68,15 @@ public class ImageReplacer extends PDFStreamEngine {
 		
 		this.processPage(page);
 		
+		var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, true);
+		pageContentStream.saveGraphicsState();
+		pageContentStream.close();
+		
 		pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true);
+		pageContentStream.restoreGraphicsState();
 		pageContentStream.setStrokingColor(Color.DARK_GRAY);
 		pageContentStream.setLineWidth(2);
-		drawPictureCensorBox();
+		drawPictureCensorBox(pageContentStream);
 		pageContentStream.close();
 		return this.rects;
 		
@@ -96,7 +98,6 @@ public class ImageReplacer extends PDFStreamEngine {
 			PDXObject xobject = getResources().getXObject(objectName);
 			// check if the object is an image object
 			if (xobject instanceof PDImageXObject) {
-				//PDImageXObject image = (PDImageXObject) xobject;
 				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
 				LOGGER.info("Image [{}]", objectName.getName());
 				LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
@@ -106,10 +107,20 @@ public class ImageReplacer extends PDFStreamEngine {
 				rects.add(new Rectangle2D.Float(ctmNew.getTranslateX(), ctmNew.getTranslateY(),
 												ctmNew.getScalingFactorX(),
 												ctmNew.getScalingFactorY()));
-				//((PDImageXObject) xobject).setBitsPerComponent(0);
 			} else if (xobject instanceof PDFormXObject) {
 				PDFormXObject form = (PDFormXObject) xobject;
-				showForm(form);
+				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
+				LOGGER.info("Image [{}]", objectName.getName());
+				LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
+							ctmNew.getTranslateY());
+				LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
+							ctmNew.getScalingFactorY());
+				var bounds = form.getBBox();
+				rects.add(new Rectangle2D.Float(
+						ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
+						ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY(),
+						ctmNew.getScalingFactorX() * bounds.getWidth(),
+						ctmNew.getScalingFactorY() * bounds.getHeight()));
 			}
 		} else {
 			super.processOperator(operator, operands);
@@ -122,7 +133,7 @@ public class ImageReplacer extends PDFStreamEngine {
 	 *
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
-	private void drawPictureCensorBox() throws IOException {
+	private void drawPictureCensorBox(PDPageContentStream pageContentStream) throws IOException {
 		for (var rect : this.rects) {
 			pageContentStream.addRect((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(),
 									  (float) rect.getHeight());

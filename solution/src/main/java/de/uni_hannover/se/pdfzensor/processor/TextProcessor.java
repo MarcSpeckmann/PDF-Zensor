@@ -59,6 +59,18 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
+	 * Ends the current document and gives it to the Handler.
+	 *
+	 * @param document The PDF document that has been processed.
+	 * @throws IOException if the document is in invalid state.
+	 */
+	@Override
+	protected void endDocument(final PDDocument document) throws IOException {
+		handler.endDocument(document);
+		super.endDocument(document);
+	}
+	
+	/**
 	 * Start the current page and pass it to the handler.
 	 *
 	 * @param page The page we are about to process.
@@ -68,17 +80,6 @@ public class TextProcessor extends PDFStreamProcessor {
 	protected void startPage(final @NotNull PDPage page) throws IOException {
 		super.startPage(page);
 		handler.beginPage(document, page, getCurrentPageNo());
-	}
-	
-	/**
-	 * Checks whether the current text should be censored. If so, shouldBeCensored is set to true.
-	 *
-	 * @param text Text position to be processed.
-	 */
-	@Override
-	protected void processTextPosition(final TextPosition text) {
-		shouldBeCensored = handler.shouldCensorText(text);
-		super.processTextPosition(text);
 	}
 	
 	/**
@@ -94,15 +95,14 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * Ends the current document and gives it to the Handler.
+	 * Checks whether the current text should be censored. If so, shouldBeCensored is set to true.
 	 *
-	 * @param document The PDF document that has been processed.
-	 * @throws IOException if the document is in invalid state.
+	 * @param text Text position to be processed.
 	 */
 	@Override
-	protected void endDocument(final PDDocument document) throws IOException {
-		handler.endDocument(document);
-		super.endDocument(document);
+	protected void processTextPosition(final TextPosition text) {
+		shouldBeCensored = handler.shouldCensorText(text);
+		super.processTextPosition(text);
 	}
 	
 	/**
@@ -118,11 +118,13 @@ public class TextProcessor extends PDFStreamProcessor {
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
 		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
-		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
-			writer.writeTokens(operands);
-			writer.writeToken(operator);
+		if (!DRAW_OBJECT.equals(operator.getName())) {
+			if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
+				writer.writeTokens(operands);
+				writer.writeToken(operator);
+			}
+			super.processOperator(operator, operands);
 		}
-		super.processOperator(operator, operands);
 		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored) {
 			writer.writeTokens(operands);
 			writer.writeToken(operator);
