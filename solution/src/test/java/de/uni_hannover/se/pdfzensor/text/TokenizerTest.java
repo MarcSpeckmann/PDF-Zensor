@@ -1,40 +1,47 @@
 package de.uni_hannover.se.pdfzensor.text;
 
-import org.junit.jupiter.api.Test;
+import de.uni_hannover.se.pdfzensor.testing.argumentproviders.TokenProvider;
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TokenizerTest {
 	
-	@Test
-	void callSST() {
-		simpleStreamTokenization(new String[]{"helloworld"}, new String[]{"hello", "world"});
-		simpleStreamTokenization(new String[]{"h", "e", "l", "l", "o", "w", "o", "r", "l", "d"}, new String[]{"hello", "world"});
-		simpleStreamTokenization(new String[]{"w", "o", "r", "l", "d"}, new String[]{"world"});
-		simpleStreamTokenization(new String[]{"w", "o", "r", "l", "d", "y"}, new String[]{"worldy"});
-		simpleStreamTokenization(new String[]{"he", "lloworld", "ywo", "rld"}, new String[]{"hello", "worldy", "world"});
-	}
-	
-	void simpleStreamTokenization(String[] input, String[] tokenized) {
-		var tokenizer = new Tokenizer<>(TestToken.values());
+	@ParameterizedTest
+	@ArgumentsSource(TokenProvider.class)
+	void simpleStreamTokenization(@NotNull String[][] inputs, String[] tokenized) {
 		var ref = new Object() {
 			int index = 0;
 		};
-		tokenizer.setHandler((token, payload, type) -> {
-			assertEquals(tokenized[ref.index], token);
-			ref.index++;
-		});
-		
-		for (String str : input)
-			assertDoesNotThrow(() -> tokenizer.input(str, Collections.nCopies(str.length(), new Object())));
+		try (var tokenizer = new Tokenizer<>(TestToken.values())) {
+			tokenizer.setHandler((token, payload, type) -> {
+				assertTrue(ArrayUtils.isArrayIndexValid(tokenized, ref.index));
+				assertEquals(tokenized[ref.index], token);
+				ref.index++;
+			});
+			
+			for (String[] input : inputs) {
+				for (String str : input)
+					assertDoesNotThrow(() -> tokenizer.input(str, Collections.nCopies(str.length(), new Object())));
+				assertTrue(tokenizer.tryFlush());
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		assertEquals(ref.index, tokenized.length);
 	}
 	
 	
 	enum TestToken implements TokenDef {
-		HELLO("hello", Color.black), WORLD("world", Color.white), WORLDY("worldy", Color.gray);
+		HELLO("hello", Color.black), WORLD("world", Color.white), WORLDS("worlds", Color.gray), SAY("say", Color.blue);
 		Color color;
 		String regex;
 		
