@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider.expExpressions;
@@ -26,15 +27,17 @@ public class SettingsProvider implements ArgumentsProvider {
 	 * require further testing when combining configuration file and command-line arguments (tests in
 	 * <code>CLArgsTest</code> should suffice).
 	 *
-	 * @param out  The output file which should be converted into an argument.
-	 * @param lvl  The verbosity level which should be converted into an argument.
-	 * @param mode The mode which should be converted into an argument.
-	 * @param exp  The expressions as a string-string pair
+	 * @param out   The output file which should be converted into an argument.
+	 * @param lvl   The verbosity level which should be converted into an argument (zero equals {@link Level#WARN}).
+	 * @param mode  The mode which should be converted into an argument.
+	 * @param exp   The expressions as a string-string pair.
+	 * @param quiet The boolean specifying silencing the logging output.
 	 * @return The given values converted into valid command-line arguments including an input.
 	 */
 	@NotNull
 	private static String[] createCLArguments(@Nullable String out, final int lvl, @Nullable Mode mode,
-											  @Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp) {
+											  @Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
+											  boolean quiet) {
 		var arguments = new ArrayList<String>();
 		
 		arguments.add("sample.pdf");
@@ -62,6 +65,8 @@ public class SettingsProvider implements ArgumentsProvider {
 					arguments.add(pair.getRight());
 			}
 		}
+		if (quiet)
+			arguments.add("-q");
 		
 		return arguments.toArray(new String[0]);
 	}
@@ -77,51 +82,52 @@ public class SettingsProvider implements ArgumentsProvider {
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();
 		for (var expList : expExpressions) {
-			list.add(Arguments.of(null,
-								  createCLArguments(null, -1, null, expList),
-								  "sample.pdf", null, null, null, new ArrayList<>(expList), null));
-			
-			// Mode set by CLArgs
-			list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-								  createCLArguments(null, -1, Mode.MARKED, expList),
-								  "sample.pdf", "censoredFile.pdf", Level.DEBUG, Mode.MARKED, new ArrayList<>(expList),
-								  null));
-			// output overwritten by CLArgs
-			list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-								  createCLArguments("clArgsOutput.pdf", -1, Mode.UNMARKED, expList),
-								  "sample.pdf", "clArgsOutput.pdf", Level.DEBUG, Mode.UNMARKED,
-								  new ArrayList<>(expList), null));
-			// verbosity overwritten by CLArgs
-			list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-								  createCLArguments(null, 6, null, expList),
-								  "sample.pdf", "censoredFile.pdf", Level.TRACE, null, new ArrayList<>(expList), null));
-			// verbosity downscaled
-			list.add(Arguments.of("valid/high_verbosity.json",
-								  createCLArguments("out.pdf", 5, null, expList),
-								  "sample.pdf", "out.pdf", Level.DEBUG, Mode.ALL, new ArrayList<>(expList), null));
-			// nested output
-			list.add(Arguments.of("valid/mode_casesDiffer.json",
-								  createCLArguments(null, -1, null, expList),
-								  "sample.pdf", "nested" + File.separatorChar + "output.pdf", null, Mode.UNMARKED,
-								  new ArrayList<>(expList), null));
-			// with default colors
+			for (boolean quiet : List.of(true, false)) {
+				list.add(Arguments.of(null, createCLArguments(null, -1, null, expList, quiet), "sample.pdf", null, null,
+									  null, new ArrayList<>(expList), null, quiet));
+				
+				// Mode set by CLArgs
+				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
+									  createCLArguments(null, -1, Mode.MARKED, expList, quiet), "sample.pdf",
+									  "censoredFile.pdf", Level.DEBUG, Mode.MARKED, new ArrayList<>(expList), null,
+									  quiet));
+				// output overwritten by CLArgs
+				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
+									  createCLArguments("clArgsOutput.pdf", -1, Mode.UNMARKED, expList, quiet),
+									  "sample.pdf", "clArgsOutput.pdf", Level.DEBUG, Mode.UNMARKED,
+									  new ArrayList<>(expList), null, quiet));
+				// verbosity overwritten by CLArgs
+				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
+									  createCLArguments(null, 3, null, expList, quiet), "sample.pdf",
+									  "censoredFile.pdf", Level.TRACE, null, new ArrayList<>(expList), null, quiet));
+				// verbosity downscaled
+				list.add(Arguments
+								 .of("valid/high_verbosity.json", createCLArguments("out.pdf", 2, null, expList, quiet),
+									 "sample.pdf", "out.pdf", Level.DEBUG, Mode.ALL, new ArrayList<>(expList), null,
+									 quiet));
+				// nested output
+				list.add(Arguments.of("valid/mode_casesDiffer.json", createCLArguments(null, -1, null, expList, quiet),
+									  "sample.pdf", "nested" + File.separatorChar + "output.pdf", null, Mode.UNMARKED,
+									  new ArrayList<>(expList), null, quiet));
+			}
+			// default colors in config
 			for (var e : expectedColorsForConfig.entrySet()) {
 				var expExpressionsList = new ArrayList<>(expList);
 				var configList = expectedExpressionForConfig.get(e.getKey());
 				if (configList != null)
 					expExpressionsList.addAll(configList);
 				list.add(Arguments.of(e.getKey(),
-									  createCLArguments(null, -1, null, expList),
-									  "sample.pdf", null, null, null, expExpressionsList, e.getValue()));
+									  createCLArguments(null, -1, null, expList, false),
+									  "sample.pdf", null, null, null, expExpressionsList, e.getValue(), false));
 			}
-			// with expressions in config
+			// expressions in config
 			for (var e : expectedExpressionForConfig.entrySet()) {
 				var expExpressionsList = new ArrayList<>(expList);
 				expExpressionsList.addAll(e.getValue());
 				list.add(Arguments.of(e.getKey(),
-									  createCLArguments(null, -1, null, expList),
+									  createCLArguments(null, -1, null, expList, false),
 									  "sample.pdf", null, null, null, expExpressionsList,
-									  expectedColorsForConfig.get(e.getKey())));
+									  expectedColorsForConfig.get(e.getKey()), false));
 			}
 		}
 		

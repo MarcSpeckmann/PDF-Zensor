@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -61,13 +60,13 @@ public final class Settings {
 	 *
 	 * @param configPath the path to the config file (SHOULD BE REMOVED LATER)
 	 * @param args       The commandline arguments.
-	 * @throws IOException If the configuration file could not be parsed.
 	 */
-	public Settings(@Nullable String configPath, @NotNull final String... args) throws IOException {
+	public Settings(@Nullable String configPath, @NotNull final String... args) {
 		final var clArgs = CLArgs.fromStringArray(args);
 		final var config = getConfig(configPath);
-		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.OFF);
-		Logging.init(verbose);
+		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.WARN);
+		Logging.init(clArgs.getQuiet() ? Level.OFF : verbose);
+		
 		
 		input = clArgs.getInput();
 		output = checkOutput(
@@ -84,10 +83,15 @@ public final class Settings {
 		logger.log(Level.DEBUG, "\tConfig-file: {}", configPath);
 		logger.log(Level.DEBUG, "\tOutput-file: {}", output);
 		logger.log(Level.DEBUG, "\tLogger verbosity: {}", verbose);
+		logger.log(Level.DEBUG, "\tQuiet: {}", clArgs.getQuiet());
+		logger.log(Level.DEBUG, "\tCensor mode: {}", mode);
 		logger.log(Level.DEBUG, "\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.log(Level.DEBUG, "\tExpressions");
 		for (var exp : expressions)
 			logger.log(Level.DEBUG, "\t\t{}", exp);
+		logger.log(Level.DEBUG, "\tDefault Colors");
+		for (var col : Objects.requireNonNullElse(config.getDefaultColors(), new Color[1]))
+			logger.log(Level.DEBUG, "\t\t{}", () -> colorToString(col));
 	}
 	
 	/**

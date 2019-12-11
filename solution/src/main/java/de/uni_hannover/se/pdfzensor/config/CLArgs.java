@@ -95,8 +95,8 @@ final class CLArgs {
 		private static String hexColor = null; // not used, expressions are parsed by a custom consumer
 		
 		/**
-		 * The top of the stack always contains the regex when {@link #consumeParameters(Stack, ArgSpec, CommandSpec)}
-		 * is called because this consumer follows <code>-e</code> or <code>--expression</code> respectively.
+		 * The top of the stack always contains the regex when this method is called because this consumer follows
+		 * <code>-e</code> or <code>--expression</code> respectively.
 		 * <br>
 		 * The argument on the stack after the call may be a color code that follows the regex or another argument, in
 		 * which case the regex is added to the expressions list without a color and the rest of the stack remains for
@@ -110,6 +110,10 @@ final class CLArgs {
 				expressions.add(new Expression(reg, (Color) null));
 		}
 	}
+	
+	/** A boolean indicating that the logger output should not be shown. */
+	@Option(names = {"-q", "--quiet"}, arity = "0", description = {"Silence the logging."})
+	private boolean quiet = false;
 	
 	/**
 	 * CLArgs' default constructor should be hidden to the public as {@link #fromStringArray(String...)} should be used
@@ -172,14 +176,14 @@ final class CLArgs {
 	}
 	
 	/**
-	 * Returns verbosity level given by the user.
+	 * Returns verbosity level given by the user. Starts at {@link Level#WARN} for no given <code>-v</code>.
 	 *
 	 * @return null or the level of logging verbosity if verbose was given in the arguments.
 	 */
 	@Contract(pure = true)
 	@Nullable
 	Level getVerbosity() {
-		return verbose == null ? null : VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, verbose.length)];
+		return verbose == null ? null : VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, verbose.length + 3)];
 	}
 	
 	/**
@@ -208,5 +212,15 @@ final class CLArgs {
 	@NotNull
 	Expression[] getExpressions() {
 		return expressions.toArray(new Expression[0]);
+	}
+	
+	/**
+	 * Returns whether or not quiet mode should be enabled for logging events. Overwrites the verbosity setting.
+	 *
+	 * @return True if the logging output should not be shown, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean getQuiet() {
+		return this.quiet;
 	}
 }
