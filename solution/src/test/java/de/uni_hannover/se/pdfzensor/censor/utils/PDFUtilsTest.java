@@ -89,14 +89,14 @@ class PDFUtilsTest {
 										   input.spaceWidth, input.unicode, input.charCodes, input.font, input.fontSize,
 										   input.fontSizeInPt);
 		try {
-			assertEquals(Math.round(expected.getHeight()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getHeight()));
-			assertEquals(Math.round(expected.getWidth()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getWidth()));
-			assertEquals(Math.round(expected.getX()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getX()));
-			assertEquals(Math.round(expected.getY()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getY()));
+			assertEquals(Math.floor(expected.getHeight()),
+						 Math.floor(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getHeight()));
+			assertEquals(Math.floor(expected.getWidth()),
+						 Math.floor(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getWidth()));
+			assertEquals(Math.floor(expected.getX()),
+						 Math.floor(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getX()));
+			assertEquals(Math.floor(expected.getY()),
+						 Math.floor(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getY()));
 		} catch (IOException e) {
 			fail("IOException: font of TextPosition object couldn't be loaded correctly");
 		}

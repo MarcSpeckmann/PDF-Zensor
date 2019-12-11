@@ -28,16 +28,13 @@ import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextM
 @SuppressWarnings("WeakerAccess") // this class is member of the public API
 public final class Annotations {
 	private static final Logger LOGGER = Logging.getLogger();
+	//to make the annotations larger so that the FIRST glyph fit in
+	private static final double X_SHIFT = 1;
 	
 	@NotNull
 	private List<Rectangle2D> highlights;
 	@NotNull
 	private List<Rectangle2D> links;
-	
-	//to make the annotations (especially microsoft edge annotations) larger so that the glyphs fit in
-	private final static double X_SHIFT = 0.1;
-	private final static double HEIGHT_INCREASE = 0.1;
-	private final static double WIDTH_INCREASE = 1.2;
 	
 	
 	public Annotations() {
@@ -46,7 +43,7 @@ public final class Annotations {
 		links = List.of();
 	}
 	
-	//TODO: move to PDFUtils.java
+	
 	/**
 	 * Translates the given PDF annotation into a bounding box {@link Rectangle2D}.
 	 *
@@ -66,9 +63,10 @@ public final class Annotations {
 			}
 			rectangle = path.getBounds2D();
 		}
-		return new Rectangle2D.Double(rectangle.getX() - X_SHIFT, rectangle.getY(),
-									  rectangle.getWidth() + WIDTH_INCREASE,
-									  rectangle.getHeight() + HEIGHT_INCREASE);
+		return new Rectangle2D.Double(Math.ceil(rectangle.getX() - X_SHIFT),
+									  Math.ceil(rectangle.getY()),
+									  Math.ceil(rectangle.getWidth()),
+									  Math.ceil(rectangle.getHeight()));
 	}
 	
 	/**

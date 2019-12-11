@@ -64,7 +64,10 @@ public final class PDFUtils {
 			at.scale(.001, .001);
 		Rectangle2D r = new Rectangle2D.Double(0, 0, totalWidth, bb.getHeight() + bb.getLowerLeftY());
 		Shape s = at.createTransformedShape(r);
-		return s.getBounds2D();
+		var rectangle = s.getBounds2D();
+		return new Rectangle2D.Double(Math.floor(rectangle.getX()), Math.floor(rectangle.getY()),
+							   Math.floor(rectangle.getWidth()),
+							   Math.floor(rectangle.getHeight()));
 	}
 	
 }
