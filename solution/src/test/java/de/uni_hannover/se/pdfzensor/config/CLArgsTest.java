@@ -35,11 +35,13 @@ class CLArgsTest {
 	 * @param verbosity   The expected logger verbosity as specified in args.
 	 * @param mode        The expected censoring mode as specified in args.
 	 * @param expressions The expected expressions as a list of string-string pairs as specified in args.
+	 * @param quiet       The expected logger mode (whether or not it is expected to be silenced).
 	 */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}")
 	@ArgumentsSource(CLArgumentProvider.class)
 	void testArgsParser(@NotNull String[] args, @NotNull File input, @Nullable File output, @Nullable Level verbosity,
-						@Nullable Mode mode, @NotNull ArrayList<ImmutablePair<String, String>> expressions) {
+						@Nullable Mode mode, @NotNull ArrayList<ImmutablePair<String, String>> expressions,
+						boolean quiet) {
 		var clArgs = CLArgs.fromStringArray(args);
 		assertEquals(input, clArgs.getInput());
 		assertEquals(output, clArgs.getOutput());
@@ -54,5 +56,6 @@ class CLArgsTest {
 			assertEquals(expectedExp.getRegex(), actualExp.getRegex());
 			assertEquals(expectedExp.getColor(), actualExp.getColor());
 		}
+		assertEquals(quiet, clArgs.getQuiet());
 	}
 }
