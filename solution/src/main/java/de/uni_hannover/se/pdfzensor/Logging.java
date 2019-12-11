@@ -58,7 +58,7 @@ public final class Logging {
 	 */
 	@NotNull
 	public static Logger getLogger() {
-		init(Level.OFF); //Won't do anything if the logging is initialized already
+		init(Level.ERROR); //Won't do anything if the logging is initialized already
 		//Taken from LogManager#getLogger
 		return LogManager.getLogger(StackLocatorUtil.getCallerClass(2));
 	}
