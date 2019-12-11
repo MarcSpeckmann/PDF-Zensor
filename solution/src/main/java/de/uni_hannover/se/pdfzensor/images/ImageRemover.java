@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * TODO add javaDoc
  */
 public final class ImageRemover {
-	static void remove(PDDocument doc) throws IOException {
+	static public void remove(PDDocument doc) throws IOException {
 		var myListMap = new ArrayList<AbstractMap.SimpleEntry<Integer, org.apache.pdfbox.cos.COSName>>();
 		for (var i = 0; i < doc.getNumberOfPages(); ++i) {
 			for (var name : doc.getPage(i).getResources().getXObjectNames()) {
