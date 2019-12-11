@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -39,17 +38,24 @@ class TokenizerTest {
 		assertEquals(ref.index, tokenized.length);
 	}
 	
-	
+	/**
+	 * The TestToken is a simple implementation of {@link TokenDef} and should only be used by unit-tests.
+	 */
 	enum TestToken implements TokenDef {
-		HELLO("hello", Color.black), WORLD("world", Color.white), WORLDS("worlds", Color.gray), SAY("say", Color.blue);
-		Color color;
-		String regex;
+		HELLO("hello"), WORLD("world"), WORLDS("worlds"), SAY("says?");
+		private String regex;
 		
-		TestToken(String regex, Color color) {
-			this.color = color;
+		/**
+		 * Initializes a new token-type using the given regex. The regex describes what text-patterns should be
+		 * considered instances of this token.
+		 *
+		 * @param regex the regex that identifies instances of this token.
+		 */
+		TestToken(String regex) {
 			this.regex = regex;
 		}
 		
+		/** {@inheritDoc} */
 		@Override
 		public String getRegex() {
 			return regex;
