@@ -3,7 +3,6 @@ package de.uni_hannover.se.pdfzensor.images;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-
 import javax.naming.OperationNotSupportedException;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -24,9 +23,9 @@ public final class ImageRemover {
 	/**
 	 * Static function that will remove the Images {@link PDImageXObject} from the given {@link PDDocument}.
 	 * @param doc {@link PDDocument} that will have its Images {@link PDImageXObject} removed.
-	 * @throws IOException
+	 * @throws IOException when there is an error at retrieving the {@link PDXObject}.
 	 */
-	static public void remove(PDDocument doc) throws IOException {
+	public static void remove(PDDocument doc) throws IOException {
 		var myListMap = new ArrayList<AbstractMap.SimpleEntry<Integer, org.apache.pdfbox.cos.COSName>>();
 		for (var i = 0; i < doc.getNumberOfPages(); ++i) {
 			for (var name : doc.getPage(i).getResources().getXObjectNames()) {
