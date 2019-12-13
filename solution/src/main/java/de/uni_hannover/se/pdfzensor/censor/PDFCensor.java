@@ -17,6 +17,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -32,19 +33,18 @@ import java.util.function.Predicate;
  * annotations and the mode
  */
 public final class PDFCensor implements PDFHandler {
-	/** The maximum horizontal gap between two glyphs to still combine their bounds. */
-	private static final float MAX_BRIDGED_WIDTH = 10.8f;
-	
-	/** The maximum vertical gap between two glyphs to still combine their bounds. */
-	private static final float MAX_BRIDGED_HEIGHT = 10.8f;
-	
 	/**
-	 * The maximum difference in the x (or y) coordinate to still consider glyphs to be on the same line (or same
-	 * column). Exists to keep the censor bars (to prevent the combination of bounding boxes into one single box
-	 * censoring the whole page). Slightly increasing this value will also combine sub- and superscript text into the
-	 * censor bar.
+	 * The permitted deviation of the width/height of two rectangles from their union's width/height to still consider
+	 * that union an extension of those rectangles.
+	 * <br>
+	 * Should be a number between 0 and 1 (values greater than or equal to 1 will always allow the rectangles to be
+	 * unified, values smaller than or equal to 0 will never allow them to be unified). The higher the number the
+	 * greater the tolerance, meaning two rectangles are sooner considered an horizontal/vertical extension of each
+	 * other if this value is greater.
+	 *
+	 * @see #getExtended(Rectangle2D, Rectangle2D)
 	 */
-	private static final float MAX_COORDINATE_DIFF = 1f;
+	private static final float DEVIATION_TOLERANCE = .2f;
 	
 	private static final Logger LOGGER = Logging.getLogger();
 	
@@ -127,21 +127,23 @@ public final class PDFCensor implements PDFHandler {
 	
 	/**
 	 * Either adds the given <code>pair</code> to the <code>boundingBoxes</code> list or extends the last element of the
-	 * list to also cover the bounds of the given pair (if the bounds are within the margin and the color is the same).
+	 * list to also cover the bounds of the given pair (if the bounds are an extension of the previous bounds and the
+	 * color is the same).
 	 * <br>
-	 * Whether or not the previous bounds will be extended by the bounds of the given pair depends on the result of
-	 * {@link #areAdjacent(Rectangle2D, Rectangle2D)} when called with the two rectangles.
+	 * Whether or not the previous bounds will be extended depends on the result of {@link #getExtended(Rectangle2D,
+	 * Rectangle2D)} when called with the two rectangles.
 	 *
 	 * @param pair The pair to include in the <code>boundingBoxes</code> list.
+	 * @see #getExtended(Rectangle2D, Rectangle2D)
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final ImmutablePair<Rectangle2D, Color> pair) {
 		if (!boundingBoxes.isEmpty()) {
 			var bb = pair.getLeft();
 			var last = boundingBoxes.get(boundingBoxes.size() - 1);
-			var l = last.getLeft();
-			if (last.getRight().equals(pair.getRight()) && areAdjacent(l, bb)) {
+			Rectangle2D union = null;
+			if (last.getRight().equals(pair.getRight()) && (union = getExtended(last.getLeft(), bb)) != null) {
 				boundingBoxes.remove(last);
-				bb.setRect(l.createUnion(bb));
+				bb.setRect(union);
 			}
 		}
 		boundingBoxes.add(pair);
@@ -202,27 +204,32 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * Uses {@link #MAX_BRIDGED_WIDTH}, {@link #MAX_BRIDGED_HEIGHT} and {@link #MAX_COORDINATE_DIFF} to determine if two
-	 * given rectangles are horizontally or vertically adjacent to each other.
+	 * Tests if a union created out of the two given rectangles is a horizontal or vertical extension out of those
+	 * rectangles. Should that be the case the union is returned, however, should the union not be a horizontal or
+	 * vertical extension, null will be returned.
 	 * <br>
-	 * The rectangles are considered horizontally adjacent if their center y-coordinates are within the range of {@link
-	 * #MAX_COORDINATE_DIFF} and the horizontal gap between them is smaller than or equal to {@link
-	 * #MAX_BRIDGED_WIDTH}.
+	 * Two rectangles are considered a horizontal extension of each other if both of their heights are deviating no more
+	 * than {@link #DEVIATION_TOLERANCE} % from the height of their union. Likewise, two rectangles are considered a
+	 * vertical extension of each other if both of their widths are deviating no more than {@link #DEVIATION_TOLERANCE}
+	 * % from the width of their union.
 	 * <br>
-	 * Similarly, they are considered vertically adjacent if their center x-coordinates are within the range of {@link
-	 * #MAX_COORDINATE_DIFF} and the vertical gap between them is smaller than or equal to {@link #MAX_BRIDGED_HEIGHT}.
+	 * Note that deviating over the width/height of the union is impossible because a union is always at least the size
+	 * of each of the rectangles out of which it was constructed.
 	 *
 	 * @param r1 the first {@link Rectangle2D}.
 	 * @param r2 the second {@link Rectangle2D}.
-	 * @return true if the rectangles are horizontally or vertically adjacent to each other, false otherwise.
+	 * @return A {@link Rectangle2D} which is the union of both given rectangles or null.
+	 * @see Rectangle2D#createUnion(Rectangle2D)
 	 */
-	private static boolean areAdjacent(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
+	@Nullable
+	private static Rectangle2D getExtended(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
 		Validate.isTrue(ObjectUtils.allNotNull(r1, r2), "The rectangles may not be null.");
-		final var xDiff = Math.abs(r1.getCenterX() - r2.getCenterX());
-		final var yDiff = Math.abs(r1.getCenterY() - r2.getCenterY());
-		final var horizontalGap = xDiff - (r1.getWidth() + r2.getWidth()) / 2f;
-		final var verticalGap = yDiff - (r1.getHeight() + r2.getHeight()) / 2f;
-		return ((yDiff <= MAX_COORDINATE_DIFF && horizontalGap <= MAX_BRIDGED_WIDTH) ||
-				(xDiff <= MAX_COORDINATE_DIFF && verticalGap <= MAX_BRIDGED_HEIGHT));
+		final var comb = r1.createUnion(r2);
+		final var percentage = 1 - DEVIATION_TOLERANCE;
+		final var widthTolerance = comb.getWidth() * percentage;
+		final var heightTolerance = comb.getHeight() * percentage;
+		final var sameColumn = r1.getWidth() > widthTolerance && r2.getWidth() > widthTolerance;
+		final var sameLine = r1.getHeight() > heightTolerance && r2.getHeight() > heightTolerance;
+		return (sameLine || sameColumn) ? comb : null;
 	}
 }
