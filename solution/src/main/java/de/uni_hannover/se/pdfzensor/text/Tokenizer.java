@@ -28,11 +28,22 @@ import java.util.stream.Stream;
  * @param <T> the token-implementation to be used by the tokenizer
  * @param <C> the payload-type
  */
+@SuppressWarnings("WeakerAccess")
 public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushable {
 	/** The Logger-instance instances of this class should log their output into. */
 	private static final Logger LOGGER = Logging.getLogger();
+	/** The T[] represents the token-definitions as they were passed to {@link #Tokenizer(TokenDef[])}. */
 	@NotNull
 	private final T[] tokens;
+	/**
+	 * The pattern contains a regex that is used to find occurrences of the {@link #tokens} within the input. To enable
+	 * resolving which token was responsible for the match, each token-definition gets its own capture group. When a
+	 * match was found we can just search for the matching capture group and index it into the {@link #tokens}. To allow
+	 * for that the order of the tokens' regex has to coincide with the order of the token-definitions in {@link
+	 * #tokens}.
+	 *
+	 * @see #onTokenEncountered(MatchResult)
+	 */
 	@NotNull
 	private final Pattern pattern;
 	/**
@@ -44,7 +55,7 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	private final Queue<C> payload = new ConcurrentLinkedQueue<>();
 	/**
 	 * OutputStream and InputStream form a pipe. Data gets written to the output-stream via {@link #input(String,
-	 * Collection)} and the scanner reads from the input-stream.
+	 * Collection)} and the scanner reads from the input-stream inside the scanner-thread ({@link #thread}).
 	 */
 	private PipedOutputStream outputStream;
 	/** Stores the current scanner-thread that is responsible for waiting for input and tokenizing it. */
@@ -65,9 +76,7 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	public Tokenizer(@NotNull T... tokens) {
 		this.tokens = Validate.noNullElements(tokens);
 		final var regex = Arrays.stream(tokens).map(T::getRegex).collect(Collectors.joining(")|(", "(", ")"));
-		// This would match without gaps but can not handle invalid tokens
-		// pattern = Pattern.compile(String.format("(?:%s)(?=%s|$)", regex, regex), Pattern.DOTALL);
-		pattern = Pattern.compile(regex+"|.", Pattern.DOTALL);
+		pattern = Pattern.compile(regex + "|.", Pattern.DOTALL);
 		LOGGER.debug("Initialized tokenizer with the pattern: {}", pattern::pattern);
 		setupParser();
 	}
@@ -105,15 +114,22 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	
 	/**
 	 * <b><i>Do not call this method manually! It is meant to be a callback only.</i></b><br>
+	 * This method is called when a token was encountered by the scanner-thread ({@link #thread}. It contains the
+	 * information about the found token-match in form of a {@link MatchResult} and is responsible for handling the
+	 * match. "Handling" includes finding the first capturing-group that is not null and indexing that index into the
+	 * token-definitions. This works because we generate our {@link #pattern} such that each token has its own capture
+	 * group and these are ordered according to the ordering in the token-definition array ({@link #tokens}). When a
+	 * group is found (or <code>null</code> for when the character could not be matched), the correct amount of payload
+	 * is dequeued from {@link #payload} via {@link #pop(int)} and the {@link #handler} is called.
 	 *
-	 * @param result
+	 * @param result the match result representing the found token in the input-stream. May not be null.
 	 */
 	private void onTokenEncountered(@NotNull MatchResult result) {
 		Objects.requireNonNull(result);
+		//group is 1-based (0 marks the entire match) so we have to subtract one to make it 0-based and index into tokens
 		T token = IntStream.rangeClosed(1, result.groupCount()).filter(i -> Objects.nonNull(result.group(i)))
-							 .mapToObj(g -> tokens[g - 1]).findFirst().orElse(null);
+						   .mapToObj(g -> tokens[g - 1]).findFirst().orElse(null);
 		var resultPayload = pop(result.group().length());
-		//group is 1-based (0 marks the entire match) so we have to subtract one to make it 0-based
 		handler.accept(result.group(), resultPayload, token);
 	}
 	
@@ -179,12 +195,26 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		return success;
 	}
 	
+	/**
+	 * The input-method should be used to pass data into the tokenizer. Via the {@link #outputStream}-End of the pipe
+	 * the data is passed into the scanner-thread ({@link #thread}) where it is matched. The payload at index
+	 * <code>i</code> corresponds to the character at index <code>i</code> in the data. Once a character was matched it
+	 * is passed to the {@link #handler} with its correlating payload.
+	 *
+	 * @param data    the input-text that should be tokenized. Not <code>null</code>.
+	 * @param payload the payload of the data. When the handler is called the payload corresponding to the token is
+	 *                passed back. Not <code>null</code>.
+	 * @throws IOException              if an I/O error occurs.
+	 * @throws NullPointerException     if data or payload are <code>null</code>.
+	 * @throws IllegalArgumentException if data.length() and payload.size() are not equal.
+	 * @see #setHandler(TriConsumer)
+	 */
 	public void input(@NotNull String data, @NotNull Collection<? extends C> payload) throws IOException {
 		Objects.requireNonNull(data);
 		Objects.requireNonNull(payload);
-		Validate.validState(data.length() == payload.size(),
-							String.format("Data length (%d) and payload size (%d) do not match for data: %s",
-										  data.length(), payload.size(), data));
+		Validate.isTrue(data.length() == payload.size(),
+						String.format("Data length (%d) and payload size (%d) do not match for data: \"%s\"",
+									  data.length(), payload.size(), data));
 		this.payload.addAll(payload);
 		outputStream.write(data.getBytes());
 	}
@@ -192,7 +222,11 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	
 	/**
 	 * Sets a new handler to handle parsed tokens. Overwrites an existing one if set. Removes the handler if null was
-	 * passed.
+	 * passed. The handler has to take 3 arguments: a {@link String} containing the value of the matched token, a {@link
+	 * List<C>} containing the payload of each character of the token, and a nullable {@link T} that represents the
+	 * token-definition that was matched. It is guaranteed that the length of the String and the List is the same and
+	 * the order of the payload in the list corresponds to the character-order in the String. The token-definition is
+	 * null if no token could be matched.
 	 *
 	 * @param handler the new handler or null to just remove the old one
 	 */
