@@ -20,14 +20,14 @@ public final class PDFCensorUnmarkedArgumentProvider implements ArgumentsProvide
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();
 		
-		//in case there is a Markup Annotation
+		// in case there is a Markup Annotation
 		// both elements should be combined
 		list.add(Arguments.arguments(new String[]{getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPosition.pdf"),"-u"},
 									 new Rectangle2D.Double[]{
 											 new Rectangle2D.Double(0, 0, 20, 20),
 											 new Rectangle2D.Double(25, 0, 20, 20)},
 									 1));
-		//dummy test to check if it works even it if there are no Markup Annotation
+		// dummy test to check if it works even it if there are no Markup Annotations
 		// element 0 and 1 should be combined, 2 and 3 should both remain on their own (different colors)
 		// 3 elements at the end.
 		list.add(Arguments.arguments(new String[]{getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPositionLinks.pdf"),"-u"},

@@ -44,7 +44,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 *
 	 * @param input                   The input PDF-file to check.
 	 * @param uncombinedBoundingBoxes The rectangle of the TextPosition in the input PDF-file that has to be censored at
-	 *                                the End.
+	 *                                the end.
 	 * @param combinedBoundingBoxesNr The expected length of the bounds-pair list at the end of a page after all
 	 *                                combinations have been applied.
 	 * @throws IOException If the document could not be loaded.
@@ -83,7 +83,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	}
 	
 	/**
-	 * checks if a element isn't Marked
+	 * checks if a element isn't marked
 	 *
 	 * @return true iff the TextPosition is not marked up
 	 */
@@ -144,7 +144,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 		
 		/*checks if the the list of the bounds is being combined correctly*/
 		Assertions.assertEquals(combinedBoundingBoxesNr, list.size(),
-								"the number of the combined BoundingBoxes must equals the excepted one");
+								"the number of the combined BoundingBoxes must equal the expected one");
 		
 		properCensor.endPage(doc, page, pageNum);
 		
@@ -190,7 +190,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 		/* tests when a new Box is being added*/
 		if (actual) {
 			Assertions.assertTrue(sizeAfter > 0,
-								  "the Bounding Boxes list must not be Empty after a TextPosition has been censored");
+								  "the Bounding Boxes list must not be empty after a TextPosition has been censored");
 			
 			/* when the colors are different*/
 			if ((lastBoundsBefore != null) && !lastBoundsBefore.getRight().equals(lastBoundsAfter.getRight())) {
