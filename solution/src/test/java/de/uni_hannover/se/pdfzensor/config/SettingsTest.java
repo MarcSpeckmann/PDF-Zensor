@@ -63,15 +63,7 @@ class SettingsTest {
 		if (output != null)
 			assertEquals(output, settings.getOutput());
 		
-		var rootLogger = getRootLogger();
-		assertTrue(rootLogger.isPresent());
-		assertNotNull(rootLogger.get().getLevel());
-		if (quiet)
-			assertEquals(Level.OFF, rootLogger.get().getLevel());
-		else if (verbosity != null)
-			assertEquals(verbosity, rootLogger.get().getLevel());
-		else
-			assertTrue(rootLogger.get().getLevel().isLessSpecificThan(Level.WARN));
+		assertExpectedVerbosity(verbosity, quiet);
 		
 		assertEquals(Objects.requireNonNullElse(mode, Mode.ALL), settings.getMode());
 		
@@ -118,15 +110,7 @@ class SettingsTest {
 		if (output != null)
 			assertEquals(output.getName(), settings.getOutput().getName());
 		
-		var rootLogger = getRootLogger();
-		assertTrue(rootLogger.isPresent());
-		assertNotNull(rootLogger.get().getLevel());
-		if (quiet)
-			assertEquals(Level.OFF, rootLogger.get().getLevel());
-		else if (verbosity != null)
-			assertEquals(verbosity, rootLogger.get().getLevel());
-		else
-			assertTrue(rootLogger.get().getLevel().isLessSpecificThan(Level.WARN));
+		assertExpectedVerbosity(verbosity, quiet);
 		
 		assertNotNull(settings.getMode());
 		if (mode != null)
@@ -178,5 +162,25 @@ class SettingsTest {
 				expColor = defColors[usedColors++];
 			assertEquals(expColor, actual[i].getColor());
 		}
+	}
+	
+	/**
+	 * Asserts that the root logger and console logger have the expected levels set and are initialized.
+	 *
+	 * @param verbosity The expected verbosity level of the console logger.
+	 * @param quiet     The expected value for quiet.
+	 */
+	private void assertExpectedVerbosity(@Nullable Level verbosity, boolean quiet) {
+		var rootLogger = getRootLogger();
+		assertTrue(rootLogger.isPresent());
+		assertEquals(Level.ALL, rootLogger.get().getLevel());
+		Level consoleLoggerLevel = getPrivateField(Logging.class, "consoleLevel");
+		assertNotNull(consoleLoggerLevel);
+		if (quiet)
+			assertEquals(Level.OFF, consoleLoggerLevel);
+		else if (verbosity != null)
+			assertEquals(verbosity, consoleLoggerLevel);
+		else
+			assertTrue(consoleLoggerLevel.isLessSpecificThan(Level.WARN));
 	}
 }

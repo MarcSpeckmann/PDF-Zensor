@@ -38,7 +38,8 @@ class LoggingTest {
 		assertFalse(isLoggingInitialized());
 		Logging.init(level);
 		assertTrue(isLoggingInitialized());
-		assertEquals(level, getRootLogger().orElseThrow().getLevel());
+		assertEquals(Level.ALL, getRootLogger().orElseThrow().getLevel());
+		assertEquals(level, getPrivateField(Logging.class, "consoleLevel"));
 		Logging.deinit();
 		assertFalse(isLoggingInitialized());
 	}
@@ -55,7 +56,8 @@ class LoggingTest {
 		assertFalse(isLoggingInitialized());
 		assertNotNull(Logging.getLogger());
 		assertTrue(isLoggingInitialized());
-		assertEquals(Level.ERROR, getRootLogger().orElseThrow().getLevel());
+		assertEquals(Level.ALL, getRootLogger().orElseThrow().getLevel());
+		assertEquals(Level.ERROR, getPrivateField(Logging.class, "consoleLevel"));
 		Logging.deinit();
 		assertFalse(isLoggingInitialized());
 	}

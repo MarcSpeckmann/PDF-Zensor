@@ -113,7 +113,7 @@ public final class TestUtility {
 	
 	/**
 	 * Returns the private method of the given class that has the provided name and parameter-types. Throws a {@link
-	 * RuntimeException} if any error occurs.
+	 * RuntimeException} if an error occurs.
 	 *
 	 * @param cls        the class of which to retrieve the private method. Not null.
 	 * @param methodName the name of the method that should be retrieved. Not null.
@@ -128,6 +128,28 @@ public final class TestUtility {
 			method.setAccessible(true);
 			return method;
 		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Returns the private field of the given class that has the provided name. Throws a {@link RuntimeException} if an
+	 * error occurs.
+	 *
+	 * @param cls       the class of which to retrieve the private field. Not null.
+	 * @param fieldName the name of the field that should be retrieved. Not null.
+	 * @param <T>       the type of the field which will be retrieved.
+	 * @return The field with the given name and the type T.
+	 * @throws RuntimeException if the field could not be retrieved or cast to the type.
+	 */
+	@SuppressWarnings("unchecked")
+	@NotNull
+	public static <T> T getPrivateField(@NotNull Class<?> cls, @NotNull String fieldName) {
+		try {
+			var field = cls.getDeclaredField(fieldName);
+			field.setAccessible(true);
+			return ((Class<T>) field.getGenericType()).cast(field.get(cls));
+		} catch (NoSuchFieldException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}
