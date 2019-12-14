@@ -19,6 +19,8 @@ public class TokenProvider implements ArgumentsProvider {
 		var args = new ArrayList<Arguments>();
 		//Single pass (no flushing)
 		args.add(Arguments.of(new String[][]{{}}, new String[]{}));
+		args.add(Arguments.of(new String[][]{{"world"}}, new String[]{"world"}));
+		args.add(Arguments.of(new String[][]{{"worlds"}}, new String[]{"worlds"}));
 		args.add(Arguments.of(new String[][]{{"helloworld"}}, new String[]{"hello", "world"}));
 		args.add(Arguments.of(new String[][]{{"h", "e", "l", "l", "o", "w", "o", "r", "l", "d"}},
 							  new String[]{"hello", "world"}));
@@ -26,12 +28,17 @@ public class TokenProvider implements ArgumentsProvider {
 		args.add(Arguments.of(new String[][]{{"w", "o", "r", "l", "d", "s"}}, new String[]{"worlds"}));
 		args.add(Arguments.of(new String[][]{{"he", "lloworld", "swo", "rld"}},
 							  new String[]{"hello", "worlds", "world"}));
-		args.add(Arguments.of(new String[][]{{"worldsay"}}, new String[]{"world", "say"}));
-		args.add(Arguments.of(new String[][]{{"worldsays"}}, new String[]{"world", "says"}));
+		//This may not be tokenized as world-say but as worlds-a-y because worlds should be matched first.
+		args.add(Arguments.of(new String[][]{{"worldsay"}}, new String[]{"worlds", "a", "y"}));
 		//Two passes (flushing twice)
 		args.add(Arguments.of(new String[][]{{"hello"}, {"world"}}, new String[]{"hello", "world"}));
 		args.add(Arguments.of(new String[][]{{"hello"}, {"worlds"}}, new String[]{"hello", "worlds"}));
 		args.add(Arguments.of(new String[][]{{"hello"}, {}, {}, {"worlds"}, {}}, new String[]{"hello", "worlds"}));
+		
+		//Unmatched chars
+		args.add(Arguments.of(new String[][]{{"he"}, {"llo"}}, new String[]{"h", "e", "l", "l", "o"}));
+		args.add(Arguments.of(new String[][]{{"hello_world"}}, new String[]{"hello", "_", "world"}));
+		args.add(Arguments.of(new String[][]{{"world says"}}, new String[]{"world", " ", "says"}));
 		return args.stream();
 	}
 }

@@ -29,29 +29,32 @@ import java.util.stream.Stream;
  * @param <C> the payload-type
  */
 public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushable {
+	/** The Logger-instance instances of this class should log their output into. */
 	private static final Logger LOGGER = Logging.getLogger();
+	@NotNull
 	private final T[] tokens;
+	@NotNull
 	private final Pattern pattern;
-	/**
-	 * OutputStream and InputStream form a pipe. Data gets written to the output-stream via {@link #input(String,
-	 * Collection)} and the scanner reads from the input-stream.
-	 */
-	private PipedOutputStream outputStream;
-	private Thread thread;
 	/**
 	 * Payload contains a queue with the payload for each token that is currently in the stream. It is mandatory that
 	 * they payload of any character that gets added to the stream is added to this queue. When a character got matched
 	 * and is removed from the stream it's corresponding payload is removed from the queue to be passed to the handler.
 	 */
 	@NotNull
-	private Queue<C> payload = new ConcurrentLinkedQueue<>();
-	
+	private final Queue<C> payload = new ConcurrentLinkedQueue<>();
+	/**
+	 * OutputStream and InputStream form a pipe. Data gets written to the output-stream via {@link #input(String,
+	 * Collection)} and the scanner reads from the input-stream.
+	 */
+	private PipedOutputStream outputStream;
+	/** Stores the current scanner-thread that is responsible for waiting for input and tokenizing it. */
+	private Thread thread;
 	/**
 	 * Holds the current handler-callback that will be called once a token was read. By default it is {@link
 	 * #emptyHandle(String, List, TokenDef)}.
 	 */
 	@NotNull
-	private TriConsumer<String, List<C>, T> handler = this::emptyHandle;
+	private TriConsumer<String, List<C>, @Nullable T> handler = this::emptyHandle;
 	
 	/**
 	 * Creates a new tokenizer from the passed tokens.
@@ -62,7 +65,9 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	public Tokenizer(@NotNull T... tokens) {
 		this.tokens = Validate.noNullElements(tokens);
 		final var regex = Arrays.stream(tokens).map(T::getRegex).collect(Collectors.joining(")|(", "(", ")"));
-		pattern = Pattern.compile(String.format("(?:%s)(?=%s|$)", regex, regex), Pattern.DOTALL);
+		// This would match without gaps but can not handle invalid tokens
+		// pattern = Pattern.compile(String.format("(?:%s)(?=%s|$)", regex, regex), Pattern.DOTALL);
+		pattern = Pattern.compile(regex+"|.", Pattern.DOTALL);
 		LOGGER.debug("Initialized tokenizer with the pattern: {}", pattern::pattern);
 		setupParser();
 	}
@@ -74,6 +79,7 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	private void setupParser() {
 		var latch = new CountDownLatch(1); //a latch used to wait for the initialization to be done in thread
 		thread = new Thread(() -> {
+			LOGGER.debug("Initializing in the scanner-thread");
 			try {
 				outputStream = new PipedOutputStream();
 				var inputStream = new PipedInputStream(outputStream);
@@ -85,7 +91,8 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 			} catch (IOException e) {
 				LOGGER.fatal("An error occurred while tokenizing", e);
 			}
-		});
+		}, "Token-Scanner");
+		LOGGER.debug("Starting the scanner-thread");
 		thread.start();
 		try {
 			latch.await();
@@ -93,6 +100,7 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 			LOGGER.warn("Waiting for the thread to initialize got interrupted", e);
 			Thread.currentThread().interrupt();
 		}
+		LOGGER.debug("Tokenizer initialized and thread started");
 	}
 	
 	/**
@@ -102,14 +110,11 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	 */
 	private void onTokenEncountered(@NotNull MatchResult result) {
 		Objects.requireNonNull(result);
-		int group = IntStream.rangeClosed(1, result.groupCount()).filter(i -> Objects.nonNull(result.group(i)))
-							 .findFirst()
-							 .orElseThrow(//This case should be impossible
-										  () -> new RuntimeException(
-												  "The token matched anything but no capture group"));
+		T token = IntStream.rangeClosed(1, result.groupCount()).filter(i -> Objects.nonNull(result.group(i)))
+							 .mapToObj(g -> tokens[g - 1]).findFirst().orElse(null);
 		var resultPayload = pop(result.group().length());
 		//group is 1-based (0 marks the entire match) so we have to subtract one to make it 0-based
-		handler.accept(result.group(), resultPayload, tokens[group - 1]);
+		handler.accept(result.group(), resultPayload, token);
 	}
 	
 	/**
@@ -122,20 +127,28 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		return Stream.generate(payload::remove).limit(count).collect(Collectors.toUnmodifiableList());
 	}
 	
+	/**
+	 * Closes the parser and reopens it. This triggers the current input to be matched and thus the handler being called
+	 * on it.
+	 *
+	 * @throws IOException If an I/O error occurs
+	 */
 	@Override
 	public void flush() throws IOException {
+		LOGGER.debug("Flushing the tokenizer...");
 		close();
 		setupParser();
 	}
 	
 	/**
 	 * Closes all streams and other resources associated with the tokenizer. Waits for the scanner-thread to close down
-	 * before returning.
+	 * before returning. A closed closed tokenizer may be reopened by calling {@link #flush()}.
 	 *
-	 * @throws IOException if an I/O Error occurs
+	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
 	public void close() throws IOException {
+		LOGGER.debug("Closing the tokenizer...");
 		outputStream.close();
 		try {
 			thread.join();
@@ -143,14 +156,24 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 			Thread.currentThread().interrupt();
 			LOGGER.warn("Failed to join thread", e);
 		}
+		payload.clear();
+		thread = null;
+		outputStream = null;
 	}
 	
+	/**
+	 * Tries to {@link #flush()} the tokenizer. If that throws an {@link IOException} false is returned. On success true
+	 * is returned.
+	 *
+	 * @return Returns true if {@link #flush()} was called successfully (nothing was thrown). False otherwise.
+	 * @see #flush()
+	 */
 	public boolean tryFlush() {
 		boolean success = false;
 		try {
 			flush();
 			success = true;
-		} catch (Exception e) {
+		} catch (IOException e) {
 			LOGGER.error("Failed to flush the current stream", e);
 		}
 		return success;
@@ -173,14 +196,14 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	 *
 	 * @param handler the new handler or null to just remove the old one
 	 */
-	public void setHandler(@Nullable TriConsumer<String, List<C>, T> handler) {
+	public void setHandler(@Nullable TriConsumer<String, List<C>, @Nullable T> handler) {
 		this.handler = Optional.ofNullable(handler).orElse(this::emptyHandle);
 	}
 	
 	/**
 	 * A dummy-(/empty) handler. Should be used as a default value for {@link #handler} instead of null.
 	 */
-	private void emptyHandle(String value, List<C> payload, T token) {
+	private void emptyHandle(String value, List<C> payload, @Nullable T token) {
 		/*Intentionally left blank*/
 	}
 }

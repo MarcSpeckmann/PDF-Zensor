@@ -1,8 +1,12 @@
 package de.uni_hannover.se.pdfzensor.text;
 
+import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.TokenProvider;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -12,6 +16,24 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TokenizerTest {
+	
+	@BeforeAll
+	static void initLogging() {
+		Logging.init(Level.DEBUG);
+	}
+	
+	@Test
+	void testDefaultHandler() {
+		try (var tokenizer = new Tokenizer<>(TestToken.values())) {
+			tokenizer.input("hello", Collections.nCopies(5, new Object()));
+			assertTrue(tokenizer.tryFlush());
+			
+			assertDoesNotThrow(() -> tokenizer.setHandler(null));
+			tokenizer.input("hello", Collections.nCopies(5, new Object()));
+		} catch (Exception e) {
+			fail(e);
+		}
+	}
 	
 	@ParameterizedTest
 	@ArgumentsSource(TokenProvider.class)
@@ -33,16 +55,16 @@ class TokenizerTest {
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			fail(e);
 		}
-		assertEquals(ref.index, tokenized.length);
+		assertEquals(tokenized.length, ref.index);
 	}
 	
 	/**
 	 * The TestToken is a simple implementation of {@link TokenDef} and should only be used by unit-tests.
 	 */
 	enum TestToken implements TokenDef {
-		HELLO("hello"), WORLD("world"), WORLDS("worlds"), SAY("says?");
+		HELLO("hello"), SAY("says?"), WORLDS("worlds"), WORLD("world");
 		private String regex;
 		
 		/**
