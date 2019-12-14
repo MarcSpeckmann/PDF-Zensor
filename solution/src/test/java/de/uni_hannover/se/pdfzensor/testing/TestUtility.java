@@ -3,7 +3,9 @@ package de.uni_hannover.se.pdfzensor.testing;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -88,6 +90,23 @@ public final class TestUtility {
 	}
 	
 	/**
+	 * Compares the bounds of two rectangles with consideration to a small error margin.
+	 *
+	 * @param expected The expected rectangle bounds.
+	 * @param actual   The actual rectangle bounds.
+	 * @return True if the bounds of the rectangles are equal according to the margin, false otherwise.
+	 */
+	public static boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual) {
+		var range = 1 / 1000000.0;
+		Objects.requireNonNull(expected);
+		Objects.requireNonNull(actual);
+		return (range > Math.abs(expected.getX() - actual.getX())) &&
+			   (range > Math.abs(expected.getY() - actual.getY())) &&
+			   (range > Math.abs(expected.getWidth() - actual.getWidth())) &&
+			   (range > Math.abs(expected.getHeight() - actual.getHeight()));
+	}
+	
+	/**
 	 * Performs a join on the two streams. That means that for each value-combinations of the both streams the joiner is
 	 * called. The results are given in the resulting stream.
 	 *
@@ -115,6 +134,26 @@ public final class TestUtility {
 			return method;
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * retrieve a private field from a given instance
+	 * @param aClass the class that we get the private field from
+	 * @param fieldName the name of the field that should be return
+	 * @param instance the instance of the class
+	 * @param dummyField an dummy instance of the wanted field so it can be casted (DONT USE VAR AS INPUT)
+	 * @param <T>  the content type of class.
+	 * @param <K>  the content type of Field.
+	 * @return the Wanted Private Field
+	 */
+	public static <T, K> K getPrivateParameter(@NotNull Class<?> aClass, @NotNull String fieldName, @NotNull T instance, @Nullable K dummyField) {
+		try {
+			var parameter = aClass.getDeclaredField(fieldName);
+			parameter.setAccessible(true);
+			return (K) parameter.get(instance);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw  new RuntimeException("Could not retrieve the " + fieldName ,e);
 		}
 	}
 }

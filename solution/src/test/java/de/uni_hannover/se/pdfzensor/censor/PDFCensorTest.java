@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -91,24 +91,7 @@ class PDFCensorTest implements PDFHandler {
 		PDPage censoredPage = doc.getPage(0);
 		//Assertions.assertEquals(doc.get);
 	}
-	
-	/**
-	 * Compares the bounds of two rectangles with consideration to a small error margin.
-	 *
-	 * @param expected The expected rectangle bounds.
-	 * @param actual   The actual rectangle bounds.
-	 * @return True if the bounds of the rectangles are equal according to the margin, false otherwise.
-	 */
-	private boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual) {
-		var range = 1 / 1000000.0;
-		Objects.requireNonNull(expected);
-		Objects.requireNonNull(actual);
-		return (range > Math.abs(expected.getX() - actual.getX())) &&
-			   (range > Math.abs(expected.getY() - actual.getY())) &&
-			   (range > Math.abs(expected.getWidth() - actual.getWidth())) &&
-			   (range > Math.abs(expected.getHeight() - actual.getHeight()));
-	}
-	
+
 	/**
 	 * Returns the list of bounds-color pairs of the instance.
 	 *

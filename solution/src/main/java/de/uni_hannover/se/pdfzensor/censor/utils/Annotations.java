@@ -28,8 +28,6 @@ import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextM
 @SuppressWarnings("WeakerAccess") // this class is member of the public API
 public final class Annotations {
 	private static final Logger LOGGER = Logging.getLogger();
-	//to make the annotations larger so that the FIRST glyph fit in
-	private static final double X_SHIFT = 1;
 	
 	@NotNull
 	private List<Rectangle2D> highlights;
@@ -63,10 +61,7 @@ public final class Annotations {
 			}
 			rectangle = path.getBounds2D();
 		}
-		return new Rectangle2D.Double(Math.ceil(rectangle.getX() - X_SHIFT),
-									  Math.ceil(rectangle.getY()),
-									  Math.ceil(rectangle.getWidth()),
-									  Math.ceil(rectangle.getHeight()));
+		return rectangle;
 	}
 	
 	/**
@@ -138,7 +133,7 @@ public final class Annotations {
 	 * @return true if the given rect entirely fits into at least one rect of {@link #highlights} otherwise false
 	 */
 	public boolean isMarked(@NotNull Rectangle2D rect) {
-		return isMarked(rect, MarkCriterion.CONTAIN);
+		return isMarked(rect, MarkCriterion.INTERSECT);
 	}
 	
 	/**

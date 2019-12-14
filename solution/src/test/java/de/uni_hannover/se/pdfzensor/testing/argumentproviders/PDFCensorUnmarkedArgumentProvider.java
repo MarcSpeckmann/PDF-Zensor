@@ -11,23 +11,26 @@ import java.util.stream.Stream;
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 
-public final class PDFCensorBoundingBoxProvider implements ArgumentsProvider {
+/**
+ * ArgumentsProvider for PDFCensorUnmarkedTest
+ */
+public final class PDFCensorUnmarkedArgumentProvider implements ArgumentsProvider {
+	
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();
 		
-		// element 0 and 1 should be combined, 2 should remain on its own:
-		// 2 elements at the end.
-		list.add(Arguments.arguments(getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPosition.pdf"),
+		//in case there is a Markup Annotation
+		// both elements should be combined
+		list.add(Arguments.arguments(new String[]{getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPosition.pdf"),"-u"},
 									 new Rectangle2D.Double[]{
 											 new Rectangle2D.Double(0, 0, 20, 20),
-											 new Rectangle2D.Double(25, 0, 20, 20),
-											 new Rectangle2D.Double(0, 30, 20, 20)},
-									 2));
-		
-		// element 0 and 1 should be combined, 2 and 3 should both remain on their own (different colors):
+											 new Rectangle2D.Double(25, 0, 20, 20)},
+									 1));
+		//dummy test to check if it works even it if there are no Markup Annotation
+		// element 0 and 1 should be combined, 2 and 3 should both remain on their own (different colors)
 		// 3 elements at the end.
-		list.add(Arguments.arguments(getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPositionLinks.pdf"),
+		list.add(Arguments.arguments(new String[]{getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPositionLinks.pdf"),"-u"},
 									 new Rectangle2D.Double[]{
 											 new Rectangle2D.Double(0, 0, 20, 20),
 											 new Rectangle2D.Double(25, 0, 20, 20),

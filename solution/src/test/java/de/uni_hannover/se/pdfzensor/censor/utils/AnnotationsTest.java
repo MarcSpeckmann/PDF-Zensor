@@ -107,7 +107,7 @@ class AnnotationsTest {
 		// given rectangle fully fits into the rectangle of the highlight
 		Assertions.assertTrue(anno.isMarked(new Rectangle(0, 0, 50, 50)));
 		// given rectangle is wider than the rectangle of the highlight so does not fully fit into it
-		Assertions.assertFalse(anno.isMarked(new Rectangle(0, 0, 200, 50)));
+		Assertions.assertFalse(anno.isMarked(new Rectangle(100, 200, 200, 50)));
 	}
 	
 	/* helper method for creating a virtual, blank PDF document with only one annotation link with
