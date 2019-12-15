@@ -4,17 +4,21 @@ import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.censor.utils.Annotations;
 import de.uni_hannover.se.pdfzensor.censor.utils.MetadataRemover;
 import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
+import de.uni_hannover.se.pdfzensor.config.Expression;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
+import de.uni_hannover.se.pdfzensor.text.Tokenizer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -37,12 +41,15 @@ public final class PDFCensor implements PDFHandler {
 	private static final float MAX_BRIDGED_HEIGHT = .5f;
 	
 	private static final Logger LOGGER = Logging.getLogger();
-	
+	/**
+	 * The tokenizer calls {@link #onTokenEncountered(String, List, Expression)} when a token was found and thus enables
+	 * the censor to draw the bounds of characters belonging to this token in the color providing to the token ({@link
+	 * Expression}. The payload of each character is the {@link Rectangle2D} representing its bounds on the page.
+	 */
+	private final Tokenizer<Expression, Rectangle2D> tokenizer;
 	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
-	
 	private Predicate<Rectangle2D> removePredicate;
-	
 	private Annotations annotations = new Annotations();
 	
 	/**
@@ -50,6 +57,8 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	public PDFCensor(@NotNull Settings settings) {
 		Objects.requireNonNull(settings);
+		tokenizer = new Tokenizer<>(settings.getExpressions());
+		tokenizer.setHandler(this::onTokenEncountered);
 		this.removePredicate = rect -> true;
 	}
 	
@@ -86,6 +95,8 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void endPage(PDDocument doc, PDPage page, int pageNum) {
 		try {
+			tokenizer.flush();
+			
 			drawCensorBars(doc, page);
 			page.getAnnotations().clear();
 		} catch (IOException e) {
@@ -100,6 +111,11 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	@Override
 	public void endDocument(PDDocument doc) {
+		try {
+			tokenizer.close();
+		} catch (IOException e) {
+			LOGGER.warn(e);
+		}
 		boundingBoxes = null;
 		MetadataRemover.censorMetadata(doc);
 	}
@@ -110,34 +126,56 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	@Override
 	public boolean shouldCensorText(TextPosition pos) {
-		var censoredPair = getTextPositionInfo(pos).filter(p -> removePredicate.test(p.getLeft()));
-		censoredPair.ifPresent(this::addOrExtendBoundingBoxes);
-		return censoredPair.isPresent();
+		var bounds = getTextPositionInfo(pos).filter(p -> removePredicate.test(p));
+		bounds.ifPresentOrElse(b -> {
+			try {
+				tokenizer.input(pos.getUnicode(), List.of(b));
+			} catch (IOException e) {
+				LOGGER.warn(e);
+			}
+		}, tokenizer::tryFlush);
+		return bounds.isPresent();
 	}
 	
 	/**
-	 * Either adds the given <code>pair</code> to the <code>boundingBoxes</code> list or extends the last element of the
-	 * list to also cover the the bounds of the given pair (if the bounds are within the margin and the color is the
-	 * same).
-	 * <br>
-	 * Whether or not the previous bounds will be extended depends on the coordinates of the glyphs and {@link
-	 * #MAX_BRIDGED_WIDTH} and {@link #MAX_BRIDGED_HEIGHT}.
+	 * <b><i>Do not call this method manually! It is meant to be a callback only.</i></b><br>
+	 * This method is a callback for the tokenizer. It is called when a token was matched (or no match could be found
+	 * for a character). In our case we want to handle this here by filling the bounding-box of the character with the
+	 * respective color (as defined in {@link Expression#getColor()}).
 	 *
-	 * @param pair The pair to include in the <code>boundingBoxes</code> list.
+	 * @param value   The entire value of the token. Not <code>null</code>. (e.g. {@code 123} for {@code [0-9]+})
+	 * @param payload A list containing the payload for each character in the order they occur in the value.
+	 * @param token   The token that got matched. May be <code>null</code> if no match was found.
+	 * @see #tokenizer
+	 * @see Tokenizer#setHandler(TriConsumer)
 	 */
-	private void addOrExtendBoundingBoxes(@NotNull final ImmutablePair<Rectangle2D, Color> pair) {
+	private void onTokenEncountered(String value, @NotNull List<Rectangle2D> payload, @Nullable Expression token) {
+		LOGGER.debug("Found token [{}]: {}", token, value);
+		Objects.requireNonNull(token);
+		payload.forEach(rect -> addOrExtendBoundingBoxes(rect, token.getColor()));
+	}
+	
+	/**
+	 * Either adds the given bounding-box and color to the {@link #boundingBoxes} list or extends the last element of
+	 * the list to also cover the the bounds of the given pair (if the bounds are within the margin and the color is the
+	 * same).<br> Whether or not the previous bounds will be extended depends on the coordinates of the glyphs and
+	 * {@link #MAX_BRIDGED_WIDTH} and {@link #MAX_BRIDGED_HEIGHT}.
+	 *
+	 * @param bb    The bounding-box that should be added to the list of censored bounding-boxes.
+	 * @param color The color in which the provided bounding-box should be censored.
+	 */
+	private void addOrExtendBoundingBoxes(@NotNull final Rectangle2D bb, final Color color) {
 		if (!boundingBoxes.isEmpty()) {
-			var bb = pair.getLeft();
 			var last = boundingBoxes.get(boundingBoxes.size() - 1);
 			var l = last.getLeft();
-			if (last.getRight().equals(pair.getRight()) &&
+			if (last.getRight().equals(color) &&
 				Math.abs(bb.getY() - l.getY()) <= MAX_BRIDGED_HEIGHT &&
 				Math.abs(bb.getX() - (l.getX() + l.getWidth())) <= MAX_BRIDGED_WIDTH) {
 				boundingBoxes.remove(last);
 				bb.setRect(l.createUnion(bb));
 			}
 		}
-		boundingBoxes.add(pair);
+		boundingBoxes.add(new ImmutablePair<>(bb, color));
 	}
 	
 	/**
@@ -147,8 +185,8 @@ public final class PDFCensor implements PDFHandler {
 	 * @param pos The TextPosition to transform into a bounds-color pair.
 	 * @return An optional containing either the bounds-color pair or nothing, if an error occurred.
 	 */
-	private Optional<ImmutablePair<Rectangle2D, Color>> getTextPositionInfo(@NotNull TextPosition pos) {
-		var result = Optional.<ImmutablePair<Rectangle2D, Color>>empty();
+	private Optional<Rectangle2D> getTextPositionInfo(@NotNull TextPosition pos) {
+		var result = Optional.<Rectangle2D>empty();
 		try {
 			var font = pos.getFont();
 			var s = new StringBuilder();
@@ -157,12 +195,7 @@ public final class PDFCensor implements PDFHandler {
 			
 			if (StringUtils.isNotBlank(s)) {
 				var transformed = PDFUtils.transformTextPosition(pos);
-				var color = Color.DARK_GRAY;
-				
-				if (annotations.isLinked(transformed))
-					color = Color.BLUE;
-				
-				result = Optional.of(new ImmutablePair<>(transformed, color));
+				result = Optional.of(transformed);
 			}
 		} catch (IOException e) {
 			LOGGER.log(Level.ERROR, "There was an error handling the font.", e);
