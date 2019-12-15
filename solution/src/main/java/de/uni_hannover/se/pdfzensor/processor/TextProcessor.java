@@ -5,17 +5,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.*;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.Boolean.TRUE;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
 
 
@@ -30,7 +34,7 @@ import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
 public class TextProcessor extends PDFStreamProcessor {
 	private static final Logger LOGGER = Logging.getLogger();
 	private PDFHandler handler;
-	private boolean shouldBeCensored = false;
+	private List<Boolean> shouldBeCensored = new ArrayList<>();
 	
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
@@ -59,6 +63,18 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
+	 * Ends the current document and gives it to the Handler.
+	 *
+	 * @param document The PDF document that has been processed.
+	 * @throws IOException if the document is in invalid state.
+	 */
+	@Override
+	protected void endDocument(final PDDocument document) throws IOException {
+		handler.endDocument(document);
+		super.endDocument(document);
+	}
+	
+	/**
 	 * Start the current page and pass it to the handler.
 	 *
 	 * @param page The page we are about to process.
@@ -68,17 +84,6 @@ public class TextProcessor extends PDFStreamProcessor {
 	protected void startPage(final @NotNull PDPage page) throws IOException {
 		super.startPage(page);
 		handler.beginPage(document, page, getCurrentPageNo());
-	}
-	
-	/**
-	 * Checks whether the current text should be censored. If so, shouldBeCensored is set to true.
-	 *
-	 * @param text Text position to be processed.
-	 */
-	@Override
-	protected void processTextPosition(final TextPosition text) {
-		shouldBeCensored = handler.shouldCensorText(text);
-		super.processTextPosition(text);
 	}
 	
 	/**
@@ -94,15 +99,14 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
-	 * Ends the current document and gives it to the Handler.
+	 * Checks whether the current text should be censored. If so, shouldBeCensored is set to true.
 	 *
-	 * @param document The PDF document that has been processed.
-	 * @throws IOException if the document is in invalid state.
+	 * @param text Text position to be processed.
 	 */
 	@Override
-	protected void endDocument(final PDDocument document) throws IOException {
-		handler.endDocument(document);
-		super.endDocument(document);
+	protected void processTextPosition(final TextPosition text) {
+		shouldBeCensored.add(handler.shouldCensorText(text));
+		super.processTextPosition(text);
 	}
 	
 	/**
@@ -118,14 +122,60 @@ public class TextProcessor extends PDFStreamProcessor {
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
 		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
+		shouldBeCensored.clear();
 		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
 			writer.writeTokens(operands);
 			writer.writeToken(operator);
 		}
 		super.processOperator(operator, operands);
-		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored) {
-			writer.writeTokens(operands);
-			writer.writeToken(operator);
+		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
+			COSArray newOperands;
+			if (SHOW_TEXT.equals(operator.getName()))
+				newOperands = removeCharsFromText(operands, shouldBeCensored);
+			else newOperands = removeCharsFromTextAdjusted(operands, shouldBeCensored);
+			writer.writeTokens(newOperands);
+			writer.writeToken(Operator.getOperator(SHOW_TEXT_ADJUSTED));
 		}
+	}
+	
+	private static COSArray removeCharsFromString(COSString string, PDFont font, List<Boolean> censor) {
+		var newOperands = new COSArray();
+		try (var is = new ByteArrayInputStream(string.getBytes())) {
+			while (is.available() > 0) {
+				int code = font.readCode(is);
+				if (TRUE.equals(censor.remove(0))) {
+					var tj = -font.getWidth(code);
+					if (font.isVertical())
+						tj = -font.getHeight(code);
+					newOperands.add(new COSFloat(tj));
+				} else {
+					newOperands.add(new COSString(font.encode(font.toUnicode(code))));
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.error(e);
+		}
+		return newOperands;
+	}
+	
+	private COSArray removeCharsFromText(List<COSBase> operands, List<Boolean> censor) {
+		var font = getGraphicsState().getTextState().getFont();
+		return removeCharsFromString((COSString) operands.get(0), font, censor);
+	}
+	
+	private COSArray removeCharsFromTextAdjusted(List<COSBase> operands, List<Boolean> censor) {
+		var font = getGraphicsState().getTextState().getFont();
+		var newOperands = new COSArray();
+		
+		var operand = (COSArray) operands.get(0);
+		for (var op : operand) {
+			if (op instanceof COSNumber) {
+				newOperands.add(op);
+			} else if (op instanceof COSString) {
+				var ops = removeCharsFromString((COSString) op, font, censor);
+				newOperands.addAll(ops);
+			}
+		}
+		return newOperands;
 	}
 }
