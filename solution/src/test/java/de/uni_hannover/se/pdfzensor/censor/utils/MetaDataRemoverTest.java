@@ -34,6 +34,12 @@ class MetaDataRemoverTest {
 		}
 	}
 	
+	/** Assert that {@link MetadataRemover} is a utility class. */
+	@Test
+	void testMetadataRemover() {
+		TestUtility.assertIsUtilityClass(MetadataRemover.class);
+	}
+	
 	/**
 	 * Tests if the MetadateRemover does not throw an exception if it is unable to retrieve the document information of
 	 * the given file

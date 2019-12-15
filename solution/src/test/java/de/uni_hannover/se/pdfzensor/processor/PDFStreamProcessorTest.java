@@ -33,6 +33,7 @@ class PDFStreamProcessorTest {
 	}
 	
 	/**
+	 * @param file The file for which the stack from the {@link PDFStreamProcessor} should be tested.
 	 * @throws IOException If there is an error loading the file or properties.
 	 */
 	@ParameterizedTest

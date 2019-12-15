@@ -1,8 +1,10 @@
 package de.uni_hannover.se.pdfzensor.testing;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -10,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.Permission;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -108,13 +111,57 @@ public final class TestUtility {
 		return s1.flatMap(t -> s2.stream().map(k -> joiner.apply(t, k)));
 	}
 	
+	/**
+	 * Returns the private method of the given class that has the provided name and parameter-types. Throws a {@link
+	 * RuntimeException} if any error occurs.
+	 *
+	 * @param cls        the class of which to retrieve the private method. Not null.
+	 * @param methodName the name of the method that should be retrieved. Not null.
+	 * @param paramTypes the types of the parameters. Not null.
+	 * @return the accessible {@link Method}-object that represents the desired method.
+	 * @throws RuntimeException if the method could not be retrieved.
+	 */
+	@NotNull
 	public static Method getPrivateMethod(@NotNull Class<?> cls, @NotNull String methodName, Class<?>... paramTypes) {
 		try {
-			var method = cls.getDeclaredMethod(methodName, paramTypes);
+			var method = cls.getDeclaredMethod(methodName, Validate.noNullElements(paramTypes));
 			method.setAccessible(true);
 			return method;
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Asserts that the provided executable calls {@link System#exit(int)} with the expected error-code.
+	 *
+	 * @param code       the expected exit-code.
+	 * @param executable the executable to test for a call to {@link System#exit(int)} with the desired exit code.
+	 */
+	public static void assertExitCode(int code, Executable executable) {
+		var defaultSecManager = System.getSecurityManager();
+		try {
+			var manager = new SecurityManager() {
+				int actualCode;
+				
+				@Override
+				public void checkPermission(Permission perm) { /* allow anything. */ }
+				
+				@Override
+				public void checkPermission(Permission perm, Object context) { /* allow anything. */ }
+				
+				@Override
+				public void checkExit(final int status) {
+					super.checkExit(status);
+					actualCode = status;
+					throw new SecurityException("Aborting System.exit()");
+				}
+			};
+			System.setSecurityManager(manager);
+			assertThrows(SecurityException.class, executable, "System.exit was not called");
+			assertEquals(code, manager.actualCode, "Wrong exit code");
+		} finally {
+			System.setSecurityManager(defaultSecManager);
 		}
 	}
 }
