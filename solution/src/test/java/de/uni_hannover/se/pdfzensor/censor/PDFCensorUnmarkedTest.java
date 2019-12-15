@@ -51,6 +51,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 */
 	@ParameterizedTest(name = "Run {index}: pdf: {0}, elements: {1}, finalExpectedElements {2}")
 	@ArgumentsSource(PDFCensorUnmarkedArgumentProvider.class)
+	/* Ignore SonarLint error because the constructor is for test cases only */
 	void testPDFCensor(@NotNull String[] input, @NotNull Rectangle2D.Double[] uncombinedBoundingBoxes,
 					   int combinedBoundingBoxesNr) throws IOException {
 		
@@ -70,22 +71,20 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 * a mask function so that the code remains cleaner
 	 */
 	private List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes() {
-		List<ImmutablePair<Rectangle2D, Color>> list = null;
-		return getPrivateParameter(PDFCensor.class, "boundingBoxes", this.properCensor, list);
+		return getPrivateParameter(PDFCensor.class, "boundingBoxes", this.properCensor, null);
 	}
 	
 	/**
 	 * a mask function so that the code remains cleaner
 	 */
 	private Annotations getAnnotation() {
-		Annotations list = null;
-		return getPrivateParameter(PDFCensor.class, "annotations", this.properCensor, list);
+		return getPrivateParameter(PDFCensor.class, "annotations", this.properCensor, null);
 	}
 	
 	/**
 	 * checks if a element isn't marked
 	 *
-	 * @return true iff the TextPosition is not marked up
+	 * @return true if the TextPosition is not marked up
 	 */
 	private boolean isNotMarked(@NotNull final TextPosition pos) {
 		boolean excepted = false;
@@ -104,11 +103,10 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	public void beginDocument(final PDDocument doc) {
 		Objects.requireNonNull(properCensor);
 		
-		/*checks that the list has not been initialized yet */
+		/* checks that the list has not been initialized yet */
 		Assertions.assertNull(getBoundingBoxes(), "boundingBoxes should not be initialized before the document start");
 		
 		properCensor.beginDocument(doc);
-		
 		
 		var list = getBoundingBoxes();
 		Assertions.assertNotNull(list, "boundingBoxes should be initialized after the document start");
@@ -138,18 +136,17 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	public void endPage(final PDDocument doc, final PDPage page, final int pageNum) {
 		Objects.requireNonNull(properCensor);
 		
-		
 		var list = getBoundingBoxes();
 		Assertions.assertNotNull(list, "boundingBoxes should be initialized since the document has been started");
 		
-		/*checks if the the list of the bounds is being combined correctly*/
+		/* checks if the the list of the bounds is being combined correctly */
 		Assertions.assertEquals(combinedBoundingBoxesNr, list.size(),
 								"the number of the combined BoundingBoxes must equal the expected one");
 		
 		properCensor.endPage(doc, page, pageNum);
 		
 		try {
-			/*checks whether the annotation has been deleted*/
+			/* checks whether the annotation has been deleted */
 			Assertions.assertTrue(page.getAnnotations().isEmpty(), "the Annotation were not deleted");
 		} catch (IOException e) {
 			Assertions.fail(e.getMessage());
@@ -175,7 +172,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	public boolean shouldCensorText(final TextPosition pos) {
 		Objects.requireNonNull(properCensor);
 		
-		/* before the TextPosition has been processed*/
+		/* before the TextPosition has been processed */
 		var listBefore = getBoundingBoxes();
 		int sizeBefore = listBefore.size();
 		var lastBoundsBefore = (sizeBefore > 0) ? listBefore.get(sizeBefore - 1) : null;
@@ -183,16 +180,16 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 		boolean actual = properCensor.shouldCensorText(pos);
 		Assertions.assertEquals(isNotMarked(pos), actual, "a textPosition is misidentified");
 		
-		/* after the TextPosition has been processed*/
+		/* after the TextPosition has been processed */
 		var listAfter = getBoundingBoxes();
 		int sizeAfter = listAfter.size();
 		var lastBoundsAfter = (sizeAfter > 0) ? listAfter.get(sizeAfter - 1) : null;
-		/* tests when a new Box is being added*/
+		/* tests when a new Box is being added */
 		if (actual) {
 			Assertions.assertTrue(sizeAfter > 0,
 								  "the Bounding Boxes list must not be empty after a TextPosition has been censored");
 			
-			/* when the colors are different*/
+			/* when the colors are different */
 			if ((lastBoundsBefore != null) && !lastBoundsBefore.getRight().equals(lastBoundsAfter.getRight())) {
 				Assertions.assertEquals(sizeBefore + 1, sizeAfter);
 			}
