@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static java.lang.Math.abs;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * to outsource some functionality to keep the tests comprehensible yet comprehensive.
  */
 public final class TestUtility {
+	public static final double EPSILON = 1e-6;
 	
 	/**
 	 * Asserts that the provided class is not null and a static utility class. A static utility class should contain
@@ -88,22 +90,36 @@ public final class TestUtility {
 		var caller = StackLocatorUtil.getCallerClass(2);
 		return URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8);
 	}
+	/**
+	 * Checks if the two floating-point numbers are approximately equal. Returns true if <code>{@code
+	 * |d1-d2|<Ɛ}</code>.
+	 *
+	 * @param d1      the first number to be compared.
+	 * @param d2      the second number to be compared.
+	 * @param epsilon the precision of the comparison.
+	 * @return true if <code>{@code |d1-d2|<Ɛ}</code>.
+	 * @see #EPSILON
+	 */
+	public static boolean approx(double d1, double d2, double epsilon) {
+		return abs(d1 - d2) < epsilon;
+	}
 	
 	/**
 	 * Compares the bounds of two rectangles with consideration to a small error margin.
 	 *
 	 * @param expected The expected rectangle bounds.
 	 * @param actual   The actual rectangle bounds.
+	 * @param epsilon  the precision of the comparison.
 	 * @return True if the bounds of the rectangles are equal according to the margin, false otherwise.
 	 */
-	public static boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual) {
-		var range = 1 / 1000000.0;
+	public static boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual,
+											   double epsilon) {
 		Objects.requireNonNull(expected);
 		Objects.requireNonNull(actual);
-		return (range > Math.abs(expected.getX() - actual.getX())) &&
-			   (range > Math.abs(expected.getY() - actual.getY())) &&
-			   (range > Math.abs(expected.getWidth() - actual.getWidth())) &&
-			   (range > Math.abs(expected.getHeight() - actual.getHeight()));
+		return approx(expected.getX(), actual.getX(), epsilon) &&
+			   approx(expected.getY(), actual.getY(), epsilon) &&
+			   approx(expected.getWidth(), actual.getWidth(), epsilon) &&
+			   approx(expected.getHeight(), actual.getHeight(), epsilon);
 	}
 	
 	/**

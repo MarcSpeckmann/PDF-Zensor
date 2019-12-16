@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.checkRectanglesEqual;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -164,7 +164,7 @@ class PDFCensorTest implements PDFHandler {
 		var expBounds = elements[element];
 		if (sizeBefore == sizeAfter) // element was extended
 			expBounds = (Rectangle2D.Double) elements[element].createUnion(oldLast.getLeft());
-		Assertions.assertTrue(checkRectanglesEqual(expBounds, newLast.getLeft()));
+		Assertions.assertTrue(checkRectanglesEqual(expBounds, newLast.getLeft(), EPSILON));
 		
 		element++;
 		return actual;

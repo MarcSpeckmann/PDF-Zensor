@@ -202,7 +202,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 				expBounds = (Rectangle2D.Double) uncombinedBoundingBoxes[currTextPosition]
 						.createUnion(lastBoundsBefore.getLeft());
 			}
-			Assertions.assertTrue(checkRectanglesEqual(expBounds, lastBoundsAfter.getLeft()),
+			Assertions.assertTrue(checkRectanglesEqual(expBounds, lastBoundsAfter.getLeft(), EPSILON),
 								  "a new Box should be added correctly");
 			currTextPosition++;
 		}
