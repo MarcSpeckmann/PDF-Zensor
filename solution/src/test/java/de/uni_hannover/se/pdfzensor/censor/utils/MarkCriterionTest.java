@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This test class tests the {@link MarkCriterion#getPredicate} function to compare a rectangle {@link #rect} with a set
@@ -48,15 +47,6 @@ class MarkCriterionTest {
 		RECTANGLES.put(new Boolean[]{false, false}, new Rectangle2D.Double(5, 5, 2, 2)); // (5,5) (7,7)
 		RECTANGLES.put(new Boolean[]{false, false}, new Rectangle2D.Double(2, 2, 2, 2)); // (2,2) (4,4)
 		RECTANGLES.put(new Boolean[]{false, false}, new Rectangle2D.Double(2, 2, -1, -1));    //empty
-	}
-	
-	/**
-	 * tests for {@link MarkCriterion} constructor
-	 */
-	@Test
-	void testMarkCriteria() {
-		assertDoesNotThrow(() -> MarkCriterion.CONTAIN);
-		assertDoesNotThrow(() -> MarkCriterion.INTERSECT);
 	}
 	
 	/**
