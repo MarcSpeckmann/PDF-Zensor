@@ -36,13 +36,13 @@ class PDFCensorMarkedTest implements PDFHandler {
 	private int combinedBoundingBoxesNr;
 	
 	/** The BoundingBoxes of the individual elements of the PDF-file (not combined). */
-	private Rectangle2D.Double[] uncombinedBoundingBoxes;
+	private Rectangle2D[] uncombinedBoundingBoxes;
 	
 	/**
 	 * Checks if the elements in the PDF-file equals the given elements and are added to the bounds-color-list
 	 * correctly.
 	 *
-	 * @param input                   The input PDF-file to check.
+	 * @param file                   The input PDF-file to check.
 	 * @param uncombinedBoundingBoxes The rectangle of the TextPosition in the input PDF-file that has to be censored at
 	 *                                the end.
 	 * @param combinedBoundingBoxesNr The expected length of the bounds-pair list at the end of a page after all
@@ -52,10 +52,10 @@ class PDFCensorMarkedTest implements PDFHandler {
 	@ParameterizedTest(name = "Run {index}: pdf: {0}, elements: {1}, finalExpectedElements {2}")
 	@ArgumentsSource(PDFCensorMarkedArgumentProvider.class)
 	/* Ignore SonarLint error because the constructor is for test cases only and in <code>dummyProcessor.process(doc)</code> */
-	void testPDFCensor(@NotNull String[] input, @NotNull Rectangle2D.Double[] uncombinedBoundingBoxes,
+	void testPDFCensor(@NotNull String file, @NotNull Rectangle2D[] uncombinedBoundingBoxes,
 					   int combinedBoundingBoxesNr) throws IOException {
 		
-		var dummySettings = new Settings(null, input);
+		var dummySettings = new Settings(null, file, "-m");
 		this.properCensor = new PDFCensor(dummySettings);
 		this.currTextPosition = 0;
 		this.uncombinedBoundingBoxes = uncombinedBoundingBoxes;
@@ -196,10 +196,10 @@ class PDFCensorMarkedTest implements PDFHandler {
 			}
 			
 			/* checks if the added Box get combined correctly */
-			Rectangle2D.Double expBounds = uncombinedBoundingBoxes[currTextPosition];
+			Rectangle2D expBounds = uncombinedBoundingBoxes[currTextPosition];
 			/* the last Box was extended*/
 			if (sizeBefore == sizeAfter && lastBoundsBefore != null) {
-				expBounds = (Rectangle2D.Double) uncombinedBoundingBoxes[currTextPosition]
+				expBounds = uncombinedBoundingBoxes[currTextPosition]
 						.createUnion(lastBoundsBefore.getLeft());
 			}
 			Assertions.assertTrue(checkRectanglesEqual(expBounds, lastBoundsAfter.getLeft(), EPSILON),

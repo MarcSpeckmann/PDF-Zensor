@@ -12,7 +12,10 @@ import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PA
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 
 /**
- * ArgumentsProvider for PDFCensorMarkedTest
+ * PDFCensorMarkedArgumentProvider can be used as a value-source for methods taking <code>{@code String, Rectangle2D[],
+ * int}</code> for and argument. The string is the path to the pdf-file that should be read. The Rectangle2D[] are the
+ * uncombined bounding boxes. It is later checked if they - joined - are approximately the same as the actual, censored
+ * bounding-boxes. Lastly the int gives the amount of combined bounding-boxes that are expected.
  */
 public final class PDFCensorMarkedArgumentProvider implements ArgumentsProvider {
 	
@@ -22,17 +25,15 @@ public final class PDFCensorMarkedArgumentProvider implements ArgumentsProvider 
 		
 		// in case there is a Markup Annotation
 		// both elements should be combined
-		list.add(Arguments.arguments(new String[]{getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPosition.pdf"), "-m"},
-									 new Rectangle2D.Double[]{
-											 new Rectangle2D.Double(0, 30, 20, 20)},
+		list.add(Arguments.arguments(getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPosition.pdf"),
+									 new Rectangle2D[]{new Rectangle2D.Double(0, 30, 20, 20)},
 									 1));
 		// dummy test to check if it works even it if there are no Markup Annotations
 		// element 0 and 1 should be combined, 2 and 3 should both remain on their own (different colors)
 		// 3 elements at the end.
-		list.add(
-				Arguments.arguments(new String[]{getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPositionLinks.pdf"), "-m"},
-									new Rectangle2D.Double[]{},
-									0));
+		list.add(Arguments.arguments(getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPositionLinks.pdf"),
+									 new Rectangle2D[]{},
+									 0));
 		return list.stream();
 	}
 }
