@@ -23,16 +23,16 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
  * This class generates arguments for CLArgsTest for testing CLArgs and implements {@link ArgumentsProvider}.
  */
 public class CLArgumentProvider implements ArgumentsProvider {
+	/** List containing lists of pairs, the left element of the pair is a regex and the right element is a hex color */
+	static final ArrayList<ArrayList<ImmutablePair<String, String>>> expExpressions = new ArrayList<>();
 	/** List of template input files. */
 	private static final String[] inputFiles = {"/pdf-files/sample.pdf", "/pdf-files/sample.bla.pdf"};
 	/** List of template output files. */
 	private static final String[] outputFiles = {null, "file.pdf", "src/test/resources/sample.pdf", "weirdSuffix.bla.pdf"};
 	/** List of all possible verbosity levels. */
-	private static final int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length + 1).toArray();
+	private static final int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length - 2).toArray();
 	/** List of all possible mode options. */
 	private static final Mode[] modeOptions = {Mode.MARKED, Mode.UNMARKED, null};
-	/** List containing lists of pairs, the left element of the pair is a regex and the right element is a hex color */
-	static final ArrayList<ArrayList<ImmutablePair<String, String>>> expExpressions = new ArrayList<>();
 	
 	static {
 		final String[] expressionRegex = {"reg0", "reg1", "reg2", "reg3", "reg4"};
@@ -64,17 +64,19 @@ public class CLArgumentProvider implements ArgumentsProvider {
 	 * This method creates an Argument which contains a input file, output file, verbosity level, mode and expressions
 	 * depending on the given method inputs.
 	 *
-	 * @param in   input file
-	 * @param out  output file
-	 * @param lvl  verbosity level
-	 * @param mode mode indicating which argument to set
-	 * @param exp  expressions as a string-string pair
+	 * @param in    input file
+	 * @param out   output file
+	 * @param lvl   verbosity level (zero equals {@link Level#WARN})
+	 * @param mode  mode indicating which argument to set
+	 * @param exp   expressions as a string-string pair
+	 * @param quiet quiet logging
 	 * @return a Argument of created commando line arguments and the method inputs
 	 */
 	@NotNull
 	private static Arguments createArgument(@NotNull String in, @Nullable String out, final int lvl,
 											@Nullable Mode mode,
-											@Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp) {
+											@Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
+											boolean quiet) {
 		var arguments = new ArrayList<String>();
 		arguments.add(in);
 		if (out != null) {
@@ -84,7 +86,7 @@ public class CLArgumentProvider implements ArgumentsProvider {
 		Level verbosity = null;
 		if (lvl > 0) {
 			arguments.add("-" + "v".repeat(lvl));
-			verbosity = VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, lvl)];
+			verbosity = VERBOSITY_LEVELS[fitToArray(VERBOSITY_LEVELS, lvl + 3)];
 		}
 		if (mode != null) {
 			switch (mode) {
@@ -104,17 +106,20 @@ public class CLArgumentProvider implements ArgumentsProvider {
 					arguments.add(pair.getRight());
 			}
 		}
+		if (quiet)
+			arguments.add("-q");
 		// No tests without input file, because this case would be caught by the main.
 		var inFile = new File(in);
 		var outFile = Optional.ofNullable(out).map(File::new).orElse(null);
 		var expressions = Optional.ofNullable(exp).orElse(new ArrayList<>());
-		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile, verbosity, mode, expressions);
+		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile, verbosity, mode, expressions, quiet);
 	}
 	
 	/**
 	 * This method provides an argument stream for a parametrized test. {@link #createArgument(String, String, int,
-	 * Mode, ArrayList)} will be called with each possible combination of {@link #inputFiles}, {@link #outputFiles},
-	 * {@link #verbosityLevels} and the achievable {@link Mode} settings via the command line but without expressions.
+	 * Mode, ArrayList, boolean)} will be called with each possible combination of {@link #inputFiles}, {@link
+	 * #outputFiles}, {@link #verbosityLevels}, achievable {@link Mode} settings via the command line and quiet settings
+	 * but without expressions.
 	 * <br>
 	 * {@link Mode} via the command line: {@link Mode#MARKED} for <code>-m</code>, {@link Mode#UNMARKED} for
 	 * <code>-u</code> or * <code>null</code> for neither (<code>-m</code> or <code>-u</code>).
@@ -133,10 +138,11 @@ public class CLArgumentProvider implements ArgumentsProvider {
 			for (String out : outputFiles)
 				for (int lvl : verbosityLevels)
 					for (Mode mode : modeOptions)
-						list.add(createArgument(in, out, lvl, mode, null));
+						for (boolean quiet : List.of(true, false))
+							list.add(createArgument(in, out, lvl, mode, null, quiet));
 		for (String in : inputFiles)
 			for (var expList : expExpressions)
-				list.add(createArgument(in, null, -1, null, new ArrayList<>(expList)));
+				list.add(createArgument(in, null, -1, null, new ArrayList<>(expList), false));
 		return list.stream();
 	}
 }

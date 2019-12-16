@@ -29,7 +29,7 @@ class PDFUtilsTest {
 	/**
 	 * A Hash Map containing bundled data as TextPosition objects and the corresponding expected output-rectangle
 	 */
-	private static final Map<Rectangle2D, TextPositionValue> TEXTPOSITION = new HashMap<>();
+	private static final Map<Rectangle2D, TextPositionValue> TEXT_POSITION = new HashMap<>();
 	/**
 	 * A Hash Map containing an input-rectangle from type PDRectangle and the corresponding expected output-rectangle
 	 * from type Rectangle2D
@@ -44,11 +44,11 @@ class PDFUtilsTest {
 	
 	static {
 		// test with one char in TextPosition
-		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f),
-						 tpValue1);
+		TEXT_POSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f),
+						  tpValue1);
 		// test with two chars in TextPosition
-		TEXTPOSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f),
-						 tpValue2);
+		TEXT_POSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f),
+						  tpValue2);
 	}
 	
 	static {
@@ -61,12 +61,12 @@ class PDFUtilsTest {
 	
 	/**
 	 * Provides a set of arguments for {@link #transformTextPositionTest(TextPositionValue, Rectangle2D)} generated from
-	 * {@link #TEXTPOSITION}.
+	 * {@link #TEXT_POSITION}.
 	 *
 	 * @return An argument stream containing {@link TextPositionValue}s and {@link Rectangle2D.Float}s.
 	 */
 	private static Stream<Arguments> textPositionProvider() {
-		return TEXTPOSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
+		return TEXT_POSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
 	/**
