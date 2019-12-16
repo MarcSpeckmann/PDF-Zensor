@@ -18,7 +18,7 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** UtilsTest should contain all unit-tests related to {@link Utils}. */
-public class UtilsTest {
+class UtilsTest {
 	
 	/**
 	 * Checks general properties of the {@link Utils}-class.

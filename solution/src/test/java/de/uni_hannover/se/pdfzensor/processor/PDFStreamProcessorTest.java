@@ -36,8 +36,9 @@ class PDFStreamProcessorTest {
 	@Test
 	void pushStreamWhenUninitialized() throws IOException {
 		final var processor = new PDFStreamProcessor();
-		final var pushStreamMethod = TestUtility.getPrivateMethod(processor.getClass(), "pushStream", DoubleBufferedStream.class);
-		assertDoesNotThrow(() -> pushStreamMethod.invoke(processor, (DoubleBufferedStream)null));
+		final var pushStreamMethod = TestUtility
+				.getPrivateMethod(processor.getClass(), "pushStream", DoubleBufferedStream.class);
+		assertDoesNotThrow(() -> pushStreamMethod.invoke(processor, (DoubleBufferedStream) null));
 	}
 	
 	/**

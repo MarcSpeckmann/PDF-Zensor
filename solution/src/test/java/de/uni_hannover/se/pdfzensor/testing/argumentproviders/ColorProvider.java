@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  */
 public class ColorProvider implements ArgumentsProvider {
 	public static final String[] COLOR_PREFIXES = {"0X", "0x", "#"};
-	public static final Map<Color, String[]> COLORS = new HashMap<>();
+	static final Map<Color, String[]> COLORS = new HashMap<>();
 	
 	static {
 		COLORS.put(Color.black, new String[]{"000", "000000"});

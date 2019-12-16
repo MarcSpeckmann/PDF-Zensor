@@ -16,6 +16,7 @@ import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.Objects;
 
@@ -33,19 +34,17 @@ public final class Logging {
 	@SuppressWarnings("squid:S2386") // we can disable it here as this is an enum array and should not be alterable
 	public static final Level[] VERBOSITY_LEVELS =
 			{Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL};
-	
+	/** The path to the log file and its name. */
+	private static final String LOG_FILE = "log.log";
+	/** Log files with a file size (in KBs) meeting or exceeding this value will be overwritten. */
+	private static final int LOG_FILE_SIZE_KB = 1024;
 	/** Stores the context that is currently initialized. */
 	@Nullable
 	private static LoggerContext context = null;
-	
-	/** The path to the log file and its name. */
-	private static final String LOG_FILE = "log.log";
-	
-	/** Log files with a file size (in KBs) meeting or exceeding this value will be overwritten. */
-	private static final int LOG_FILE_SIZE_KB = 1024;
-	
 	/** The level of the console logger. */
+	@SuppressWarnings("FieldCanBeLocal")// the field is retrieved via introspection in the tests
 	@Nullable
+	@TestOnly
 	private static Level consoleLevel = null;
 	
 	/**

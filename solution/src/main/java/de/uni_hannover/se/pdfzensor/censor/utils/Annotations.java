@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils.pdRectToRect2D;
 import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT;
 
 /**
@@ -33,11 +34,13 @@ public final class Annotations {
 	@NotNull
 	private List<Rectangle2D> links;
 	
+	
 	public Annotations() {
 		LOGGER.log(Level.DEBUG, "Initialized a new Annotations-instance");
 		highlights = List.of();
 		links = List.of();
 	}
+	
 	
 	/**
 	 * Translates the given PDF annotation into a bounding box {@link Rectangle2D}.
@@ -47,7 +50,7 @@ public final class Annotations {
 	 */
 	@NotNull
 	private static Rectangle2D getAnnotationRect(@NotNull PDAnnotation annotation) {
-		var rectangle = PDFUtils.pdRectToRect2D(annotation.getRectangle());
+		var rectangle = pdRectToRect2D(annotation.getRectangle());
 		if (annotation instanceof PDAnnotationTextMarkup) {
 			final var quads = ((PDAnnotationTextMarkup) annotation).getQuadPoints();
 			var path = new Path2D.Float();
@@ -130,7 +133,7 @@ public final class Annotations {
 	 * @return true if the given rect entirely fits into at least one rect of {@link #highlights} otherwise false
 	 */
 	public boolean isMarked(@NotNull Rectangle2D rect) {
-		return isMarked(rect, MarkCriterion.CONTAIN);
+		return isMarked(rect, MarkCriterion.INTERSECT);
 	}
 	
 	/**

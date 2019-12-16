@@ -23,6 +23,8 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
  * This class generates arguments for CLArgsTest for testing CLArgs and implements {@link ArgumentsProvider}.
  */
 public class CLArgumentProvider implements ArgumentsProvider {
+	/** List containing lists of pairs, the left element of the pair is a regex and the right element is a hex color */
+	static final ArrayList<ArrayList<ImmutablePair<String, String>>> expExpressions = new ArrayList<>();
 	/** List of template input files. */
 	private static final String[] inputFiles = {"/pdf-files/sample.pdf", "/pdf-files/sample.bla.pdf"};
 	/** List of template output files. */
@@ -31,8 +33,6 @@ public class CLArgumentProvider implements ArgumentsProvider {
 	private static final int[] verbosityLevels = IntStream.range(0, VERBOSITY_LEVELS.length - 2).toArray();
 	/** List of all possible mode options. */
 	private static final Mode[] modeOptions = {Mode.MARKED, Mode.UNMARKED, null};
-	/** List containing lists of pairs, the left element of the pair is a regex and the right element is a hex color */
-	static final ArrayList<ArrayList<ImmutablePair<String, String>>> expExpressions = new ArrayList<>();
 	
 	static {
 		final String[] expressionRegex = {"reg0", "reg1", "reg2", "reg3", "reg4"};
