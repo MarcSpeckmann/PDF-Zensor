@@ -142,16 +142,17 @@ public final class TestUtility {
 	 * @param aClass the class that we get the private field from
 	 * @param fieldName the name of the field that should be return
 	 * @param instance the instance of the class
-	 * @param dummyField an dummy instance of the wanted field so it can be casted (DONT USE VAR AS INPUT)
+	 * @param toCast the class of Field that is wanted so it cant be cast
 	 * @param <T>  the content type of class.
 	 * @param <K>  the content type of Field.
 	 * @return the Wanted Private Field
 	 */
-	public static <T, K> K getPrivateParameter(@NotNull Class<?> aClass, @NotNull String fieldName, @NotNull T instance, @Nullable K dummyField) {
+	public static <T, K> K getPrivateParameter(@NotNull Class<?> aClass, @NotNull String fieldName, @NotNull T instance, @Nullable Class<K> toCast) {
+		Objects.requireNonNull(toCast);
 		try {
 			var parameter = aClass.getDeclaredField(fieldName);
 			parameter.setAccessible(true);
-			return (K) parameter.get(instance);
+			return toCast.cast(parameter.get(instance));
 		} catch (NoSuchFieldException | IllegalAccessException e) {
 			throw  new RuntimeException("Could not retrieve the " + fieldName ,e);
 		}

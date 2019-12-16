@@ -71,14 +71,14 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 * a mask function so that the code remains cleaner
 	 */
 	private List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes() {
-		return getPrivateParameter(PDFCensor.class, "boundingBoxes", this.properCensor, null);
+		return getPrivateParameter(PDFCensor.class, "boundingBoxes", this.properCensor, List.class);
 	}
 	
 	/**
 	 * a mask function so that the code remains cleaner
 	 */
 	private Annotations getAnnotation() {
-		return getPrivateParameter(PDFCensor.class, "annotations", this.properCensor, null);
+		return getPrivateParameter(PDFCensor.class, "annotations", this.properCensor, Annotations.class);
 	}
 	
 	/**
