@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
+
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
 	private PDFCensor properCensor;
@@ -87,23 +89,6 @@ class PDFCensorTest implements PDFHandler {
 		try (final var doc = PDDocument.load(dummySettings.getInput())) {
 			dummyProcessor.process(doc);
 		}
-	}
-	
-	/**
-	 * Compares the bounds of two rectangles with consideration to a small error margin.
-	 *
-	 * @param expected The expected rectangle bounds.
-	 * @param actual   The actual rectangle bounds.
-	 * @return True if the bounds of the rectangles are equal according to the margin, false otherwise.
-	 */
-	private boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual) {
-		var range = 1 / 1000000.0;
-		Objects.requireNonNull(expected);
-		Objects.requireNonNull(actual);
-		return (range > Math.abs(expected.getX() - actual.getX())) &&
-			   (range > Math.abs(expected.getY() - actual.getY())) &&
-			   (range > Math.abs(expected.getWidth() - actual.getWidth())) &&
-			   (range > Math.abs(expected.getHeight() - actual.getHeight()));
 	}
 	
 	@Override
@@ -180,7 +165,7 @@ class PDFCensorTest implements PDFHandler {
 		var expBounds = elements[element];
 		if (sizeBefore == sizeAfter) // element was extended
 			expBounds = (Rectangle2D.Double) elements[element].createUnion(oldLast.getLeft());
-		Assertions.assertTrue(checkRectanglesEqual(expBounds, newLast.getLeft()));
+		Assertions.assertTrue(checkRectanglesEqual(expBounds, newLast.getLeft(), EPSILON));
 		
 		element++;
 		return actual;

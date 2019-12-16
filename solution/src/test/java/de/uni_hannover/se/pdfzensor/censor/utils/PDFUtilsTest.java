@@ -16,9 +16,9 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.checkRectanglesEqual;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -96,14 +96,7 @@ class PDFUtilsTest {
 										   input.spaceWidth, input.unicode, input.charCodes, input.font, input.fontSize,
 										   input.fontSizeInPt);
 		try {
-			assertEquals(Math.round(expected.getHeight()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getHeight()));
-			assertEquals(Math.round(expected.getWidth()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getWidth()));
-			assertEquals(Math.round(expected.getX()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getX()));
-			assertEquals(Math.round(expected.getY()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getY()));
+			assertTrue(checkRectanglesEqual(expected, PDFUtils.transformTextPosition(tp), 1e-3));
 		} catch (IOException e) {
 			fail("IOException: font of TextPosition object couldn't be loaded correctly");
 		}

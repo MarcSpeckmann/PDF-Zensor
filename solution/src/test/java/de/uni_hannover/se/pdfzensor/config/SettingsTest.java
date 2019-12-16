@@ -174,7 +174,7 @@ class SettingsTest {
 		var rootLogger = getRootLogger();
 		assertTrue(rootLogger.isPresent());
 		assertEquals(Level.ALL, rootLogger.get().getLevel());
-		Level consoleLoggerLevel = getPrivateField(Logging.class, "consoleLevel");
+		Level consoleLoggerLevel = getPrivateField(Logging.class, null, "consoleLevel");
 		assertNotNull(consoleLoggerLevel);
 		if (quiet)
 			assertEquals(Level.OFF, consoleLoggerLevel);

@@ -113,7 +113,7 @@ class AnnotationsTest {
 			// given rectangle fully fits into the rectangle of the highlight
 			Assertions.assertTrue(anno.isMarked(new Rectangle(0, 0, 50, 50)));
 			// given rectangle is wider than the rectangle of the highlight so does not fully fit into it
-			Assertions.assertFalse(anno.isMarked(new Rectangle(0, 0, 200, 50)));
+			Assertions.assertFalse(anno.isMarked(new Rectangle(100, 200, 200, 50)));
 		} catch (IOException e) {
 			fail(e);
 		}
@@ -163,7 +163,7 @@ class AnnotationsTest {
 			Annotations anno = new Annotations();
 			anno.cachePage(testPage);
 			// given rectangle is outside the rectangle of the link respectively bordering so not intersecting
-			Assertions.assertFalse(anno.isLinked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
+			Assertions.assertFalse(anno.isLinked(new Rectangle(100, 0, 100, 100), MarkCriterion.CONTAIN));
 			// rect is given, criteria is null
 			Assertions.assertThrows(NullPointerException.class, () -> anno.isLinked(new Rectangle(0, 0, 50, 50), null));
 			
