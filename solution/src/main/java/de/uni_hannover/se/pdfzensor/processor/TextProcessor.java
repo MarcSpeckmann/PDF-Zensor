@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -121,6 +123,10 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
+		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING)) {
+			super.processOperator(operator, operands);
+			return;
+		}
 		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
 		shouldBeCensored.clear();
 		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
@@ -133,23 +139,40 @@ public class TextProcessor extends PDFStreamProcessor {
 			if (SHOW_TEXT.equals(operator.getName()))
 				newOperands = removeCharsFromText(operands, shouldBeCensored);
 			else newOperands = removeCharsFromTextAdjusted(operands, shouldBeCensored);
-			writer.writeTokens(newOperands);
+			writer.writeToken(newOperands);
 			writer.writeToken(Operator.getOperator(SHOW_TEXT_ADJUSTED));
 		}
 	}
 	
 	private static COSArray removeCharsFromString(COSString string, PDFont font, List<Boolean> censor) {
 		var newOperands = new COSArray();
+		if (censor.isEmpty())
+			return newOperands;
 		try (var is = new ByteArrayInputStream(string.getBytes())) {
 			while (is.available() > 0) {
+				int before = is.available();
 				int code = font.readCode(is);
+				int numRead = before - is.available();
+				
+				var last = newOperands.size() > 0? newOperands.get(newOperands.size()-1) : null;
 				if (TRUE.equals(censor.remove(0))) {
 					var tj = -font.getWidth(code);
 					if (font.isVertical())
 						tj = -font.getHeight(code);
+					if (last instanceof COSFloat) {
+						tj += ((COSFloat) last).floatValue();
+						newOperands.remove(newOperands.size()-1);
+					}
 					newOperands.add(new COSFloat(tj));
 				} else {
-					newOperands.add(new COSString(font.encode(font.toUnicode(code))));
+					int startIndex = string.getBytes().length - before;
+					byte[] data = {};
+					if (last instanceof COSString) {
+						data = ((COSString) last).getBytes();
+						newOperands.remove(newOperands.size()-1);
+					}
+					data = ArrayUtils.addAll(data, ArrayUtils.subarray(string.getBytes(), startIndex, startIndex+numRead));
+					newOperands.add(new COSString(data));
 				}
 			}
 		} catch (IOException e) {
@@ -176,6 +199,7 @@ public class TextProcessor extends PDFStreamProcessor {
 				newOperands.addAll(ops);
 			}
 		}
+		//newOperands.addAll(operand);
 		return newOperands;
 	}
 }
