@@ -4,6 +4,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
 import org.junit.jupiter.api.Test;
+
+import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResource;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.io.IOException;
@@ -58,18 +61,17 @@ public class TextProcessorTest {
 	@Test
 	void testTextProcessingOrderOfFunctionCallsInTextProcessor() throws IOException {
 		TextProcessor tp = new TextProcessor(handler);
-		String path = "src/test/resources/pdf-files/cusatop-intro.pdf";
-		File file = new File(path);
-		PDDocument doc;
-		doc = PDDocument.load(file);
-		tp.getText(doc);
-
-		var numberOfPages = doc.getPages().getCount();
-
-		assertEquals(numberOfPages, pageBeginCounter);
-		assertEquals(0, checkOrderSequenceCounter);
-		assertTrue(beginDocument);
-		assertTrue(endDocument);
+		File file = getResource(PDF_RESOURCE_PATH+"cusatop-intro.pdf");
+		try (final var doc = PDDocument.load(file)) {
+			tp.getText(doc);
+			
+			var numberOfPages = doc.getPages().getCount();
+			
+			assertEquals(numberOfPages, pageBeginCounter);
+			assertEquals(0, checkOrderSequenceCounter);
+			assertTrue(beginDocument);
+			assertTrue(endDocument);
+		}
 	}
 
 	/**

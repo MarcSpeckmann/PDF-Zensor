@@ -64,9 +64,9 @@ class PDFCensorTest implements PDFHandler {
 		this.finalExpectedElements = finalExpectedElements;
 		
 		final var dummyProcessor = new PDFProcessor(this);
-		final var doc = PDDocument.load(dummySettings.getInput());
-		dummyProcessor.process(doc);
-		doc.close();
+		try (final var doc = PDDocument.load(dummySettings.getInput())) {
+			dummyProcessor.process(doc);
+		}
 	}
 	
 	/**

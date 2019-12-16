@@ -19,10 +19,10 @@ public class App {
 				final var settings = new Settings(null, args);
 				final var censor = new PDFCensor(settings);
 				final var processor = new PDFProcessor(censor);
-				final var doc = PDDocument.load(settings.getInput());
-				processor.process(doc);
-				doc.save(settings.getOutput());
-				doc.close();
+				try (final var doc = PDDocument.load(settings.getInput())) {
+					processor.process(doc);
+					doc.save(settings.getOutput());
+				}
 			}
 		} catch (CommandLine.ParameterException ex) {
 			CLErrorMessageHandler handler = new CLErrorMessageHandler();
