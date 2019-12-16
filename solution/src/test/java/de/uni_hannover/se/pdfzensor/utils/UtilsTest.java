@@ -11,16 +11,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ColorProvider.COLOR_PREFIXES;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** UtilsTest should contain all unit-tests related to {@link Utils}. */
-public class UtilsTest {
+class UtilsTest {
 	
 	/**
 	 * Checks general properties of the {@link Utils}-class.
@@ -120,24 +118,29 @@ public class UtilsTest {
 	/**
 	 * Asserts for each ColorCodes-Color-pair that all of the provided color-codes are representing the expected color
 	 * when adding anyone of the {@link ColorProvider#COLOR_PREFIXES}. To test validity for each prefix-code-combination
-	 * it is asserted that {@link Utils#getColorOrNull(String)} returns the correct color.<br> The reverse direction is
-	 * also tested by calling {@link Utils#colorToString(Color)} and checking if it returns any of the color-codes when
-	 * stripped of its prefix.
+	 * it is asserted that {@link Utils#getColorOrNull(String)} returns the correct color.
+	 * <br>
+	 * Also tests that {@link Utils#isHexColorCode(String)} will return true for each prefix-code-combination.
+	 * <br>
+	 * The reverse direction is also tested by calling {@link Utils#colorToString(Color)} and checking if it returns any
+	 * of the color-codes when stripped of its prefix.
 	 *
-	 * @param colorCodes The color-codes that should correspond to the given color.
-	 * @param expected   The color that should be represented in hexadecimal notation by the color-codes.
+	 * @param colorCode A color-code that should correspond to the given color.
+	 * @param expected  The color that should be represented in hexadecimal notation by the color-code.
 	 */
-	@ParameterizedTest(name = "Run {index}: ColorCodes: {0}")
+	@ParameterizedTest(name = "Run {index}: colorCode: {0}")
 	@ArgumentsSource(ColorProvider.class)
-	void testColorCode(@NotNull String[] colorCodes, Color expected) {
+	void testColorCode(@NotNull String colorCode, @NotNull Color expected) {
 		//Check if getColorOrNull works correctly
-		for (String code : colorCodes)
-			for (String pre : COLOR_PREFIXES)
-				assertEquals(expected, getColorOrNull(pre + code));
+		assertEquals(expected, getColorOrNull(colorCode));
+		assertTrue(isHexColorCode(colorCode));
 		//Check if colorToString works correctly
-		var actual = colorToString(expected).replaceFirst("(?i)0x|#", "");
-		assertTrue(Arrays.stream(colorCodes).anyMatch(actual::equalsIgnoreCase),
-				   "Expected one of: #" + Arrays.toString(colorCodes) + " but was: #" + actual);
+		var exp = colorCode.replaceFirst("(?i)0x|#", "");
+		if (exp.length() > 3) {
+			var actual = colorToString(expected).replaceFirst("(?i)0x|#", "");
+			assertTrue(exp.equalsIgnoreCase(actual),
+					   String.format("Expected %s to match the color %s, but was %s.", exp, expected, actual));
+		}
 	}
 	
 	/**
@@ -152,6 +155,8 @@ public class UtilsTest {
 	/**
 	 * Asserts for each of the passed color-codes that it is invalid by calling {@link Utils#getColorOrNull(String)} and
 	 * expecting an {@link IllegalArgumentException}.
+	 * <br>
+	 * Also tests that {@link Utils#isHexColorCode(String)} will return false for invalid color codes.
 	 *
 	 * @param code the color-code to assert invalidity for.
 	 */
@@ -160,5 +165,6 @@ public class UtilsTest {
 			"0Xkkkkk", "1Xffffff", "#varargs", "#a color"})
 	void testIllegalColor(String code) {
 		assertThrows(IllegalArgumentException.class, () -> getColorOrNull(code));
+		assertFalse(isHexColorCode(code));
 	}
 }

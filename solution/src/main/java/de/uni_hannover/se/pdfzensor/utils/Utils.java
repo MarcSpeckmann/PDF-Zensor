@@ -82,7 +82,6 @@ public final class Utils {
 		return Color.decode(hexCode);
 	}
 	
-	
 	/**
 	 * Returns the corresponding 6 digit color code for the provided color. That is the RGB channels written in
 	 * hexadecimal successively (in that order). The hex-string is than prepended with a #-symbol.<br> Example: black
@@ -99,5 +98,16 @@ public final class Utils {
 		return Optional.ofNullable(color)
 					   .map(c -> String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue()))
 					   .orElse("null");
+	}
+	
+	/**
+	 * Checks if a string is a valid hexadecimal color code and returns true if it is, false otherwise.
+	 *
+	 * @param hexCode The string which should be checked.
+	 * @return True if it is a hexadecimal color code, false otherwise.
+	 */
+	@NotNull
+	public static boolean isHexColorCode(@NotNull String hexCode) {
+		return hexCode.matches(THREE_DIGIT_HEX_PATTERN) || hexCode.matches(SIX_DIGIT_HEX_PATTERN);
 	}
 }

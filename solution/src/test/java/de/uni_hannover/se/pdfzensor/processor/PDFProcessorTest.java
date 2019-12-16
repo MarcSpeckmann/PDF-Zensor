@@ -1,28 +1,14 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
-import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /** PDFProcessorTest should contain all unit-tests related to {@link PDFProcessor}. */
 class PDFProcessorTest {
-	/** Path to the pdf-tests Resources */
-	private static final String PDF_PATH = "/pdf-files/";
-	
 	/** to checks a pdf-document is being processed In the right order */
 	private int checkOrderCounter = 0;
 	/** to checks a pdf-document is being closed and opened In the right order */
@@ -78,15 +64,6 @@ class PDFProcessorTest {
 			return false;
 		}
 	};
-	
-	/**
-	 * @return A stream of all files in the directory {@link #PDF_PATH}.
-	 * @throws IOException If there is an error loading the files.
-	 */
-	private static Stream<Arguments> testForFile() throws IOException {
-		return Files.walk(Paths.get(TestUtility.getResource(PDF_PATH).getAbsolutePath())).map(Path::toFile)
-					.filter(File::isFile).map(Arguments::of);
-	}
 	
 	/**
 	 * tests the {@link PDFProcessor#PDFProcessor(PDFHandler)} by valid and invalid input

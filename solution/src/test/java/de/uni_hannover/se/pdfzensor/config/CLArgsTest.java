@@ -1,12 +1,16 @@
 package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,14 +26,36 @@ class CLArgsTest {
 		assertThrows(IllegalArgumentException.class, CLArgs::fromStringArray);
 	}
 	
-	/** Checks if the arguments are parsed into the corresponding expected values. */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}")
+	/**
+	 * Checks if the arguments are parsed into the corresponding expected values.
+	 *
+	 * @param args        The command-line arguments to parse.
+	 * @param input       The expected input file as specified in args.
+	 * @param output      The expected output file as specified in args.
+	 * @param verbosity   The expected logger verbosity as specified in args.
+	 * @param mode        The expected censoring mode as specified in args.
+	 * @param expressions The expected expressions as a list of string-string pairs as specified in args.
+	 * @param quiet       The expected logger mode (whether or not it is expected to be silenced).
+	 */
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}")
 	@ArgumentsSource(CLArgumentProvider.class)
-	void testArgsParser(String[] args, File input, File output, Level verbosity, Mode mode) {
+	void testArgsParser(@NotNull String[] args, @NotNull File input, @Nullable File output, @Nullable Level verbosity,
+						@Nullable Mode mode, @NotNull ArrayList<ImmutablePair<String, String>> expressions,
+						boolean quiet) {
 		var clArgs = CLArgs.fromStringArray(args);
 		assertEquals(input, clArgs.getInput());
 		assertEquals(output, clArgs.getOutput());
 		assertEquals(verbosity, clArgs.getVerbosity());
 		assertEquals(mode, clArgs.getMode());
+		var actualExpressions = clArgs.getExpressions();
+		assertNotNull(actualExpressions);
+		assertEquals(expressions.size(), actualExpressions.length);
+		for (var i = 0; i < expressions.size(); i++) {
+			var expectedExp = new Expression(expressions.get(i).getLeft(), expressions.get(i).getRight());
+			var actualExp = actualExpressions[i];
+			assertEquals(expectedExp.getRegex(), actualExp.getRegex());
+			assertEquals(expectedExp.getColor(), actualExp.getColor());
+		}
+		assertEquals(quiet, clArgs.getQuiet());
 	}
 }

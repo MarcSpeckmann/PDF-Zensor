@@ -24,14 +24,13 @@ class CLErrorMessageHandlerTest {
 	}
 	
 	/**
-	 * Testing if {@link CommandLine.ParameterException} is handled the right way.
-	 * The error message provided from the exception should be printed into System.err.
-	 * Further more should the synopsis and a hint to use the --help command printed to System.err.
-	 * If a exception was handled the return code should be not null.
+	 * Testing if {@link CommandLine.ParameterException} is handled the right way. The error message provided from the
+	 * exception should be printed into System.err. Further more should the synopsis and a hint to use the --help
+	 * command printed to System.err. If a exception was handled the return code should be not null.
 	 */
 	@Test
 	@DisplayName("Test CLErrorMessageHandler output")
-	void testhandleParseException() {
+	void testHandleParseException() {
 		//redirect System.err to ByteArrayOutputStream
 		final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 		final PrintStream originalOut = System.err;
@@ -42,20 +41,20 @@ class CLErrorMessageHandlerTest {
 		
 		//check null input
 		assertThrows(NullPointerException.class, () -> handler.handleParseException(null, null));
-		assertThrows(NullPointerException.class, () ->handler.handleParseException(null, new String[]{}));
+		assertThrows(NullPointerException.class, () -> handler.handleParseException(null, new String[]{}));
 		
 		//construct ParameterException
-		var errmsg = "Error";
-		CommandLine.ParameterException ex = new CommandLine.ParameterException(cmd, errmsg);
+		var errMsg = "Error";
+		CommandLine.ParameterException ex = new CommandLine.ParameterException(cmd, errMsg);
 		
-		assertDoesNotThrow(()->handler.handleParseException(ex, null));
+		assertDoesNotThrow(() -> handler.handleParseException(ex, null));
 		
 		//string can be empty because it is not used inside the method handleParseException
 		//return isn't allowed to bei 0, because an exception occurred
 		assertTrue(handler.handleParseException(ex, new String[]{}) != 0);
 		
 		assertTrue(outContent.toString()
-							 .contains(errmsg));
+							 .contains(errMsg));
 		assertTrue(outContent.toString()
 							 .contains(cmd.getHelp()
 										  .fullSynopsis()));

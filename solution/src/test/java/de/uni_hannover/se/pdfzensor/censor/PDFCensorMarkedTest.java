@@ -72,14 +72,14 @@ class PDFCensorMarkedTest implements PDFHandler {
 	 */
 	private List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes() {
 		/* Ignore warning because we can not create a class with generic attributes */
-		return getPrivateParameter(PDFCensor.class, "boundingBoxes", this.properCensor, List.class);
+		return getPrivateField(PDFCensor.class, this.properCensor, "boundingBoxes");
 	}
 	
 	/**
 	 * a mask function so that the code remains cleaner
 	 */
 	private Annotations getAnnotation() {
-		return getPrivateParameter(PDFCensor.class, "annotations", this.properCensor, Annotations.class);
+		return getPrivateField(PDFCensor.class, this.properCensor, "annotations");
 	}
 	
 	/**

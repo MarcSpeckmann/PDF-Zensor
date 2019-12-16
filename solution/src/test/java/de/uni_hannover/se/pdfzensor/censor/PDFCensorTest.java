@@ -39,7 +39,27 @@ class PDFCensorTest implements PDFHandler {
 	/** The bounds of the individual elements of the PDF-file (not combined). */
 	private Rectangle2D.Double[] elements;
 	
+	/**
+	 * Returns the list of bounds-color pairs of the instance.
+	 *
+	 * @param fromInstance The instance from which the list should be retrieved.
+	 * @return The bounds-color pair list of the given instance.
+	 */
+	@Nullable
+	@SuppressWarnings("unchecked")
+	private static List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes(@NotNull PDFCensor fromInstance) {
+		try {
+			var boundingBoxesField = PDFCensor.class.getDeclaredField("boundingBoxes");
+			boundingBoxesField.setAccessible(true);
+			return (List<ImmutablePair<Rectangle2D, Color>>) boundingBoxesField.get(fromInstance);
+		} catch (Exception e) {
+			Assertions.fail("Could not retrieve the bounds-color pair list.", e);
+		}
+		return null;
+	}
+	
 	/** Checks for invalid settings argument. */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void testInvalidSettings() {
 		Assertions.assertThrows(NullPointerException.class, () -> new PDFCensor(null));
@@ -66,28 +86,9 @@ class PDFCensorTest implements PDFHandler {
 		this.finalExpectedElements = finalExpectedElements;
 		
 		final var dummyProcessor = new PDFProcessor(this);
-		final var doc = PDDocument.load(dummySettings.getInput());
-		dummyProcessor.process(doc);
-		doc.close();
-	}
-
-	/**
-	 * Returns the list of bounds-color pairs of the instance.
-	 *
-	 * @param fromInstance The instance from which the list should be retrieved.
-	 * @return The bounds-color pair list of the given instance.
-	 */
-	@Nullable
-	@SuppressWarnings("unchecked")
-	private static List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes(@NotNull PDFCensor fromInstance) {
-		try {
-			var boundingBoxesField = PDFCensor.class.getDeclaredField("boundingBoxes");
-			boundingBoxesField.setAccessible(true);
-			return (List<ImmutablePair<Rectangle2D, Color>>) boundingBoxesField.get(fromInstance);
-		} catch (Exception e) {
-			Assertions.fail("Could not retrieve the bounds-color pair list.", e);
+		try (final var doc = PDDocument.load(dummySettings.getInput())) {
+			dummyProcessor.process(doc);
 		}
-		return null;
 	}
 	
 	@Override
@@ -119,13 +120,13 @@ class PDFCensorTest implements PDFHandler {
 		Assertions.assertNotNull(getBoundingBoxes(properCensor));
 		// Checks if the expected number of elements have been combined
 		// (requires colors to be added because differently colored elements should not be combined)
-
+		
 		Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
 		
 		properCensor.endPage(doc, page, pageNum);
 		try {
 			Assertions.assertTrue(page.getAnnotations().isEmpty());
-		} catch (IOException e){
+		} catch (IOException e) {
 			Assertions.fail(e.getMessage());
 		}
 		
@@ -156,7 +157,7 @@ class PDFCensorTest implements PDFHandler {
 		var sizeAfter = listAfter.size();
 		Assertions.assertTrue(sizeAfter > 0);
 		var newLast = listAfter.get(sizeAfter - 1);
-
+		
 		// Colors differ, expect element to be added instead of combined.
 		if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
 			Assertions.assertEquals(sizeBefore + 1, sizeAfter);

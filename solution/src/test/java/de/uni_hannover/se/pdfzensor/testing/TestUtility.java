@@ -1,9 +1,10 @@
 package de.uni_hannover.se.pdfzensor.testing;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.function.Executable;
 
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -12,6 +13,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.Permission;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -90,6 +92,7 @@ public final class TestUtility {
 		var caller = StackLocatorUtil.getCallerClass(2);
 		return URLDecoder.decode(caller.getResource(path).getFile(), StandardCharsets.UTF_8);
 	}
+	
 	/**
 	 * Checks if the two floating-point numbers are approximately equal. Returns true if <code>{@code
 	 * |d1-d2|<Ɛ}</code>.
@@ -143,9 +146,20 @@ public final class TestUtility {
 		return s1.flatMap(t -> s2.stream().map(k -> joiner.apply(t, k)));
 	}
 	
+	/**
+	 * Returns the private method of the given class that has the provided name and parameter-types. Throws a {@link
+	 * RuntimeException} if an error occurs.
+	 *
+	 * @param cls        the class of which to retrieve the private method. Not null.
+	 * @param methodName the name of the method that should be retrieved. Not null.
+	 * @param paramTypes the types of the parameters. Not null.
+	 * @return the accessible {@link Method}-object that represents the desired method.
+	 * @throws RuntimeException if the method could not be retrieved.
+	 */
+	@NotNull
 	public static Method getPrivateMethod(@NotNull Class<?> cls, @NotNull String methodName, Class<?>... paramTypes) {
 		try {
-			var method = cls.getDeclaredMethod(methodName, paramTypes);
+			var method = cls.getDeclaredMethod(methodName, Validate.noNullElements(paramTypes));
 			method.setAccessible(true);
 			return method;
 		} catch (NoSuchMethodException e) {
@@ -154,23 +168,57 @@ public final class TestUtility {
 	}
 	
 	/**
-	 * retrieve a private field from a given instance
-	 * @param aClass the class that we get the private field from
-	 * @param fieldName the name of the field that should be return
-	 * @param instance the instance of the class
-	 * @param toCast the class of Field that is wanted so it cant be cast
-	 * @param <T>  the content type of class.
-	 * @param <K>  the content type of Field.
-	 * @return the Wanted Private Field
+	 * Returns the private field of the given class that has the provided name. Throws a {@link RuntimeException} if an
+	 * error occurs.
+	 *
+	 * @param cls       the class of which to retrieve the private field. Not null.
+	 * @param fieldName the name of the field that should be retrieved. Not null.
+	 * @param <T>       the type of the field which will be retrieved.
+	 * @return The field with the given name and the type T.
+	 * @throws RuntimeException if the field could not be retrieved or cast to the type.
 	 */
-	public static <T, K> K getPrivateParameter(@NotNull Class<?> aClass, @NotNull String fieldName, @NotNull T instance, @Nullable Class<K> toCast) {
-		Objects.requireNonNull(toCast);
+	@SuppressWarnings("unchecked")
+	@NotNull
+	public static <T, K> T getPrivateField(@NotNull Class<K> cls, K parameter, @NotNull String fieldName) {
 		try {
-			var parameter = aClass.getDeclaredField(fieldName);
-			parameter.setAccessible(true);
-			return toCast.cast(parameter.get(instance));
+			var field = cls.getDeclaredField(fieldName);
+			field.setAccessible(true);
+			return (T)field.get(parameter);
 		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw  new RuntimeException("Could not retrieve the " + fieldName ,e);
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Asserts that the provided executable calls {@link System#exit(int)} with the expected error-code.
+	 *
+	 * @param code       the expected exit-code.
+	 * @param executable the executable to test for a call to {@link System#exit(int)} with the desired exit code.
+	 */
+	public static void assertExitCode(int code, Executable executable) {
+		var defaultSecManager = System.getSecurityManager();
+		try {
+			var manager = new SecurityManager() {
+				int actualCode;
+				
+				@Override
+				public void checkPermission(Permission perm) { /* allow anything. */ }
+				
+				@Override
+				public void checkPermission(Permission perm, Object context) { /* allow anything. */ }
+				
+				@Override
+				public void checkExit(final int status) {
+					super.checkExit(status);
+					actualCode = status;
+					throw new SecurityException("Aborting System.exit()");
+				}
+			};
+			System.setSecurityManager(manager);
+			assertThrows(SecurityException.class, executable, "System.exit was not called");
+			assertEquals(code, manager.actualCode, "Wrong exit code");
+		} finally {
+			System.setSecurityManager(defaultSecManager);
 		}
 	}
 }
