@@ -4,7 +4,7 @@ import de.uni_hannover.se.pdfzensor.censor.utils.Annotations;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import de.uni_hannover.se.pdfzensor.processor.PDFProcessor;
-import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFCensorUnmarkedArgumentProvider;
+import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFCensorMarkedArgumentProvider;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -23,12 +23,12 @@ import java.util.Objects;
 import static de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils.transformTextPosition;
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 
-class PDFCensorUnmarkedTest implements PDFHandler {
+class PDFCensorMarkedTest implements PDFHandler {
 	/** Acts as a super instance. */
 	private PDFCensor properCensor;
 	
 	/**
-	 * index to iterate over the censored textPosition
+	 * index to iterate over the textPosition that should be censored
 	 */
 	private int currTextPosition;
 	
@@ -50,7 +50,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 * @throws IOException If the document could not be loaded.
 	 */
 	@ParameterizedTest(name = "Run {index}: pdf: {0}, elements: {1}, finalExpectedElements {2}")
-	@ArgumentsSource(PDFCensorUnmarkedArgumentProvider.class)
+	@ArgumentsSource(PDFCensorMarkedArgumentProvider.class)
 	/* Ignore SonarLint error because the constructor is for test cases only and in <code>dummyProcessor.process(doc)</code> */
 	void testPDFCensor(@NotNull String[] input, @NotNull Rectangle2D.Double[] uncombinedBoundingBoxes,
 					   int combinedBoundingBoxesNr) throws IOException {
@@ -87,10 +87,10 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 *
 	 * @return true if the TextPosition is not marked up
 	 */
-	private boolean isNotMarked(@NotNull final TextPosition pos) {
+	private boolean isMarked(@NotNull final TextPosition pos) {
 		boolean excepted = false;
 		try {
-			excepted = !getAnnotation().isMarked(transformTextPosition(pos));
+			excepted = getAnnotation().isMarked(transformTextPosition(pos));
 		} catch (IOException e) {
 			Assertions.fail(e.getMessage());
 		}
@@ -179,7 +179,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 		var lastBoundsBefore = (sizeBefore > 0) ? listBefore.get(sizeBefore - 1) : null;
 		
 		boolean actual = properCensor.shouldCensorText(pos);
-		Assertions.assertEquals(isNotMarked(pos), actual, "a textPosition is misidentified");
+		Assertions.assertEquals(isMarked(pos), actual, "a textPosition is misidentified");
 		
 		/* after the TextPosition has been processed */
 		var listAfter = getBoundingBoxes();

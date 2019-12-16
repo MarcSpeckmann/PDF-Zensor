@@ -7,7 +7,6 @@ import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFCensorBoundingB
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.checkRectanglesEqual;
 
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -71,25 +69,6 @@ class PDFCensorTest implements PDFHandler {
 		final var doc = PDDocument.load(dummySettings.getInput());
 		dummyProcessor.process(doc);
 		doc.close();
-	}
-	
-	/**
-	 * Checks if the right elements were censored in the pdf file pdf-files/XsAtSetPosition.pdf.
-	 */
-	@Test
-	void testMarkedUnmarked() throws IOException{
-		// tests if the marked X in the pdf file is getting censored so -m is given as an argument
-		var dummySettings = new Settings(null, getResourcePath(PDF_RESOURCE_PATH + "XsAtSetPosition.pdf"),
-										 "-m");
-		var pdfcensor = new PDFCensor(dummySettings);
-		var pdfprocessor = new PDFProcessor(pdfcensor);
-		var doc = PDDocument.load(dummySettings.getInput());
-		pdfprocessor.process(doc);
-		// uncomment to generate the processed/censored file
-		// TODO : does not work I dono why it doesn't save it
-		doc.save(dummySettings.getInput().getAbsoluteFile().getParentFile() + "XsAtSetPosition_m.pdf");
-		PDPage censoredPage = doc.getPage(0);
-		//Assertions.assertEquals(doc.get);
 	}
 
 	/**
