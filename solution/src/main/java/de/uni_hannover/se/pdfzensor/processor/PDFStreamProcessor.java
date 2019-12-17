@@ -18,13 +18,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//           PLEASE NOTE: during prototyping this class did not copy all data correctly for FormXObjects.             //
-//           Thus there might be some functions missing that should further push and pop the stream-stack.            //
-//           This should be elicited further during development. Since FormXObjects will be censored like             //
-//           images it is not a huge issue but one that should be considered.                                         //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 /**
  * PDFStreamProcessor builds on the {@link org.apache.pdfbox.contentstream.PDFStreamEngine} via the {@link
  * PDFTextStripper} to add writing-functionality on top of the input streams. Thus for any stream opened by the

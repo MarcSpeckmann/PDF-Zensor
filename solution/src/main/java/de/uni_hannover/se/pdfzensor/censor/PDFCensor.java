@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static java.lang.Math.abs;
 
 /**
  * Runs functions to place censoring rectangles (or censoring graphics) and removes elements of the PDF depending on the
@@ -46,6 +49,16 @@ public final class PDFCensor implements PDFHandler {
 	 * @see #getExtended(Rectangle2D, Rectangle2D)
 	 */
 	private static final float DEVIATION_TOLERANCE = .2f;
+	
+	/**
+	 * A factor for determining whether or not a gap should be bridged.
+	 * <br>
+	 * Increasing this value will increase the gap tolerance when combining bounds. Meaning greater values will allow
+	 * greater gaps between two bounds and still combine them.
+	 *
+	 * @see #getExtended(Rectangle2D, Rectangle2D)
+	 */
+	private static final float MAX_GAP = 1.5f;
 	
 	private static final Logger LOGGER = Logging.getLogger();
 	
@@ -66,9 +79,57 @@ public final class PDFCensor implements PDFHandler {
 		if (Mode.MARKED.equals(settings.getMode()))
 			removePredicate = removePredicate.and(annotations::isMarked);
 			// to censor everything but segments marked beforehand with a different software
-		else if (Mode.UNMARKED.equals(settings.getMode())) {
+		else if (Mode.UNMARKED.equals(settings.getMode()))
 			removePredicate = removePredicate.and(Predicate.not(annotations::isMarked));
-		}
+	}
+	
+	/**
+	 * Tests if a union created out of the two given rectangles is a horizontal or vertical extension out of those
+	 * rectangles. Should that be the case the union is returned, however, should the union not be a horizontal or
+	 * vertical extension, null will be returned.
+	 * <br>
+	 * Two rectangles are considered a horizontal extension of each other if both of their heights are deviating no more
+	 * than {@link #DEVIATION_TOLERANCE} % from the height of their union. Likewise, two rectangles are considered a
+	 * vertical extension of each other if both of their widths are deviating no more than {@link #DEVIATION_TOLERANCE}
+	 * % from the width of their union.
+	 * <br>
+	 * Note that deviating over the width/height of the union is impossible because a union is always at least the size
+	 * of each of the rectangles out of which it was constructed.
+	 *
+	 * @param r1 the first {@link Rectangle2D}.
+	 * @param r2 the second {@link Rectangle2D}.
+	 * @return A {@link Rectangle2D} which is the union of both given rectangles or null.
+	 * @see Rectangle2D#createUnion(Rectangle2D)
+	 */
+	@Nullable
+	private static Rectangle2D getExtended(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
+		Validate.isTrue(ObjectUtils.allNotNull(r1, r2), "The rectangles may not be null.");
+		final var comb = r1.createUnion(r2);
+		final var percentage = 1 - DEVIATION_TOLERANCE;
+		final var widthTolerance = comb.getWidth() * percentage;
+		final var heightTolerance = comb.getHeight() * percentage;
+		final var sameColumn = r1.getWidth() > widthTolerance && r2.getWidth() > widthTolerance;
+		final var sameLine = r1.getHeight() > heightTolerance && r2.getHeight() > heightTolerance;
+		
+		final var gaps = getGaps(r1, r2);
+		final var tolerance = new Point2D.Double(comb.getWidth() * MAX_GAP, comb.getHeight() * MAX_GAP);
+		
+		return ((sameLine && gaps.getX() < tolerance.x) || (sameColumn && gaps.getY() < tolerance.y)) ? comb : null;
+	}
+	
+	/**
+	 * Returns an approximation of the vertical and horizontal gap of the two rectangles. The returned {@link Point2D}
+	 * contains the horizontal gap as its x-value and the vertical gap as its y-value.
+	 *
+	 * @param r1 The first rectangle.
+	 * @param r2 The second rectangle.
+	 * @return the approximated gap of the two rectangles: (|center1 - center2| - size1 - size2).
+	 */
+	@NotNull
+	private static Point2D getGaps(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
+		final var xDist = abs(r1.getCenterX() - r2.getCenterX());
+		final var yDist = abs(r1.getCenterY() - r2.getCenterY());
+		return new Point2D.Double(xDist - r1.getWidth() - r2.getWidth(), yDist - r1.getHeight() - r2.getHeight());
 	}
 	
 	/**
@@ -209,35 +270,5 @@ public final class PDFCensor implements PDFHandler {
 				pageContentStream.fill();
 			}
 		}
-	}
-	
-	/**
-	 * Tests if a union created out of the two given rectangles is a horizontal or vertical extension out of those
-	 * rectangles. Should that be the case the union is returned, however, should the union not be a horizontal or
-	 * vertical extension, null will be returned.
-	 * <br>
-	 * Two rectangles are considered a horizontal extension of each other if both of their heights are deviating no more
-	 * than {@link #DEVIATION_TOLERANCE} % from the height of their union. Likewise, two rectangles are considered a
-	 * vertical extension of each other if both of their widths are deviating no more than {@link #DEVIATION_TOLERANCE}
-	 * % from the width of their union.
-	 * <br>
-	 * Note that deviating over the width/height of the union is impossible because a union is always at least the size
-	 * of each of the rectangles out of which it was constructed.
-	 *
-	 * @param r1 the first {@link Rectangle2D}.
-	 * @param r2 the second {@link Rectangle2D}.
-	 * @return A {@link Rectangle2D} which is the union of both given rectangles or null.
-	 * @see Rectangle2D#createUnion(Rectangle2D)
-	 */
-	@Nullable
-	private static Rectangle2D getExtended(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
-		Validate.isTrue(ObjectUtils.allNotNull(r1, r2), "The rectangles may not be null.");
-		final var comb = r1.createUnion(r2);
-		final var percentage = 1 - DEVIATION_TOLERANCE;
-		final var widthTolerance = comb.getWidth() * percentage;
-		final var heightTolerance = comb.getHeight() * percentage;
-		final var sameColumn = r1.getWidth() > widthTolerance && r2.getWidth() > widthTolerance;
-		final var sameLine = r1.getHeight() > heightTolerance && r2.getHeight() > heightTolerance;
-		return (sameLine || sameColumn) ? comb : null;
 	}
 }
