@@ -7,6 +7,7 @@ import javax.naming.OperationNotSupportedException;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Utility-class that removes Images ({@link PDImageXObject}) from a given {@link PDDocument}.
@@ -25,16 +26,19 @@ public final class ImageRemover {
 	 * @param doc {@link PDDocument} that will have its Images {@link PDImageXObject} removed.
 	 * @throws IOException when there is an error at retrieving the {@link PDXObject}.
 	 */
+	// TODO added try and catch with ignore to discus how to handle this
 	public static void remove(PDDocument doc) throws IOException {
-		var myListMap = new ArrayList<AbstractMap.SimpleEntry<Integer, org.apache.pdfbox.cos.COSName>>();
-		for (var i = 0; i < doc.getNumberOfPages(); ++i) {
-			for (var name : doc.getPage(i).getResources().getXObjectNames()) {
-				var xObject = doc.getPage(i).getResources().getXObject(name);
-				if (xObject instanceof PDImageXObject)
-					myListMap.add(new AbstractMap.SimpleEntry<>(i, name));
-			}
-		}
-		for (var item : myListMap)
-			doc.getPage(item.getKey()).getResources().put(item.getValue(), (PDXObject) null);
+			var myListMap = new ArrayList<AbstractMap.SimpleEntry<Integer, org.apache.pdfbox.cos.COSName>>();
+			try{
+				for (var i = 0; i < doc.getNumberOfPages(); ++i) {
+					for (var name : doc.getPage(i).getResources().getXObjectNames()) {
+						var xObject = doc.getPage(i).getResources().getXObject(name);
+						if (xObject instanceof PDImageXObject)
+							myListMap.add(new AbstractMap.SimpleEntry<>(i, name));
+					}
+				}
+				for (var item : myListMap)
+					doc.getPage(item.getKey()).getResources().put(item.getValue(), (PDXObject) null);
+			}catch (NullPointerException ignored){};
 	}
 }
