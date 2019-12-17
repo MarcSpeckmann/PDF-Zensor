@@ -14,27 +14,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-
 public class ImageReplacerTest {
 	ImageReplacer imageReplacer = new ImageReplacer();
-
+	
 	
 	@Test
 	void testReplaceImageInvalidParameter() {
 		assertThrows(IllegalArgumentException.class, () -> imageReplacer.replaceImages(null, null));
 	}
 	
-	//@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}")
-	//@ArgumentsSource(CLArgumentProvider.class)
-	
-/*	@ArgumentsSource(ImageReplacerArgumentProvider.class)
-	void trueTest(boolean b) {
-		assertTrue(b);
-	}
-*/
 	// just a helper to check the coodinates
 	@Test
-	void printCoords(){
+	void printCoords() {
 		String PATH = "src/test/resources/pdf-files/";
 		try {
 			PDDocument document = PDDocument.load(
@@ -42,11 +33,14 @@ public class ImageReplacerTest {
 			PDPage page = document.getPage(0);
 			List<Rectangle2D> rl = imageReplacer.replaceImages(document, page);
 			System.out.println(String.valueOf(rl));
-		} catch (Exception e) {}
+		} catch (Exception e) {
+		}
 	}
 	
 	void rectContainedHelper(Rectangle2D rect, List<Rectangle2D> rectList) {
-		if (!rectList.contains(rect)){fail();}
+		if (!rectList.contains(rect)) {
+			fail();
+		}
 	}
 	
 	@ArgumentsSource(ImageReplacerArgumentProvider.class)
@@ -58,9 +52,7 @@ public class ImageReplacerTest {
 			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(document, page);
 			
 			rectList.forEach(rect -> rectContainedHelper(rect, rectListOfDocument));
-			System.out.println(String.valueOf(rectList));
 		} catch (Exception e) {
-			System.out.println(e);
 			fail();
 		}
 	}
