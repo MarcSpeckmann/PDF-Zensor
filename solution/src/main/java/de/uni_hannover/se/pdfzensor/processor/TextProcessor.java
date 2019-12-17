@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,6 +49,42 @@ public class TextProcessor extends PDFStreamProcessor {
 			LOGGER.log(Level.ERROR, "Handler is null");
 		this.handler = Objects.requireNonNull(handler);
 		
+	}
+	
+	/**
+	 * Transforms the provided COSString into an COSArray where each character is added if it should not be censored. If
+	 * a character should be censored its text-adjustment is added.
+	 *
+	 * @param string the string that should be transformed into a COSArray that may be used for TJ-operations.
+	 * @param font   the current font. It is used to provide the size-informationabout characters.
+	 * @param censor a list of booleans to check if each character should be censored. This list will be modified.
+	 * @return a COSArray representing the censored string as a TJ-operand.
+	 */
+	@NotNull
+	private static COSArray removeCharsFromString(COSString string, PDFont font, @NotNull List<Boolean> censor) {
+		var newOperands = new COSArray();
+		try (var is = new ByteArrayInputStream(string.getBytes())) {
+			while (is.available() > 0 && !censor.isEmpty()) {
+				int before = is.available();
+				int code = font.readCode(is);
+				int after = is.available();
+				
+				if (TRUE.equals(censor.remove(0))) {
+					var tj = -font.getWidth(code);
+					if (font.isVertical())
+						tj = -font.getHeight(code);
+					newOperands.add(new COSFloat(tj));
+				} else {
+					int startIndex = string.getBytes().length - before;
+					int endIndex = string.getBytes().length - after;
+					var data = ArrayUtils.subarray(string.getBytes(), startIndex, endIndex);
+					newOperands.add(new COSString(data));
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.error(e);
+		}
+		return newOperands;
 	}
 	
 	/**
@@ -123,7 +158,8 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
-		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING)) {
+		if (StringUtils
+				.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING)) {
 			super.processOperator(operator, operands);
 			return;
 		}
@@ -144,49 +180,34 @@ public class TextProcessor extends PDFStreamProcessor {
 		}
 	}
 	
-	private static COSArray removeCharsFromString(COSString string, PDFont font, List<Boolean> censor) {
-		var newOperands = new COSArray();
-		if (censor.isEmpty())
-			return newOperands;
-		try (var is = new ByteArrayInputStream(string.getBytes())) {
-			while (is.available() > 0) {
-				int before = is.available();
-				int code = font.readCode(is);
-				int numRead = before - is.available();
-				
-				var last = newOperands.size() > 0? newOperands.get(newOperands.size()-1) : null;
-				if (TRUE.equals(censor.remove(0))) {
-					var tj = -font.getWidth(code);
-					if (font.isVertical())
-						tj = -font.getHeight(code);
-					if (last instanceof COSFloat) {
-						tj += ((COSFloat) last).floatValue();
-						newOperands.remove(newOperands.size()-1);
-					}
-					newOperands.add(new COSFloat(tj));
-				} else {
-					int startIndex = string.getBytes().length - before;
-					byte[] data = {};
-					if (last instanceof COSString) {
-						data = ((COSString) last).getBytes();
-						newOperands.remove(newOperands.size()-1);
-					}
-					data = ArrayUtils.addAll(data, ArrayUtils.subarray(string.getBytes(), startIndex, startIndex+numRead));
-					newOperands.add(new COSString(data));
-				}
-			}
-		} catch (IOException e) {
-			LOGGER.error(e);
-		}
-		return newOperands;
-	}
-	
-	private COSArray removeCharsFromText(List<COSBase> operands, List<Boolean> censor) {
+	/**
+	 * Removes the chars that should be censored from the operands and replaces them by their widths (height for
+	 * vertical fonts). The resulting COSArray may be used as an operand for a TJ-operation.
+	 *
+	 * @param operands the operand of a Tj call that should be transformed into the censored operands for a TJ call.
+	 * @param censor   a list containing information about what character should be censored. For each censored
+	 *                 character the first element of the list is deleted such that the first element always shows if
+	 *                 the next character should be censored.
+	 * @return a TJ-operand for drawing the censored string.
+	 */
+	@NotNull
+	private COSArray removeCharsFromText(@NotNull List<COSBase> operands, List<Boolean> censor) {
 		var font = getGraphicsState().getTextState().getFont();
 		return removeCharsFromString((COSString) operands.get(0), font, censor);
 	}
 	
-	private COSArray removeCharsFromTextAdjusted(List<COSBase> operands, List<Boolean> censor) {
+	/**
+	 * Removes the chars that should be censored from the operands and replaces them by their widths (height for
+	 * vertical fonts). The resulting COSArray may be used as an operand for a TJ-operation.
+	 *
+	 * @param operands the operand of a TJ call that should be transformed into the censored operands for a TJ call.
+	 * @param censor   a list containing information about what character should be censored. For each censored
+	 *                 character the first element of the list is deleted such that the first element always shows if
+	 *                 the next character should be censored.
+	 * @return a TJ-operand for drawing the censored string.
+	 */
+	@NotNull
+	private COSArray removeCharsFromTextAdjusted(@NotNull List<COSBase> operands, List<Boolean> censor) {
 		var font = getGraphicsState().getTextState().getFont();
 		var newOperands = new COSArray();
 		
@@ -199,7 +220,6 @@ public class TextProcessor extends PDFStreamProcessor {
 				newOperands.addAll(ops);
 			}
 		}
-		//newOperands.addAll(operand);
 		return newOperands;
 	}
 }
