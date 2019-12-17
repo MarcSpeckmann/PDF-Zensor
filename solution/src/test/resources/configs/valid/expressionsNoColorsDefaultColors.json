@@ -1,0 +1,26 @@
+{
+	"expressions":[
+		{
+			"regex": "black"
+		},
+		{
+			"regex": "red"
+		},
+		{
+			"regex": "green"
+		},
+		{
+			"regex": "blue"
+		},
+		{
+			"regex": "white"
+		}
+	],
+	"defaultColors":[
+		"#000",
+		"#F00",
+		"#0F0",
+		"#00F",
+		"#FFF"
+	]
+}

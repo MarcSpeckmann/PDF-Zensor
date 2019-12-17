@@ -1,20 +1,25 @@
 package de.uni_hannover.se.pdfzensor.testing;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.function.Executable;
 
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.Permission;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static java.lang.Math.abs;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -22,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * to outsource some functionality to keep the tests comprehensible yet comprehensive.
  */
 public final class TestUtility {
+	public static final double EPSILON = 1e-6;
 	
 	/**
 	 * Asserts that the provided class is not null and a static utility class. A static utility class should contain
@@ -88,6 +94,38 @@ public final class TestUtility {
 	}
 	
 	/**
+	 * Checks if the two floating-point numbers are approximately equal. Returns true if <code>{@code
+	 * |d1-d2|<Ɛ}</code>.
+	 *
+	 * @param d1      the first number to be compared.
+	 * @param d2      the second number to be compared.
+	 * @param epsilon the precision of the comparison.
+	 * @return true if <code>{@code |d1-d2|<Ɛ}</code>.
+	 * @see #EPSILON
+	 */
+	public static boolean approx(double d1, double d2, double epsilon) {
+		return abs(d1 - d2) < epsilon;
+	}
+	
+	/**
+	 * Compares the bounds of two rectangles with consideration to a small error margin.
+	 *
+	 * @param expected The expected rectangle bounds.
+	 * @param actual   The actual rectangle bounds.
+	 * @param epsilon  the precision of the comparison.
+	 * @return True if the bounds of the rectangles are equal according to the margin, false otherwise.
+	 */
+	public static boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual,
+											   double epsilon) {
+		Objects.requireNonNull(expected);
+		Objects.requireNonNull(actual);
+		return approx(expected.getX(), actual.getX(), epsilon) &&
+			   approx(expected.getY(), actual.getY(), epsilon) &&
+			   approx(expected.getWidth(), actual.getWidth(), epsilon) &&
+			   approx(expected.getHeight(), actual.getHeight(), epsilon);
+	}
+	
+	/**
 	 * Performs a join on the two streams. That means that for each value-combinations of the both streams the joiner is
 	 * called. The results are given in the resulting stream.
 	 *
@@ -108,13 +146,79 @@ public final class TestUtility {
 		return s1.flatMap(t -> s2.stream().map(k -> joiner.apply(t, k)));
 	}
 	
+	/**
+	 * Returns the private method of the given class that has the provided name and parameter-types. Throws a {@link
+	 * RuntimeException} if an error occurs.
+	 *
+	 * @param cls        the class of which to retrieve the private method. Not null.
+	 * @param methodName the name of the method that should be retrieved. Not null.
+	 * @param paramTypes the types of the parameters. Not null.
+	 * @return the accessible {@link Method}-object that represents the desired method.
+	 * @throws RuntimeException if the method could not be retrieved.
+	 */
+	@NotNull
 	public static Method getPrivateMethod(@NotNull Class<?> cls, @NotNull String methodName, Class<?>... paramTypes) {
 		try {
-			var method = cls.getDeclaredMethod(methodName, paramTypes);
+			var method = cls.getDeclaredMethod(methodName, Validate.noNullElements(paramTypes));
 			method.setAccessible(true);
 			return method;
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Returns the private field of the given class that has the provided name. Throws a {@link RuntimeException} if an
+	 * error occurs.
+	 *
+	 * @param cls       the class of which to retrieve the private field. Not null.
+	 * @param fieldName the name of the field that should be retrieved. Not null.
+	 * @param <T>       the type of the field which will be retrieved.
+	 * @return The field with the given name and the type T.
+	 * @throws RuntimeException if the field could not be retrieved or cast to the type.
+	 */
+	@SuppressWarnings("unchecked")
+	@NotNull
+	public static <T, K> T getPrivateField(@NotNull Class<K> cls, K parameter, @NotNull String fieldName) {
+		try {
+			var field = cls.getDeclaredField(fieldName);
+			field.setAccessible(true);
+			return (T)field.get(parameter);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Asserts that the provided executable calls {@link System#exit(int)} with the expected error-code.
+	 *
+	 * @param code       the expected exit-code.
+	 * @param executable the executable to test for a call to {@link System#exit(int)} with the desired exit code.
+	 */
+	public static void assertExitCode(int code, Executable executable) {
+		var defaultSecManager = System.getSecurityManager();
+		try {
+			var manager = new SecurityManager() {
+				int actualCode;
+				
+				@Override
+				public void checkPermission(Permission perm) { /* allow anything. */ }
+				
+				@Override
+				public void checkPermission(Permission perm, Object context) { /* allow anything. */ }
+				
+				@Override
+				public void checkExit(final int status) {
+					super.checkExit(status);
+					actualCode = status;
+					throw new SecurityException("Aborting System.exit()");
+				}
+			};
+			System.setSecurityManager(manager);
+			assertThrows(SecurityException.class, executable, "System.exit was not called");
+			assertEquals(code, manager.actualCode, "Wrong exit code");
+		} finally {
+			System.setSecurityManager(defaultSecManager);
 		}
 	}
 }
