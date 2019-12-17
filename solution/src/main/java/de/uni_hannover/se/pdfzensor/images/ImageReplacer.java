@@ -98,19 +98,24 @@ public class ImageReplacer extends PDFStreamEngine {
 			PDXObject xobject = getResources().getXObject(objectName);
 			// check if the object is an image object
 			if (xobject instanceof PDImageXObject) {
-				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-				LOGGER.info("Image [{}]", objectName.getName());
-				LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
-							ctmNew.getTranslateY());
-				LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
-							ctmNew.getScalingFactorY());
-				rects.add(new Rectangle2D.Float(ctmNew.getTranslateX(), ctmNew.getTranslateY(),
-												ctmNew.getScalingFactorX(),
-												ctmNew.getScalingFactorY()));
+				PDImageXObject image = (PDImageXObject) xobject;
+				//TODO: !isStencel würde zum Beispiel bei den vielen Boxen bei Cusotop keinen kastern mehr zeichnen
+				if (!image.isStencil()) {
+					Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
+					var at = ctm.createAffineTransform();
+					var shape = at.createTransformedShape(new Rectangle2D.Double(0, 0, 1, 1));
+					var boundingbox = shape.getBounds2D();
+					LOGGER.info("PDImageXObject [{}]", objectName.getName());
+					LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", boundingbox.getX(),
+								boundingbox.getY());
+					LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", boundingbox.getWidth(),
+								boundingbox.getHeight());
+					rects.add(boundingbox);
+				}
 			} else if (xobject instanceof PDFormXObject) {
 				PDFormXObject form = (PDFormXObject) xobject;
 				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-				LOGGER.info("Image [{}]", objectName.getName());
+				LOGGER.info("PDFormXObject [{}]", objectName.getName());
 				LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
 							ctmNew.getTranslateY());
 				LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
@@ -126,6 +131,7 @@ public class ImageReplacer extends PDFStreamEngine {
 			super.processOperator(operator, operands);
 		}
 	}
+	
 	
 	/**
 	 * Draws the censor bars stored in {@link #rects} in the given
