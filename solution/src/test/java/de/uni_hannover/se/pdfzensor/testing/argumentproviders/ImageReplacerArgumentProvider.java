@@ -22,6 +22,7 @@ public class ImageReplacerArgumentProvider implements ArgumentsProvider {
 	 */
 	@Override
 	public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+		//TODO add more examples, especially something like the formAndTransparencyGroup PDF and PDFormXObjects
 		List<Rectangle2D> rectList1 = new ArrayList<>();
 		rectList1.add(new Rectangle(10, 50, 200, 200));
 		rectList1.add(new Rectangle(250, 250, 200, 200));
