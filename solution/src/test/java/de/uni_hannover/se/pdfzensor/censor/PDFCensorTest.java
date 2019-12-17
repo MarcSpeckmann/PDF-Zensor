@@ -5,6 +5,9 @@ import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import de.uni_hannover.se.pdfzensor.processor.PDFProcessor;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFCensorBoundingBoxProvider;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.pdfbox.contentstream.PDFStreamEngine;
+import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.text.TextPosition;
@@ -14,12 +17,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+
+import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -67,6 +74,39 @@ class PDFCensorTest implements PDFHandler {
 		final var doc = PDDocument.load(dummySettings.getInput());
 		dummyProcessor.process(doc);
 		doc.close();
+	}
+	
+	/**
+	 * This tests checks if after processing the PDF Document all DrawObject operator are removed
+	 *
+	 * @param input The input PDF-file to check.
+	 * @throws IOException If the document could not be loaded.
+	 */
+	@ParameterizedTest(name = "Run {index}: pdf: {0}")
+	@ValueSource(strings = {"src/test/resources/pdf-files/cusatop-intro.pdf",
+			"src/test/resources/pdf-files/formAndTransparencyGroup.pdf",
+			"src/test/resources/pdf-files/sample.pdf"})
+	void testRemoveDrawObject(@NotNull String input) throws IOException {
+		
+		var engine = new PDFStreamEngine() {
+			@Override
+			protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
+				if (DRAW_OBJECT.equals(operator.getName())) {
+					fail("Not all Images are removed");
+				}
+			}
+		};
+		
+		var settings = new Settings(null, input);
+		var censor = new PDFCensor(settings);
+		
+		final var processor = new PDFProcessor(censor);
+		final var doc = PDDocument.load(settings.getInput());
+		processor.process(doc);
+		
+		for (var page : doc.getPages()) {
+			engine.processPage(page);
+		}
 	}
 	
 	/**
@@ -134,13 +174,13 @@ class PDFCensorTest implements PDFHandler {
 		Assertions.assertNotNull(getBoundingBoxes(properCensor));
 		// Checks if the expected number of elements have been combined
 		// (requires colors to be added because differently colored elements should not be combined)
-
+		
 		Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
 		
 		properCensor.endPage(doc, page, pageNum);
 		try {
 			Assertions.assertTrue(page.getAnnotations().isEmpty());
-		} catch (IOException e){
+		} catch (IOException e) {
 			Assertions.fail(e.getMessage());
 		}
 		
@@ -171,7 +211,7 @@ class PDFCensorTest implements PDFHandler {
 		var sizeAfter = listAfter.size();
 		Assertions.assertTrue(sizeAfter > 0);
 		var newLast = listAfter.get(sizeAfter - 1);
-
+		
 		// Colors differ, expect element to be added instead of combined.
 		if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
 			Assertions.assertEquals(sizeBefore + 1, sizeAfter);
