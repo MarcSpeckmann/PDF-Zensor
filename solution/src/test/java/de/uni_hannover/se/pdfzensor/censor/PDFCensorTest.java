@@ -90,7 +90,7 @@ class PDFCensorTest implements PDFHandler {
 		
 		var engine = new PDFStreamEngine() {
 			@Override
-			protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
+			protected void processOperator(final Operator operator, final List<COSBase> operands) {
 				if (DRAW_OBJECT.equals(operator.getName())) {
 					fail("Not all Images are removed");
 				}

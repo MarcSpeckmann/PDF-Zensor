@@ -24,6 +24,7 @@ public class ImageReplacerTest {
 	}
 	
 	// just a helper to check the coodinates
+	//TODO: remove before merge
 	@Test
 	void printCoords() {
 		String PATH = "src/test/resources/pdf-files/";
@@ -37,12 +38,23 @@ public class ImageReplacerTest {
 		}
 	}
 	
+	/**
+	 * TODO: add JavaDoc
+	 * @param rect
+	 * @param rectList
+	 */
 	void rectContainedHelper(Rectangle2D rect, List<Rectangle2D> rectList) {
 		if (!rectList.contains(rect)) {
+			//TODO: add a descripton to the fail method call
 			fail();
 		}
 	}
 	
+	/**
+	 * TODO: add JavaDoc
+	 * @param rectList
+	 * @param path
+	 */
 	@ArgumentsSource(ImageReplacerArgumentProvider.class)
 	@ParameterizedTest(name = "Run {index}: ListOfImagePositions: {0}, testedDocument: {1}")
 	void testReplaceImage(List<Rectangle2D> rectList, String path) {
@@ -53,7 +65,7 @@ public class ImageReplacerTest {
 			
 			rectList.forEach(rect -> rectContainedHelper(rect, rectListOfDocument));
 		} catch (Exception e) {
-			fail();
+			fail(e);
 		}
 	}
 	

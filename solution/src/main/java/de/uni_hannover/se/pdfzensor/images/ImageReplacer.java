@@ -92,6 +92,7 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
+		//TODO: Split function to reduce complexity
 		if (DRAW_OBJECT.equals(operator.getName())) {
 			COSName objectName = (COSName) operands.get(0);
 			// get the PDF object
