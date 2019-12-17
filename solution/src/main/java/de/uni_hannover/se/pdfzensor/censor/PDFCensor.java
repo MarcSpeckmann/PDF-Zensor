@@ -50,6 +50,14 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private static final float DEVIATION_TOLERANCE = .2f;
 	
+	/**
+	 * A factor for determining whether or not a gap should be bridged.
+	 * <br>
+	 * Increasing this value will increase the gap tolerance when combining bounds. Meaning greater values will allow
+	 * greater gaps between two bounds and still combine them.
+	 *
+	 * @see #getExtended(Rectangle2D, Rectangle2D)
+	 */
 	private static final float MAX_GAP = 1.5f;
 	
 	private static final Logger LOGGER = Logging.getLogger();
@@ -71,9 +79,8 @@ public final class PDFCensor implements PDFHandler {
 		if (Mode.MARKED.equals(settings.getMode()))
 			removePredicate = removePredicate.and(annotations::isMarked);
 			// to censor everything but segments marked beforehand with a different software
-		else if (Mode.UNMARKED.equals(settings.getMode())) {
+		else if (Mode.UNMARKED.equals(settings.getMode()))
 			removePredicate = removePredicate.and(Predicate.not(annotations::isMarked));
-		}
 	}
 	
 	/**
@@ -111,7 +118,8 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * Returns an approximation of the vertical and horizontal gap of the two rectangles.
+	 * Returns an approximation of the vertical and horizontal gap of the two rectangles. The returned {@link Point2D}
+	 * contains the horizontal gap as its x-value and the vertical gap as its y-value.
 	 *
 	 * @param r1 The first rectangle.
 	 * @param r2 The second rectangle.
