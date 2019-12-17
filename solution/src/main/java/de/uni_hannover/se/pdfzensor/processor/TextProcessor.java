@@ -56,7 +56,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 * a character should be censored its text-adjustment is added.
 	 *
 	 * @param string the string that should be transformed into a COSArray that may be used for TJ-operations.
-	 * @param font   the current font. It is used to provide the size-informationabout characters.
+	 * @param font   the current font. It is used to provide the size-information about characters.
 	 * @param censor a list of booleans to check if each character should be censored. This list will be modified.
 	 * @return a COSArray representing the censored string as a TJ-operand.
 	 */
