@@ -20,8 +20,6 @@ import java.util.stream.Stream;
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//TODO: add further tests
-
 /**
  * PDFProcessorTest should contain all unit-tests related to {@link ImageRemover}.
  */
