@@ -159,7 +159,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
 		if (StringUtils
-				.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING)) {
+				.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING, NEXT_LINE)) {
 			super.processOperator(operator, operands);
 			return;
 		}
