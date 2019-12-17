@@ -1,6 +1,9 @@
 package de.uni_hannover.se.pdfzensor.images;
 
+import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.testing.TestUtility;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * PDFProcessorTest should contain all unit-tests related to {@link ImageRemover}.
  */
 class ImageRemoverTest {
+	/**
+	 * @return the {@link Stream} that contains the PD-files from the resource-folder
+	 * @throws IOException when there is an I/O-Error.
+	 */
 	private static Stream<Arguments> testArguments() throws IOException {
 		return Files.walk(Paths.get(TestUtility
 				.getResource(PDF_RESOURCE_PATH).getAbsolutePath()))
@@ -32,17 +39,14 @@ class ImageRemoverTest {
 	}
 
 	/**
-	 * Path to the pdf-tests Resources
+	 * @param file The {@link File} that has the images removed.
+	 * @throws IOException when there is an I/O-Error.
 	 */
-	//private static final String pdfPath = getResourcePath(PDF_RESOURCE_PATH + "threeImages.pdf");
 	@ParameterizedTest
 	@MethodSource("testArguments")
 	void testRemove(File file) throws IOException {
 		PDDocument testDocument = PDDocument.load(file);
-		//assertEquals(3, countPDImageXObjects(testDocument));
-		//
 		ImageRemover.remove(testDocument);
-		//
 		assertEquals(0, countPDImageXObjects(testDocument));
 		testDocument.close();
 	}
@@ -56,7 +60,6 @@ class ImageRemoverTest {
 	 */
 	private int countPDImageXObjects(PDDocument document) throws IOException {
 		var pdImageObjectCounter = 0;
-		// TODO added try and catch with ignore to discus how to handle this
 		try {
 			for (var page : document.getPages()) {
 				for (var name : page.getResources().getXObjectNames()) {

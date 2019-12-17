@@ -1,5 +1,8 @@
 package de.uni_hannover.se.pdfzensor.images;
 
+import de.uni_hannover.se.pdfzensor.Logging;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
@@ -13,6 +16,7 @@ import java.util.ArrayList;
  * Utility-class that removes Images ({@link PDImageXObject}) from a given {@link PDDocument}.
  */
 public final class ImageRemover {
+	private static final Logger LOGGER = Logging.getLogger();
 	/**
 	 * Private constructor of a utility-class that is not supposed to be called.
 	 *
@@ -28,7 +32,6 @@ public final class ImageRemover {
 	 * @param doc {@link PDDocument} that will have its Images {@link PDImageXObject} removed.
 	 * @throws IOException when there is an error at retrieving the {@link PDXObject}.
 	 */
-	// TODO added try and catch with ignore to discus how to handle this
 	public static void remove(PDDocument doc) throws IOException {
 		var myListMap = new ArrayList<AbstractMap.SimpleEntry<Integer, org.apache.pdfbox.cos.COSName>>();
 		try {
@@ -41,7 +44,8 @@ public final class ImageRemover {
 			}
 			for (var item : myListMap)
 				doc.getPage(item.getKey()).getResources().put(item.getValue(), (PDXObject) null);
-		} catch (NullPointerException ignored) {
+		} catch (NullPointerException e) {
+			LOGGER.log(Level.INFO, "PDDocument does not contain any XObjects to remove.");
 		}
 	}
 }
