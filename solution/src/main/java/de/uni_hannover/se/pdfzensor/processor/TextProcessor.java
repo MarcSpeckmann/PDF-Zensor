@@ -23,7 +23,6 @@ import java.util.Objects;
 import static java.lang.Boolean.TRUE;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
 
-
 /**
  * TextProcessor has two main purposes: for one is it responsible to abstract {@link
  * org.apache.pdfbox.text.PDFTextStripper}'s {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
@@ -48,7 +47,6 @@ public class TextProcessor extends PDFStreamProcessor {
 		if (handler == null)
 			LOGGER.log(Level.ERROR, "Handler is null");
 		this.handler = Objects.requireNonNull(handler);
-		
 	}
 	
 	/**
