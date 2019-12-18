@@ -60,13 +60,16 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private static final float MAX_GAP = 1.5f;
 	
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
 	
 	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
 	
+	/** The predicate to use when checking bounds of {@link TextPosition}s. */
 	private Predicate<Rectangle2D> removePredicate;
 	
+	/** A new annotations instance in this {@link PDFCensor}-instance. */
 	private Annotations annotations = new Annotations();
 	
 	/**
@@ -119,7 +122,7 @@ public final class PDFCensor implements PDFHandler {
 	
 	/**
 	 * Returns an approximation of the vertical and horizontal gap of the two rectangles. The returned {@link Point2D}
-	 * contains the horizontal gap as its x-value and the vertical gap as its y-value.
+	 * contains the approximated horizontal gap as its x-value and the approximated vertical gap as its y-value.
 	 *
 	 * @param r1 The first rectangle.
 	 * @param r2 The second rectangle.
@@ -184,11 +187,11 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * @param pos the TextPosition (represents string + its character's screen positions) to check
+	 * @param pos the TextPosition to check
 	 * @return true if <code>pos</code> should be censored, false otherwise
 	 */
 	@Override
-	public boolean shouldCensorText(TextPosition pos) {
+	public boolean shouldCensorText(@NotNull final TextPosition pos) {
 		var censoredPair = getTextPositionInfo(pos).filter(p -> removePredicate.test(p.getLeft()));
 		censoredPair.ifPresent(this::addOrExtendBoundingBoxes);
 		return censoredPair.isPresent();
@@ -207,10 +210,10 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final ImmutablePair<Rectangle2D, Color> pair) {
 		if (!boundingBoxes.isEmpty()) {
-			var bb = pair.getLeft();
-			var last = boundingBoxes.get(boundingBoxes.size() - 1);
-			Rectangle2D union = null;
-			if (last.getRight().equals(pair.getRight()) && (union = getExtended(last.getLeft(), bb)) != null) {
+			final var bb = pair.getLeft();
+			final var last = boundingBoxes.get(boundingBoxes.size() - 1);
+			final var union = getExtended(last.getLeft(), bb);
+			if (last.getRight().equals(pair.getRight()) && union != null) {
 				boundingBoxes.remove(last);
 				bb.setRect(union);
 			}
@@ -223,9 +226,10 @@ public final class PDFCensor implements PDFHandler {
 	 * empty optional.
 	 *
 	 * @param pos The TextPosition to transform into a bounds-color pair.
-	 * @return An optional containing either the bounds-color pair or nothing, if an error occurred.
+	 * @return An optional containing either the bounds-color pair or nothing if an error occurred.
 	 */
 	private Optional<ImmutablePair<Rectangle2D, Color>> getTextPositionInfo(@NotNull TextPosition pos) {
+		Objects.requireNonNull(pos);
 		var result = Optional.<ImmutablePair<Rectangle2D, Color>>empty();
 		try {
 			var font = pos.getFont();

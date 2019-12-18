@@ -15,7 +15,6 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static de.uni_hannover.se.pdfzensor.testing.LoggingUtility.getRootLogger;
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
@@ -68,13 +67,15 @@ class SettingsTest {
 		assertEquals(Objects.requireNonNullElse(mode, Mode.ALL), settings.getMode());
 		
 		// assert that the start of the parsed expressions comes from the command-line arguments
-		int expIndex = 0;
 		var actualExp = settings.getExpressions();
-		for (Expression e : expressions.stream().map(p -> new Expression(p.getLeft(), p.getRight()))
-									   .collect(Collectors.toList())) {
-			assertEquals(e.getRegex(), actualExp[expIndex].getRegex());
-			assertEquals(e.getColor(), actualExp[expIndex++].getColor());
-			// may assert color because no default colors were given (they could only be given by a configuration file)
+		final Color[] settingsDefColors = getPrivateField(Settings.class, null, "DEFAULT_COLORS");
+		for (int i = 0, defColorIndex = 0; i < expressions.size(); i++) {
+			var expExpression = expressions.get(i);
+			final Color expColor = expExpression.getRight() != null && defColorIndex < settingsDefColors.length ?
+					getColorOrNull(expExpression.getRight()) : settingsDefColors[defColorIndex++];
+			Expression e = new Expression(expExpression.getLeft(), expColor);
+			assertEquals(e.getRegex(), actualExp[i].getRegex());
+			assertEquals(e.getColor(), actualExp[i].getColor());
 		}
 	}
 	
@@ -117,8 +118,10 @@ class SettingsTest {
 			assertEquals(mode, settings.getMode());
 		
 		// the default fallback Expression is expected to be appended
+		final Color[] settingsDefColors = getPrivateField(Settings.class, null, "DEFAULT_COLORS");
 		expressions.add(new ImmutablePair<>(".", colorToString(Settings.DEFAULT_CENSOR_COLOR)));
-		assertEqualExpressions(expressions.toArray(new ImmutablePair[0]), settings.getExpressions(), defColors);
+		assertEqualExpressions(expressions.toArray(new ImmutablePair[0]), settings.getExpressions(),
+							   defColors != null ? defColors : settingsDefColors);
 	}
 	
 	/** Dummy Unit-tests for function getLinkColor. */

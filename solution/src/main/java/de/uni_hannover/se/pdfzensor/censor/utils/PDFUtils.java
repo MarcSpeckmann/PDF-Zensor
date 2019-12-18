@@ -14,23 +14,19 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * PDFUtils is a specialized utility-class to provide short helper-functions centered around PDF-files.
- */
+/** PDFUtils is a specialized utility-class to provide short helper-functions centered around PDF-files. */
 public final class PDFUtils {
-	
-	/**
-	 * No instance of PDFUtils should be created. Thus it will always throw an exception.
-	 */
+	/** No instance of PDFUtils should be created. Thus it will always throw an exception. */
 	@Contract(value = " -> fail", pure = true)
 	private PDFUtils() {
 		throw new UnsupportedOperationException();
 	}
 	
 	/**
-	 * Translates the given {@link PDRectangle} into a corresponding {@link Rectangle2D.Float}. Please note that the
-	 * translation technically shifts the rectangle along the y-axis since Rectangle2D is created using the upper left
-	 * corner to anchor it whereas PDRectangle provides the lower left corner.
+	 * Translates the given {@link PDRectangle} into a corresponding {@link Rectangle2D.Float}.
+	 * <br>
+	 * Note that the translation technically shifts the rectangle along the y-axis since Rectangle2D is created using
+	 * the upper left corner to anchor it whereas PDRectangle provides the lower left corner.
 	 *
 	 * @param rect A rectangle from type PDRectangle with height, width and position
 	 * @return A rectangle from type Rectangle2D with the properties of the input rectangle
@@ -42,12 +38,11 @@ public final class PDFUtils {
 		return new Rectangle2D.Float(rect.getLowerLeftX(), rect.getLowerLeftY(), rect.getWidth(), rect.getHeight());
 	}
 	
-	
 	/**
-	 * Generates a rectangle from type Rectangle2D with the height, width and position of a given text line
+	 * Generates a new {@link Rectangle2D} with the position and dimensions of the given {@link TextPosition}.
 	 *
-	 * @param pos A TextPosition representing a string and a position of characters on the screen
-	 * @return A rectangle from type Rectangle2D with the properties of height, width and position from the TextPosition
+	 * @param pos The {@link TextPosition} which's bounds should be transformed into a {@link Rectangle2D}
+	 * @return A {@link Rectangle2D} representing the bounds of the given {@link TextPosition}
 	 * @throws IOException if the font could not be loaded correctly.
 	 */
 	public static Rectangle2D transformTextPosition(@NotNull TextPosition pos) throws IOException {
@@ -66,5 +61,4 @@ public final class PDFUtils {
 		Shape s = at.createTransformedShape(r);
 		return s.getBounds2D();
 	}
-	
 }
