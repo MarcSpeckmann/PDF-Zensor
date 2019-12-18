@@ -27,6 +27,7 @@ import java.util.Objects;
 
 import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
 import static org.junit.jupiter.api.Assertions.fail;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -44,7 +45,27 @@ class PDFCensorTest implements PDFHandler {
 	/** The bounds of the individual elements of the PDF-file (not combined). */
 	private Rectangle2D.Double[] elements;
 	
+	/**
+	 * Returns the list of bounds-color pairs of the instance.
+	 *
+	 * @param fromInstance The instance from which the list should be retrieved.
+	 * @return The bounds-color pair list of the given instance.
+	 */
+	@Nullable
+	@SuppressWarnings("unchecked")
+	private static List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes(@NotNull PDFCensor fromInstance) {
+		try {
+			var boundingBoxesField = PDFCensor.class.getDeclaredField("boundingBoxes");
+			boundingBoxesField.setAccessible(true);
+			return (List<ImmutablePair<Rectangle2D, Color>>) boundingBoxesField.get(fromInstance);
+		} catch (Exception e) {
+			Assertions.fail("Could not retrieve the bounds-color pair list.", e);
+		}
+		return null;
+	}
+	
 	/** Checks for invalid settings argument. */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void testInvalidSettings() {
 		Assertions.assertThrows(NullPointerException.class, () -> new PDFCensor(null));
@@ -71,9 +92,9 @@ class PDFCensorTest implements PDFHandler {
 		this.finalExpectedElements = finalExpectedElements;
 		
 		final var dummyProcessor = new PDFProcessor(this);
-		final var doc = PDDocument.load(dummySettings.getInput());
-		dummyProcessor.process(doc);
-		doc.close();
+		try (final var doc = PDDocument.load(dummySettings.getInput())) {
+			dummyProcessor.process(doc);
+		}
 	}
 	
 	/**
@@ -107,42 +128,6 @@ class PDFCensorTest implements PDFHandler {
 		for (var page : doc.getPages()) {
 			engine.processPage(page);
 		}
-	}
-	
-	/**
-	 * Compares the bounds of two rectangles with consideration to a small error margin.
-	 *
-	 * @param expected The expected rectangle bounds.
-	 * @param actual   The actual rectangle bounds.
-	 * @return True if the bounds of the rectangles are equal according to the margin, false otherwise.
-	 */
-	private boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual) {
-		var range = 1 / 1000000.0;
-		Objects.requireNonNull(expected);
-		Objects.requireNonNull(actual);
-		return (range > Math.abs(expected.getX() - actual.getX())) &&
-			   (range > Math.abs(expected.getY() - actual.getY())) &&
-			   (range > Math.abs(expected.getWidth() - actual.getWidth())) &&
-			   (range > Math.abs(expected.getHeight() - actual.getHeight()));
-	}
-	
-	/**
-	 * Returns the list of bounds-color pairs of the instance.
-	 *
-	 * @param fromInstance The instance from which the list should be retrieved.
-	 * @return The bounds-color pair list of the given instance.
-	 */
-	@Nullable
-	@SuppressWarnings("unchecked")
-	private static List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes(@NotNull PDFCensor fromInstance) {
-		try {
-			var boundingBoxesField = PDFCensor.class.getDeclaredField("boundingBoxes");
-			boundingBoxesField.setAccessible(true);
-			return (List<ImmutablePair<Rectangle2D, Color>>) boundingBoxesField.get(fromInstance);
-		} catch (Exception e) {
-			Assertions.fail("Could not retrieve the bounds-color pair list.", e);
-		}
-		return null;
 	}
 	
 	@Override
@@ -219,7 +204,7 @@ class PDFCensorTest implements PDFHandler {
 		var expBounds = elements[element];
 		if (sizeBefore == sizeAfter) // element was extended
 			expBounds = (Rectangle2D.Double) elements[element].createUnion(oldLast.getLeft());
-		Assertions.assertTrue(checkRectanglesEqual(expBounds, newLast.getLeft()));
+		Assertions.assertTrue(checkRectanglesEqual(expBounds, newLast.getLeft(), EPSILON));
 		
 		element++;
 		return actual;

@@ -1,21 +1,26 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.contentstream.operator.Operator;
-import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.*;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.Boolean.TRUE;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
 
 
@@ -30,7 +35,7 @@ import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
 public class TextProcessor extends PDFStreamProcessor {
 	private static final Logger LOGGER = Logging.getLogger();
 	private PDFHandler handler;
-	private boolean shouldBeCensored = false;
+	private List<Boolean> shouldBeCensored = new ArrayList<>();
 	
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
@@ -44,6 +49,42 @@ public class TextProcessor extends PDFStreamProcessor {
 			LOGGER.log(Level.ERROR, "Handler is null");
 		this.handler = Objects.requireNonNull(handler);
 		
+	}
+	
+	/**
+	 * Transforms the provided COSString into an COSArray where each character is added if it should not be censored. If
+	 * a character should be censored its text-adjustment is added.
+	 *
+	 * @param string the string that should be transformed into a COSArray that may be used for TJ-operations.
+	 * @param font   the current font. It is used to provide the size-information about characters.
+	 * @param censor a list of booleans to check if each character should be censored. This list will be modified.
+	 * @return a COSArray representing the censored string as a TJ-operand.
+	 */
+	@NotNull
+	private static COSArray removeCharsFromString(COSString string, PDFont font, @NotNull List<Boolean> censor) {
+		var newOperands = new COSArray();
+		try (var is = new ByteArrayInputStream(string.getBytes())) {
+			while (is.available() > 0 && !censor.isEmpty()) {
+				int before = is.available();
+				int code = font.readCode(is);
+				int after = is.available();
+				
+				if (TRUE.equals(censor.remove(0))) {
+					var tj = -font.getWidth(code);
+					if (font.isVertical())
+						tj = -font.getHeight(code);
+					newOperands.add(new COSFloat(tj));
+				} else {
+					int startIndex = string.getBytes().length - before;
+					int endIndex = string.getBytes().length - after;
+					var data = ArrayUtils.subarray(string.getBytes(), startIndex, endIndex);
+					newOperands.add(new COSString(data));
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.error(e);
+		}
+		return newOperands;
 	}
 	
 	/**
@@ -101,7 +142,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processTextPosition(final TextPosition text) {
-		shouldBeCensored = handler.shouldCensorText(text);
+		shouldBeCensored.add(handler.shouldCensorText(text));
 		super.processTextPosition(text);
 	}
 	
@@ -117,17 +158,71 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
-		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
-		if (!DRAW_OBJECT.equals(operator.getName())) {
-			if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
-				writer.writeTokens(operands);
-				writer.writeToken(operator);
-			}
-			super.processOperator(operator, operands);
+		if (DRAW_OBJECT.equals(operator.getName())) {
+			return;
 		}
-		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored) {
+		if (StringUtils
+				.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING, NEXT_LINE)) {
+			super.processOperator(operator, operands);
+			return;
+		}
+		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
+		shouldBeCensored.clear();
+		if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
 			writer.writeTokens(operands);
 			writer.writeToken(operator);
 		}
+		super.processOperator(operator, operands);
+		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
+			COSArray newOperands;
+			if (SHOW_TEXT.equals(operator.getName()))
+				newOperands = removeCharsFromText(operands, shouldBeCensored);
+			else newOperands = removeCharsFromTextAdjusted(operands, shouldBeCensored);
+			writer.writeToken(newOperands);
+			writer.writeToken(Operator.getOperator(SHOW_TEXT_ADJUSTED));
+		}
+	}
+	
+	/**
+	 * Removes the chars that should be censored from the operands and replaces them by their widths (height for
+	 * vertical fonts). The resulting COSArray may be used as an operand for a TJ-operation.
+	 *
+	 * @param operands the operand of a Tj call that should be transformed into the censored operands for a TJ call.
+	 * @param censor   a list containing information about what character should be censored. For each censored
+	 *                 character the first element of the list is deleted such that the first element always shows if
+	 *                 the next character should be censored.
+	 * @return a TJ-operand for drawing the censored string.
+	 */
+	@NotNull
+	private COSArray removeCharsFromText(@NotNull List<COSBase> operands, List<Boolean> censor) {
+		var font = getGraphicsState().getTextState().getFont();
+		return removeCharsFromString((COSString) operands.get(0), font, censor);
+	}
+	
+	/**
+	 * Removes the chars that should be censored from the operands and replaces them by their widths (height for
+	 * vertical fonts). The resulting COSArray may be used as an operand for a TJ-operation.
+	 *
+	 * @param operands the operand of a TJ call that should be transformed into the censored operands for a TJ call.
+	 * @param censor   a list containing information about what character should be censored. For each censored
+	 *                 character the first element of the list is deleted such that the first element always shows if
+	 *                 the next character should be censored.
+	 * @return a TJ-operand for drawing the censored string.
+	 */
+	@NotNull
+	private COSArray removeCharsFromTextAdjusted(@NotNull List<COSBase> operands, List<Boolean> censor) {
+		var font = getGraphicsState().getTextState().getFont();
+		var newOperands = new COSArray();
+		
+		var operand = (COSArray) operands.get(0);
+		for (var op : operand) {
+			if (op instanceof COSNumber) {
+				newOperands.add(op);
+			} else if (op instanceof COSString) {
+				var ops = removeCharsFromString((COSString) op, font, censor);
+				newOperands.addAll(ops);
+			}
+		}
+		return newOperands;
 	}
 }

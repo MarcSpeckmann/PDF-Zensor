@@ -15,6 +15,8 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * AnnotationsTest should contain all unit-tests related to {@link Annotations}.
  */
@@ -76,17 +78,21 @@ class AnnotationsTest {
 		Assertions.assertThrows(NullPointerException.class,
 								() -> new Annotations().isMarked(null, MarkCriterion.INTERSECT));
 		
-		PDDocument testDocument = createMarkedDocument();
-		PDPage testPage = testDocument.getPage(0);
-		Annotations anno = new Annotations();
-		anno.cachePage(testPage);
-		// given rectangle is outside the rectangle of the highlight respectively bordering so not intersecting
-		Assertions.assertFalse(anno.isMarked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
-		
-		Assertions.assertThrows(NullPointerException.class, () -> anno.isMarked(new Rectangle(50, 0, 100, 100), null));
-		
-		// given rectangle is intersecting the rectangle of the highlight
-		Assertions.assertTrue(anno.isMarked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
+		try (final var testDocument = createMarkedDocument()) {
+			PDPage testPage = testDocument.getPage(0);
+			Annotations anno = new Annotations();
+			anno.cachePage(testPage);
+			// given rectangle is outside the rectangle of the highlight respectively bordering so not intersecting
+			Assertions.assertFalse(anno.isMarked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
+			
+			Assertions.assertThrows(NullPointerException.class,
+									() -> anno.isMarked(new Rectangle(50, 0, 100, 100), null));
+			
+			// given rectangle is intersecting the rectangle of the highlight
+			Assertions.assertTrue(anno.isMarked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
+		} catch (IOException e) {
+			fail(e);
+		}
 	}
 	
 	/**
@@ -100,14 +106,17 @@ class AnnotationsTest {
 		
 		
 		// given rect is in any of the highlights
-		PDDocument testDocument = createMarkedDocument();
-		PDPage testPage = testDocument.getPage(0);
-		Annotations anno = new Annotations();
-		anno.cachePage(testPage);
-		// given rectangle fully fits into the rectangle of the highlight
-		Assertions.assertTrue(anno.isMarked(new Rectangle(0, 0, 50, 50)));
-		// given rectangle is wider than the rectangle of the highlight so does not fully fit into it
-		Assertions.assertFalse(anno.isMarked(new Rectangle(0, 0, 200, 50)));
+		try (final var testDocument = createMarkedDocument()) {
+			PDPage testPage = testDocument.getPage(0);
+			Annotations anno = new Annotations();
+			anno.cachePage(testPage);
+			// given rectangle fully fits into the rectangle of the highlight
+			Assertions.assertTrue(anno.isMarked(new Rectangle(0, 0, 50, 50)));
+			// given rectangle is wider than the rectangle of the highlight so does not fully fit into it
+			Assertions.assertFalse(anno.isMarked(new Rectangle(100, 200, 200, 50)));
+		} catch (IOException e) {
+			fail(e);
+		}
 	}
 	
 	/* helper method for creating a virtual, blank PDF document with only one annotation link with
@@ -149,16 +158,19 @@ class AnnotationsTest {
 		Assertions.assertThrows(NullPointerException.class,
 								() -> new Annotations().isLinked(null, MarkCriterion.INTERSECT));
 		
-		PDDocument testDocument = createLinkedDocument();
-		PDPage testPage = testDocument.getPage(0);
-		Annotations anno = new Annotations();
-		anno.cachePage(testPage);
-		// given rectangle is outside the rectangle of the link respectively bordering so not intersecting
-		Assertions.assertFalse(anno.isLinked(new Rectangle(100, 0, 100, 100), MarkCriterion.INTERSECT));
-		// rect is given, criteria is null
-		Assertions.assertThrows(NullPointerException.class, () -> anno.isLinked(new Rectangle(0, 0, 50, 50), null));
-		
-		Assertions.assertTrue(anno.isLinked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
+		try (final var testDocument = createLinkedDocument()) {
+			PDPage testPage = testDocument.getPage(0);
+			Annotations anno = new Annotations();
+			anno.cachePage(testPage);
+			// given rectangle is outside the rectangle of the link respectively bordering so not intersecting
+			Assertions.assertFalse(anno.isLinked(new Rectangle(100, 0, 100, 100), MarkCriterion.CONTAIN));
+			// rect is given, criteria is null
+			Assertions.assertThrows(NullPointerException.class, () -> anno.isLinked(new Rectangle(0, 0, 50, 50), null));
+			
+			Assertions.assertTrue(anno.isLinked(new Rectangle(50, 0, 100, 100), MarkCriterion.INTERSECT));
+		} catch (IOException e) {
+			fail(e);
+		}
 	}
 	
 	/**
@@ -171,13 +183,16 @@ class AnnotationsTest {
 		Assertions.assertThrows(NullPointerException.class, () -> new Annotations().isLinked(null));
 		
 		// given rect in any of the links
-		PDDocument testDocument = createLinkedDocument();
-		PDPage testPage = testDocument.getPage(0);
-		Annotations anno = new Annotations();
-		anno.cachePage(testPage);
-		// given rectangle fully fits into the rectangle of the link
-		Assertions.assertTrue(anno.isLinked(new Rectangle(0, 0, 50, 50)));
-		// given rectangle is wider than the rectangle of the link so does not fully fit into it
-		Assertions.assertTrue(anno.isLinked(new Rectangle(0, 0, 200, 50)));
+		try (final var testDocument = createLinkedDocument()) {
+			PDPage testPage = testDocument.getPage(0);
+			Annotations anno = new Annotations();
+			anno.cachePage(testPage);
+			// given rectangle fully fits into the rectangle of the link
+			Assertions.assertTrue(anno.isLinked(new Rectangle(0, 0, 50, 50)));
+			// given rectangle is wider than the rectangle of the link so does not fully fit into it
+			Assertions.assertTrue(anno.isLinked(new Rectangle(0, 0, 200, 50)));
+		} catch (IOException e) {
+			fail(e);
+		}
 	}
 }
