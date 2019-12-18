@@ -38,7 +38,10 @@ public final class Settings {
 	/** The color links should be censored in if nothing else was specified. */
 	private static final Color DEFAULT_LINK_COLOR = Color.BLUE;
 	
-	/** Kenneth Kelly's 22 colors of maximum contrast. */
+	/**
+	 * Kenneth Kelly's 22 colors of maximum contrast except the first two (#F2F3F4, #222222), since high contrast to
+	 * black and white should be present (for {@link #DEFAULT_CENSOR_COLOR} and white backgrounds).
+	 */
 	@NotNull
 	private static final Color[] DEFAULT_COLORS;
 	
@@ -62,7 +65,7 @@ public final class Settings {
 	private final Expression[] expressions;
 	
 	static {
-		final var defColorCodes = "#F2F3F4,#222222,#F3C300,#875692,#F38400,#A1CAF1,#BE0032,#C2B280,#848482,#008856,#E68FAC,#0067A5,#F99379,#604E97,#F6A600,#B3446C,#DCD300,#882D17,#8DB600,#654522,#E25822,#2B3D26";
+		final var defColorCodes = "#F3C300,#875692,#F38400,#A1CAF1,#BE0032,#C2B280,#848482,#008856,#E68FAC,#0067A5,#F99379,#604E97,#F6A600,#B3446C,#DCD300,#882D17,#8DB600,#654522,#E25822,#2B3D26";
 		DEFAULT_COLORS = stream(defColorCodes.split(",")).map(Utils::getColorOrNull).filter(Objects::nonNull)
 														 .toArray(Color[]::new);
 	}
