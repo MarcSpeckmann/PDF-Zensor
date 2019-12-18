@@ -120,7 +120,7 @@ public final class PDFCensor implements PDFHandler {
 		final var sameLine = r1.getHeight() > heightTolerance && r2.getHeight() > heightTolerance;
 		
 		final var gaps = getGaps(r1, r2);
-		final var tolerance = new Point2D.Double(comb.getWidth() * MAX_GAP, comb.getHeight() * MAX_GAP);
+		final var tolerance = new Point2D.Double(comb.getHeight() * MAX_GAP, comb.getWidth() * MAX_GAP);
 		
 		return ((sameLine && gaps.getX() < tolerance.x) || (sameColumn && gaps.getY() < tolerance.y)) ? comb : null;
 	}
@@ -137,7 +137,7 @@ public final class PDFCensor implements PDFHandler {
 	private static Point2D getGaps(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
 		final var xDist = abs(r1.getCenterX() - r2.getCenterX());
 		final var yDist = abs(r1.getCenterY() - r2.getCenterY());
-		return new Point2D.Double(xDist - r1.getWidth() - r2.getWidth(), yDist - r1.getHeight() - r2.getHeight());
+		return new Point2D.Double(xDist - (r1.getWidth() + r2.getWidth())/2, yDist - (r1.getHeight() + r2.getHeight())/2);
 	}
 	
 	/**
