@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ImageReplacerTest {
 		String PATH = "src/test/resources/pdf-files/";
 		try {
 			PDDocument document = PDDocument.load(
-					new File(PATH + "threeImages.pdf"));
+					new File(PATH + "pdfinpdf.pdf"));
 			PDPage page = document.getPage(0);
 			List<Rectangle2D> rl = imageReplacer.replaceImages(document, page);
 			System.out.println(String.valueOf(rl));
@@ -56,6 +57,11 @@ public class ImageReplacerTest {
 		}
 	}
 	
+/*	Rectangle2D rectAbsHelper(Rectangle2D rect){
+		return new Rectangle2D.Double(Math.abs(rect.getX()), Math.abs(rect.getY()),
+									  Math.abs(rect.getHeight()), Math.abs(rect.getWidth()));
+	}
+*/
 	/**
 	 * This function tests if all pictures in a document are found at the correct position.
 	 *
@@ -69,7 +75,8 @@ public class ImageReplacerTest {
 			PDDocument document = PDDocument.load(new File(path));
 			PDPage page = document.getPage(0);
 			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(document, page);
-			
+			System.out.println(String.valueOf(rectListOfDocument));
+			System.out.println(String.valueOf(rectList));
 			rectList.forEach(rect -> rectContainedHelper(rect, rectListOfDocument));
 		} catch (Exception e) {
 			fail(e);
