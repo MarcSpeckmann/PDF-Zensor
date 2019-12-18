@@ -18,12 +18,15 @@ public class ImageReplacerTest {
 	ImageReplacer imageReplacer = new ImageReplacer();
 	
 	/**
-	 * TODO: add JavaDoc
+	 * Tests the replaceImages functions with invalid parameters.
 	 */
 	@Test
 	void testReplaceImageInvalidParameter() {
 		assertThrows(IllegalArgumentException.class, () -> imageReplacer.replaceImages(null, null));
-		//TODO: add test where only one input is null
+		PDDocument document = new PDDocument();
+		PDPage page = new PDPage();
+		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, page));
+		assertThrows(IllegalArgumentException.class, () -> imageReplacer.replaceImages(document, null));
 	}
 	
 	// just a helper to check the coodinates
@@ -42,21 +45,22 @@ public class ImageReplacerTest {
 	}
 	
 	/**
-	 * TODO: add JavaDoc
-	 * @param rect
-	 * @param rectList
+	 * This function fails the current test if in rectlist is no rectangle similar to rect.
+	 *
+	 * @param rect A rectangle
+	 * @param rectList A list of rectangles
 	 */
 	void rectContainedHelper(Rectangle2D rect, List<Rectangle2D> rectList) {
 		if (!rectList.contains(rect)) {
-			//TODO: add a descripton to the fail method call
-			fail();
+			fail("rectangle not found");
 		}
 	}
 	
 	/**
-	 * TODO: add JavaDoc
-	 * @param rectList
-	 * @param path
+	 * This function tests if all pictures in a document are found at the correct position.
+	 *
+	 * @param rectList A list of rectangles (coordinates).
+	 * @param path The path to the pdf to be tested.
 	 */
 	@ArgumentsSource(ImageReplacerArgumentProvider.class)
 	@ParameterizedTest(name = "Run {index}: ListOfImagePositions: {0}, testedDocument: {1}")
