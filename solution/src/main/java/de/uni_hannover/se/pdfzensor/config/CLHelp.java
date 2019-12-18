@@ -5,8 +5,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import picocli.CommandLine;
 
-import java.util.Objects;
-
 /** This class is responsible for printing the version and help if requested. */
 public final class CLHelp {
 	

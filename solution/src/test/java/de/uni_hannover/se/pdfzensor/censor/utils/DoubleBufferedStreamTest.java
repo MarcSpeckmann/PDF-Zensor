@@ -29,7 +29,11 @@ class DoubleBufferedStreamTest {
 		assertThrows(NullPointerException.class, () -> new DoubleBufferedStream(new DummyPDStream(), null));
 	}
 	
-	/** Run to check if the provided data is written to the underlying PDStream correctly. */
+	/**
+	 * Run to check if the provided data is written to the underlying PDStream correctly.
+	 *
+	 * @param data The expected stream data to use when testing the buffering.
+	 */
 	@ParameterizedTest(name = "Run {index}")
 	@ArgumentsSource(ByteArrayProvider.class)
 	void testDataBuffering(@NotNull byte[] data) {

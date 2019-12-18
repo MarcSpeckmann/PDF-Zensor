@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This test class tests the {@link MarkCriterion#getPredicate} function to compare a rectangle {@link #rect} with a set
@@ -51,17 +50,10 @@ class MarkCriterionTest {
 	}
 	
 	/**
-	 * tests for {@link MarkCriterion} constructor
-	 */
-	@Test
-	void testMarkCriteria() {
-		assertDoesNotThrow(() -> MarkCriterion.CONTAIN);
-		assertDoesNotThrow(() -> MarkCriterion.INTERSECT);
-	}
-	
-	/**
 	 * Provides a set of arguments for {@link #getPredicateTest(Rectangle2D, Boolean[])} generated from {@link
 	 * #RECTANGLES}.
+	 *
+	 * @return An argument stream containing {@link Rectangle2D.Double}s and {@link Boolean}-arrays.
 	 */
 	private static Stream<Arguments> rectangleProvider() {
 		return RECTANGLES.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
@@ -69,6 +61,9 @@ class MarkCriterionTest {
 	
 	/**
 	 * tests for {@link MarkCriterion#getPredicate} function
+	 *
+	 * @param input    The input {@link Rectangle2D}
+	 * @param expected The expected predicate values for the given rectangle.
 	 */
 	@ParameterizedTest(name = "Run {index}: Rectangles: {0}")
 	@MethodSource("rectangleProvider")

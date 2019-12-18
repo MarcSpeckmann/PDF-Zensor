@@ -5,6 +5,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
  */
 public class ColorProvider implements ArgumentsProvider {
 	public static final String[] COLOR_PREFIXES = {"0X", "0x", "#"};
-	public static final Map<Color, String[]> COLORS = new HashMap<>();
+	static final Map<Color, String[]> COLORS = new HashMap<>();
 	
 	static {
 		COLORS.put(Color.black, new String[]{"000", "000000"});
@@ -42,6 +43,11 @@ public class ColorProvider implements ArgumentsProvider {
 	
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
-		return COLORS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
+		var list = new ArrayList<Arguments>();
+		for (var prefix : COLOR_PREFIXES)
+			for (var e : COLORS.entrySet())
+				for (var color : e.getValue())
+					list.add(Arguments.of(prefix + color, e.getKey()));
+		return list.stream();
 	}
 }

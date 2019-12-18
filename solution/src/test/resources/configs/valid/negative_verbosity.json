@@ -1,4 +1,5 @@
 {
   "verbose": -3,
-  "output":"censoredFile.pdf"
+  "output":"censoredFile.pdf",
+  "censor":"marked"
 }
