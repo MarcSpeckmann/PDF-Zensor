@@ -17,10 +17,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ImageReplacerTest {
 	ImageReplacer imageReplacer = new ImageReplacer();
 	
-	
+	/**
+	 * TODO: add JavaDoc
+	 */
 	@Test
 	void testReplaceImageInvalidParameter() {
 		assertThrows(IllegalArgumentException.class, () -> imageReplacer.replaceImages(null, null));
+		//TODO: add test where only one input is null
 	}
 	
 	// just a helper to check the coodinates
