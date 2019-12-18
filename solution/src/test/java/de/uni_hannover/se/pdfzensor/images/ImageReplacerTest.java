@@ -75,8 +75,7 @@ public class ImageReplacerTest {
 			PDDocument document = PDDocument.load(new File(path));
 			PDPage page = document.getPage(0);
 			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(document, page);
-			System.out.println(String.valueOf(rectListOfDocument));
-			System.out.println(String.valueOf(rectList));
+			//TODO: round the values in the list to make the function less sensible to minor function changes
 			rectList.forEach(rect -> rectContainedHelper(rect, rectListOfDocument));
 		} catch (Exception e) {
 			fail(e);
