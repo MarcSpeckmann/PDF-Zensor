@@ -22,6 +22,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
 
@@ -64,6 +65,8 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	@NotNull
 	public List<Rectangle2D> replaceImages(PDDocument doc, PDPage page) throws IOException {
+		Objects.requireNonNull(doc);
+		Objects.requireNonNull(page);
 		LOGGER.info("Starting to process Images of page{}", page);
 		
 		this.processPage(page);
@@ -92,6 +95,8 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	@Override
 	protected void processOperator(@NotNull final Operator operator, final List<COSBase> operands) throws IOException {
+		Objects.requireNonNull(operands);
+		Objects.requireNonNull(operator);
 		if (DRAW_OBJECT.equals(operator.getName())) {
 			COSName objectName = (COSName) operands.get(0);
 			// get the PDF object
@@ -118,6 +123,8 @@ public class ImageReplacer extends PDFStreamEngine {
 	 * @param objectName The name of the {@link PDImageXObject} image.
 	 */
 	private void getPDImageBB(@NotNull PDImageXObject image, COSName objectName) {
+		Objects.requireNonNull(image);
+		Objects.requireNonNull(objectName);
 		if (!image.isStencil()) {
 			Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
 			var at = ctm.createAffineTransform();
@@ -139,7 +146,19 @@ public class ImageReplacer extends PDFStreamEngine {
 	 * @param objectName The name of the {@link PDFormXObject} form.
 	 */
 	private void getPDFormBB(@NotNull PDFormXObject form, @NotNull COSName objectName) {
-		Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
+		Objects.requireNonNull(form);
+		Objects.requireNonNull(objectName);
+		Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
+		var at = ctm.createAffineTransform();
+		var shape = at.createTransformedShape(new Rectangle2D.Double(0, 0, 1, 1));
+		var boundingbox = shape.getBounds2D();
+		LOGGER.info("PDImageXObject [{}]", objectName.getName());
+		LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", boundingbox.getX(),
+					boundingbox.getY());
+		LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", boundingbox.getWidth(),
+					boundingbox.getHeight());
+		rects.add(boundingbox);
+		/*Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
 		var bounds = form.getBBox();
 		LOGGER.info("PDFormXObject [{}]", objectName.getName());
 		LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units",
@@ -152,7 +171,7 @@ public class ImageReplacer extends PDFStreamEngine {
 				ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
 				ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY(),
 				ctmNew.getScalingFactorX() * bounds.getWidth(),
-				ctmNew.getScalingFactorY() * bounds.getHeight()));
+				ctmNew.getScalingFactorY() * bounds.getHeight()));*/
 	}
 	
 	
@@ -163,6 +182,7 @@ public class ImageReplacer extends PDFStreamEngine {
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
 	private void drawPictureCensorBox(PDPageContentStream pageContentStream) throws IOException {
+		Objects.requireNonNull(pageContentStream);
 		for (var rect : this.rects) {
 			pageContentStream.addRect((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(),
 									  (float) rect.getHeight());
