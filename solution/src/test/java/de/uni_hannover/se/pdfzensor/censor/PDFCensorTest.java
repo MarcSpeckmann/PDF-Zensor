@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
+
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
 	private PDFCensor properCensor;
@@ -37,7 +39,27 @@ class PDFCensorTest implements PDFHandler {
 	/** The bounds of the individual elements of the PDF-file (not combined). */
 	private Rectangle2D.Double[] elements;
 	
+	/**
+	 * Returns the list of bounds-color pairs of the instance.
+	 *
+	 * @param fromInstance The instance from which the list should be retrieved.
+	 * @return The bounds-color pair list of the given instance.
+	 */
+	@Nullable
+	@SuppressWarnings("unchecked")
+	private static List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes(@NotNull PDFCensor fromInstance) {
+		try {
+			var boundingBoxesField = PDFCensor.class.getDeclaredField("boundingBoxes");
+			boundingBoxesField.setAccessible(true);
+			return (List<ImmutablePair<Rectangle2D, Color>>) boundingBoxesField.get(fromInstance);
+		} catch (Exception e) {
+			Assertions.fail("Could not retrieve the bounds-color pair list.", e);
+		}
+		return null;
+	}
+	
 	/** Checks for invalid settings argument. */
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	void testInvalidSettings() {
 		Assertions.assertThrows(NullPointerException.class, () -> new PDFCensor(null));
@@ -64,45 +86,9 @@ class PDFCensorTest implements PDFHandler {
 		this.finalExpectedElements = finalExpectedElements;
 		
 		final var dummyProcessor = new PDFProcessor(this);
-		final var doc = PDDocument.load(dummySettings.getInput());
-		dummyProcessor.process(doc);
-		doc.close();
-	}
-	
-	/**
-	 * Compares the bounds of two rectangles with consideration to a small error margin.
-	 *
-	 * @param expected The expected rectangle bounds.
-	 * @param actual   The actual rectangle bounds.
-	 * @return True if the bounds of the rectangles are equal according to the margin, false otherwise.
-	 */
-	private boolean checkRectanglesEqual(@NotNull Rectangle2D expected, @NotNull Rectangle2D actual) {
-		var range = 1 / 1000000.0;
-		Objects.requireNonNull(expected);
-		Objects.requireNonNull(actual);
-		return (range > Math.abs(expected.getX() - actual.getX())) &&
-			   (range > Math.abs(expected.getY() - actual.getY())) &&
-			   (range > Math.abs(expected.getWidth() - actual.getWidth())) &&
-			   (range > Math.abs(expected.getHeight() - actual.getHeight()));
-	}
-	
-	/**
-	 * Returns the list of bounds-color pairs of the instance.
-	 *
-	 * @param fromInstance The instance from which the list should be retrieved.
-	 * @return The bounds-color pair list of the given instance.
-	 */
-	@Nullable
-	@SuppressWarnings("unchecked")
-	private static List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes(@NotNull PDFCensor fromInstance) {
-		try {
-			var boundingBoxesField = PDFCensor.class.getDeclaredField("boundingBoxes");
-			boundingBoxesField.setAccessible(true);
-			return (List<ImmutablePair<Rectangle2D, Color>>) boundingBoxesField.get(fromInstance);
-		} catch (Exception e) {
-			Assertions.fail("Could not retrieve the bounds-color pair list.", e);
+		try (final var doc = PDDocument.load(dummySettings.getInput())) {
+			dummyProcessor.process(doc);
 		}
-		return null;
 	}
 	
 	@Override
@@ -142,7 +128,7 @@ class PDFCensorTest implements PDFHandler {
 		properCensor.endPage(doc, page, pageNum);
 		try {
 			Assertions.assertTrue(page.getAnnotations().isEmpty());
-		} catch (IOException e){
+		} catch (IOException e) {
 			Assertions.fail(e.getMessage());
 		}
 		
@@ -172,11 +158,15 @@ class PDFCensorTest implements PDFHandler {
 		var listAfter = Objects.requireNonNull(getBoundingBoxes(properCensor));
 		var sizeAfter = listAfter.size();
 		
-		//TODO: this part has to be rewritting and adjusted to the now tokenized censoring
+		//TODO: this part has to be rewritten and adjusted to the now tokenized censoring
 		//This assertion is not true anymore since with the tokenizer censor-bars are not added directly.
 		//Assertions.assertTrue(sizeAfter > 0);
 		//var newLast = listAfter.get(sizeAfter - 1);
-
+		
+		//TODO: this too
+		//Assertions.assertTrue(sizeAfter > 0);
+		//var newLast = listAfter.get(sizeAfter - 1);
+		
 		// Colors differ, expect element to be added instead of combined.
 		//if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
 		//	Assertions.assertEquals(sizeBefore + 1, sizeAfter);

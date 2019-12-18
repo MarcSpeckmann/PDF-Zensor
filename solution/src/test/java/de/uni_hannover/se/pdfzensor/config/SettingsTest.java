@@ -13,9 +13,9 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static de.uni_hannover.se.pdfzensor.testing.LoggingUtility.getRootLogger;
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
@@ -38,16 +38,22 @@ class SettingsTest {
 	/**
 	 * Checks if the arguments are parsed into the corresponding expected values.
 	 *
-	 * @param args      The arguments from which the Settings constructed.
-	 * @param input     The input file.
-	 * @param output    The expected output file.
-	 * @param verbosity The expected logger verbosity level.
-	 * @param mode      The expected censoring mode.
-	 * @throws IOException If the configuration file could not be parsed.
+	 * @param args        The arguments from which the Settings constructed.
+	 * @param input       The input file.
+	 * @param output      The expected output file.
+	 * @param verbosity   The expected logger verbosity level.
+	 * @param mode        The expected censoring mode.
+	 * @param expressions The expected expressions as a list of string-string pairs as specified in the command-line
+	 *                    arguments (since there is no config).
+	 * @param quiet       The expected logger mode (whether or not it is expected to be silenced).
 	 */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}")
 	@ArgumentsSource(CLArgumentProvider.class)
-	void testSettingsNoConfig(String[] args, File input, File output, Level verbosity, Mode mode) throws IOException {
+	void testSettingsNoConfig(@NotNull String[] args, @NotNull File input, @Nullable File output,
+							  @Nullable Level verbosity,
+							  @Nullable Mode mode,
+							  @NotNull ArrayList<ImmutablePair<String, String>> expressions,
+							  boolean quiet) {
 		Logging.deinit();
 		final var settings = new Settings(null, args);
 		
@@ -57,13 +63,19 @@ class SettingsTest {
 		if (output != null)
 			assertEquals(output, settings.getOutput());
 		
-		var rootLogger = getRootLogger();
-		assertTrue(rootLogger.isPresent());
-		assertNotNull(rootLogger.get().getLevel());
-		if (verbosity != null)
-			assertEquals(verbosity, rootLogger.get().getLevel());
+		assertExpectedVerbosity(verbosity, quiet);
 		
 		assertEquals(Objects.requireNonNullElse(mode, Mode.ALL), settings.getMode());
+		
+		// assert that the start of the parsed expressions comes from the command-line arguments
+		int expIndex = 0;
+		var actualExp = settings.getExpressions();
+		for (Expression e : expressions.stream().map(p -> new Expression(p.getLeft(), p.getRight()))
+									   .collect(Collectors.toList())) {
+			assertEquals(e.getRegex(), actualExp[expIndex].getRegex());
+			assertEquals(e.getColor(), actualExp[expIndex++].getColor());
+			// may assert color because no default colors were given (they could only be given by a configuration file)
+		}
 	}
 	
 	/**
@@ -73,20 +85,21 @@ class SettingsTest {
 	 * @param args        The command-line arguments.
 	 * @param input       The input file.
 	 * @param output      The output file.
-	 * @param verbosity   The verbosity level of the logger.
+	 * @param verbosity   The verbosity level of the logger (not considering the quiet setting).
 	 * @param mode        The mode to use when censoring.
 	 * @param expressions The expressions which are expected to be parsed (exclusive the fallback Expression).
 	 * @param defColors   The default colors from which one will be added to an Expression without a color.
-	 * @throws IOException If the configuration file could not be parsed.
+	 * @param quiet       The boolean specifying if the logger should be silenced.
 	 */
 	@SuppressWarnings("unchecked")
-	@ParameterizedTest(name = "Run {index}: config: {0}, args: {1} => in: {2}, out: {3}, verbosity: {4}, mode: {5}, expressions: {6}, defColors: {7}")
+	@ParameterizedTest(name = "Run {index}: config: {0}, args: {1} => in: {2}, out: {3}, verbosity: {4}, mode: {5}, expressions: {6}, defColors: {7}, quiet: {8}")
 	@ArgumentsSource(SettingsProvider.class)
 	void testSettingsValidConfig(@Nullable String configName, @NotNull final String[] args, @NotNull File input,
 								 @Nullable File output, @Nullable Level verbosity,
 								 @Nullable Mode mode,
 								 @NotNull ArrayList<ImmutablePair<String, String>> expressions,
-								 @Nullable Color[] defColors) throws IOException {
+								 @Nullable Color[] defColors,
+								 boolean quiet) {
 		Logging.deinit();
 		var configPath = configName == null ? null : getResourcePath(CONFIG_PATH + configName);
 		var settings = new Settings(configPath, args);
@@ -97,11 +110,7 @@ class SettingsTest {
 		if (output != null)
 			assertEquals(output.getName(), settings.getOutput().getName());
 		
-		var rootLogger = getRootLogger();
-		assertTrue(rootLogger.isPresent());
-		assertNotNull(rootLogger.get().getLevel());
-		if (verbosity != null)
-			assertEquals(verbosity, rootLogger.get().getLevel());
+		assertExpectedVerbosity(verbosity, quiet);
 		
 		assertNotNull(settings.getMode());
 		if (mode != null)
@@ -112,13 +121,9 @@ class SettingsTest {
 		assertEqualExpressions(expressions.toArray(new ImmutablePair[0]), settings.getExpressions(), defColors);
 	}
 	
-	/**
-	 * dummy Unit-tests for function getLinkColor
-	 *
-	 * @throws IOException If the configuration file could not be parsed.
-	 */
+	/** Dummy Unit-tests for function getLinkColor. */
 	@Test
-	void testLinkColor() throws IOException {
+	void testLinkColor() {
 		final var settings = new Settings(null, getResource("/pdf-files/sample.pdf").getAbsolutePath());
 		assertEquals(Color.BLUE, settings.getLinkColor());
 	}
@@ -157,5 +162,25 @@ class SettingsTest {
 				expColor = defColors[usedColors++];
 			assertEquals(expColor, actual[i].getColor());
 		}
+	}
+	
+	/**
+	 * Asserts that the root logger and console logger have the expected levels set and are initialized.
+	 *
+	 * @param verbosity The expected verbosity level of the console logger.
+	 * @param quiet     The expected value for quiet.
+	 */
+	private void assertExpectedVerbosity(@Nullable Level verbosity, boolean quiet) {
+		var rootLogger = getRootLogger();
+		assertTrue(rootLogger.isPresent());
+		assertEquals(Level.ALL, rootLogger.get().getLevel());
+		Level consoleLoggerLevel = getPrivateField(Logging.class, null, "consoleLevel");
+		assertNotNull(consoleLoggerLevel);
+		if (quiet)
+			assertEquals(Level.OFF, consoleLoggerLevel);
+		else if (verbosity != null)
+			assertEquals(verbosity, consoleLoggerLevel);
+		else
+			assertTrue(consoleLoggerLevel.isLessSpecificThan(Level.WARN));
 	}
 }
