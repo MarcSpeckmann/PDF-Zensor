@@ -83,6 +83,13 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		setupParser();
 	}
 	
+	/**
+	 * Checks if the passed regex is a valid token. A regex is considered valid if it is a valid regex, does not match
+	 * the empty string and has no capture-groups.
+	 *
+	 * @param regex the regex to check for if it is a valid token.
+	 * @return true if the regex is a valid token.
+	 */
 	private static boolean isTokenValid(String regex) {
 		boolean valid = false;
 		try {
