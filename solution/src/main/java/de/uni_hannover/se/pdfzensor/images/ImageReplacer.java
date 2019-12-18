@@ -99,9 +99,9 @@ public class ImageReplacer extends PDFStreamEngine {
 			if (xobject instanceof PDImageXObject) {
 				
 				getPDImageBB((PDImageXObject) xobject, objectName);
-
+				
 			} else if (xobject instanceof PDFormXObject) {
-
+				
 				getPDFormBB((PDFormXObject) xobject, objectName);
 				
 			}
@@ -111,13 +111,13 @@ public class ImageReplacer extends PDFStreamEngine {
 	}
 	
 	/**
-	 * This method is adding the bounding box of the {@link PDImageXObject} to the {@link #rects},
-	 * but only if the {@link PDImageXObject} isn't a stencil.
+	 * This method is adding the bounding box of the {@link PDImageXObject} to the {@link #rects}, but only if the
+	 * {@link PDImageXObject} isn't a stencil.
 	 *
-	 * @param image The {@link PDImageXObject} where we want to get the position from.
+	 * @param image      The {@link PDImageXObject} where we want to get the position from.
 	 * @param objectName The name of the {@link PDImageXObject} image.
 	 */
-	private void getPDImageBB(@NotNull PDImageXObject image, COSName objectName){
+	private void getPDImageBB(@NotNull PDImageXObject image, COSName objectName) {
 		if (!image.isStencil()) {
 			Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
 			var at = ctm.createAffineTransform();
@@ -135,17 +135,19 @@ public class ImageReplacer extends PDFStreamEngine {
 	/**
 	 * This method is adding the bounding box of the {@link PDFormXObject} to the {@link #rects}.
 	 *
-	 * @param form The {@link PDFormXObject} where we want to get the position from.
+	 * @param form       The {@link PDFormXObject} where we want to get the position from.
 	 * @param objectName The name of the {@link PDFormXObject} form.
 	 */
-	private void getPDFormBB(@NotNull PDFormXObject form, @NotNull COSName objectName){
+	private void getPDFormBB(@NotNull PDFormXObject form, @NotNull COSName objectName) {
 		Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-		LOGGER.info("PDFormXObject [{}]", objectName.getName());
-		LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
-					ctmNew.getTranslateY());
-		LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
-					ctmNew.getScalingFactorY());
 		var bounds = form.getBBox();
+		LOGGER.info("PDFormXObject [{}]", objectName.getName());
+		LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units",
+					ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
+					ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY());
+		LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units",
+					ctmNew.getScalingFactorX() * bounds.getWidth(),
+					ctmNew.getScalingFactorY() * bounds.getHeight());
 		rects.add(new Rectangle2D.Float(
 				ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
 				ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY(),
