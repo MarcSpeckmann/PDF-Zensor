@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.images;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.contentstream.PDFStreamEngine;
 import org.apache.pdfbox.contentstream.operator.DrawObject;
@@ -103,11 +104,11 @@ public class ImageReplacer extends PDFStreamEngine {
 			PDXObject xobject = getResources().getXObject(objectName);
 			if (xobject instanceof PDImageXObject) {
 				
-				getPDImageBB((PDImageXObject) xobject, objectName);
+				this.rects.add(getPDImageBB((PDImageXObject) xobject, objectName));
 				
 			} else if (xobject instanceof PDFormXObject) {
 				
-				getPDFormBB((PDFormXObject) xobject, objectName);
+				this.rects.add(getPDFormBB((PDFormXObject) xobject, objectName));
 				
 			}
 		} else {
@@ -122,32 +123,11 @@ public class ImageReplacer extends PDFStreamEngine {
 	 * @param image      The {@link PDImageXObject} where we want to get the position from.
 	 * @param objectName The name of the {@link PDImageXObject} image.
 	 */
-	private void getPDImageBB(@NotNull PDImageXObject image, COSName objectName) {
+	@NotNull
+	private Rectangle2D getPDImageBB(@NotNull PDImageXObject image, COSName objectName) {
 		Objects.requireNonNull(image);
 		Objects.requireNonNull(objectName);
-		if (!image.isStencil()) {
-			Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
-			var at = ctm.createAffineTransform();
-			var shape = at.createTransformedShape(new Rectangle2D.Double(0, 0, 1, 1));
-			var boundingbox = shape.getBounds2D();
-			LOGGER.info("PDImageXObject [{}]", objectName.getName());
-			LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", boundingbox.getX(),
-						boundingbox.getY());
-			LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", boundingbox.getWidth(),
-						boundingbox.getHeight());
-			rects.add(boundingbox);
-		}
-	}
-	
-	/**
-	 * This method is adding the bounding box of the {@link PDFormXObject} to the {@link #rects}.
-	 *
-	 * @param form       The {@link PDFormXObject} where we want to get the position from.
-	 * @param objectName The name of the {@link PDFormXObject} form.
-	 */
-	private void getPDFormBB(@NotNull PDFormXObject form, @NotNull COSName objectName) {
-		Objects.requireNonNull(form);
-		Objects.requireNonNull(objectName);
+		
 		Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
 		var at = ctm.createAffineTransform();
 		var shape = at.createTransformedShape(new Rectangle2D.Double(0, 0, 1, 1));
@@ -157,21 +137,30 @@ public class ImageReplacer extends PDFStreamEngine {
 					boundingbox.getY());
 		LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", boundingbox.getWidth(),
 					boundingbox.getHeight());
-		rects.add(boundingbox);
-		/*Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-		var bounds = form.getBBox();
+		return boundingbox;
+		
+	}
+	
+	/**
+	 * This method is adding the bounding box of the {@link PDFormXObject} to the {@link #rects}.
+	 *
+	 * @param form       The {@link PDFormXObject} where we want to get the position from.
+	 * @param objectName The name of the {@link PDFormXObject} form.
+	 */
+	@NotNull
+	private Rectangle2D getPDFormBB(@NotNull PDFormXObject form, @NotNull COSName objectName) {
+		Objects.requireNonNull(form);
+		Objects.requireNonNull(objectName);
+		Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
+		var at = ctm.createAffineTransform();
+		var shape = at.createTransformedShape(PDFUtils.pdRectToRect2D(form.getBBox()));
+		var boundingbox = shape.getBounds2D();
 		LOGGER.info("PDFormXObject [{}]", objectName.getName());
-		LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units",
-					ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
-					ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY());
-		LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units",
-					ctmNew.getScalingFactorX() * bounds.getWidth(),
-					ctmNew.getScalingFactorY() * bounds.getHeight());
-		rects.add(new Rectangle2D.Float(
-				ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
-				ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY(),
-				ctmNew.getScalingFactorX() * bounds.getWidth(),
-				ctmNew.getScalingFactorY() * bounds.getHeight()));*/
+		LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", boundingbox.getX(),
+					boundingbox.getY());
+		LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", boundingbox.getWidth(),
+					boundingbox.getHeight());
+		return boundingbox;
 	}
 	
 	
