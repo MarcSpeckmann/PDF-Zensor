@@ -30,7 +30,7 @@ public class ImageReplacerArgumentProvider implements ArgumentsProvider {
 		//TODO: replace path contruction by provided function
 		String path1 = PATH + "threeImages.pdf";
 		List<Rectangle2D> rectlist2 = new ArrayList<>();
-		rectlist2.add(new Rectangle2D.Double(89.29100036621094,345.1839904785156,291.67928531146026,412.517684873339));
+		rectlist2.add(new Rectangle2D.Double(89,345,292,413));
 		String path2 = PATH + "pdfinpdf.pdf";
 		
 		return Stream.of(

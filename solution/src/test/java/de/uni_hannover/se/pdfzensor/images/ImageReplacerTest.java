@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,11 +58,12 @@ public class ImageReplacerTest {
 		}
 	}
 	
-/*	Rectangle2D rectAbsHelper(Rectangle2D rect){
-		return new Rectangle2D.Double(Math.abs(rect.getX()), Math.abs(rect.getY()),
-									  Math.abs(rect.getHeight()), Math.abs(rect.getWidth()));
+	
+	Rectangle2D rectAbsHelper(Rectangle2D rect){
+		return new Rectangle2D.Double(Math.round(rect.getX()), Math.round(rect.getY()),
+									  Math.round(rect.getWidth()),Math.round(rect.getHeight()));
 	}
-*/
+
 	/**
 	 * This function tests if all pictures in a document are found at the correct position.
 	 *
@@ -75,8 +77,11 @@ public class ImageReplacerTest {
 			PDDocument document = PDDocument.load(new File(path));
 			PDPage page = document.getPage(0);
 			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(document, page);
-			//TODO: round the values in the list to make the function less sensible to minor function changes
-			rectList.forEach(rect -> rectContainedHelper(rect, rectListOfDocument));
+			List<Rectangle2D> absRectListOfDocument = new ArrayList<Rectangle2D>();
+			rectListOfDocument.forEach(
+					rect -> absRectListOfDocument.add(rectAbsHelper(rect))
+			);
+			rectList.forEach(rect -> rectContainedHelper(rect, absRectListOfDocument));
 		} catch (Exception e) {
 			fail(e);
 		}
