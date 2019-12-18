@@ -63,16 +63,23 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private static final float MAX_GAP = 1.5f;
 	
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
+	
 	/**
 	 * The tokenizer calls {@link #onTokenEncountered(String, List, Expression)} when a token was found and thus enables
 	 * the censor to draw the bounds of characters belonging to this token in the color providing to the token ({@link
 	 * Expression}. The payload of each character is the {@link Rectangle2D} representing its bounds on the page.
 	 */
 	private final Tokenizer<Expression, Rectangle2D> tokenizer;
+	
 	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
+	
+	/** The predicate to use when checking bounds of {@link TextPosition}s. */
 	private Predicate<Rectangle2D> removePredicate;
+	
+	/** A new annotations instance in this {@link PDFCensor}-instance. */
 	private Annotations annotations = new Annotations();
 	
 	/**
@@ -127,7 +134,7 @@ public final class PDFCensor implements PDFHandler {
 	
 	/**
 	 * Returns an approximation of the vertical and horizontal gap of the two rectangles. The returned {@link Point2D}
-	 * contains the horizontal gap as its x-value and the vertical gap as its y-value.
+	 * contains the approximated horizontal gap as its x-value and the approximated vertical gap as its y-value.
 	 *
 	 * @param r1 The first rectangle.
 	 * @param r2 The second rectangle.
@@ -137,7 +144,8 @@ public final class PDFCensor implements PDFHandler {
 	private static Point2D getGaps(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
 		final var xDist = abs(r1.getCenterX() - r2.getCenterX());
 		final var yDist = abs(r1.getCenterY() - r2.getCenterY());
-		return new Point2D.Double(xDist - (r1.getWidth() + r2.getWidth())/2, yDist - (r1.getHeight() + r2.getHeight())/2);
+		return new Point2D.Double(xDist - (r1.getWidth() + r2.getWidth()) / 2,
+								  yDist - (r1.getHeight() + r2.getHeight()) / 2);
 	}
 	
 	/**
@@ -199,7 +207,7 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * @param pos the TextPosition (represents string + its character's screen positions) to check
+	 * @param pos the TextPosition to check
 	 * @return true if <code>pos</code> should be censored, false otherwise
 	 */
 	@Override
@@ -247,8 +255,8 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final Rectangle2D bb, final Color color) {
 		if (!boundingBoxes.isEmpty()) {
-			var last = boundingBoxes.get(boundingBoxes.size() - 1);
-			Rectangle2D union = getExtended(last.getLeft(), bb);
+			final var last = boundingBoxes.get(boundingBoxes.size() - 1);
+			final var union = getExtended(last.getLeft(), bb);
 			if (last.getRight().equals(color) && union != null) {
 				boundingBoxes.remove(last);
 				bb.setRect(union);
@@ -281,6 +289,7 @@ public final class PDFCensor implements PDFHandler {
 		}
 		return result;
 	}
+	
 	
 	/**
 	 * Draws the censor bars stored in {@link #boundingBoxes} with their respective color in the given

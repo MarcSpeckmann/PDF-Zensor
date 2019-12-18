@@ -4,6 +4,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.function.Executable;
 
 import java.awt.geom.Rectangle2D;
@@ -94,13 +95,13 @@ public final class TestUtility {
 	}
 	
 	/**
-	 * Checks if the two floating-point numbers are approximately equal. Returns true if <code>{@code
-	 * |d1-d2|<Ɛ}</code>.
+	 * Checks if the two floating-point numbers are approximately equal. Returns true if <code>|d1-d2| &lt;
+	 * &epsilon;</code>.
 	 *
 	 * @param d1      the first number to be compared.
 	 * @param d2      the second number to be compared.
 	 * @param epsilon the precision of the comparison.
-	 * @return true if <code>{@code |d1-d2|<Ɛ}</code>.
+	 * @return true if <code>|d1-d2| &lt; &epsilon;</code>.
 	 * @see #EPSILON
 	 */
 	public static boolean approx(double d1, double d2, double epsilon) {
@@ -172,18 +173,20 @@ public final class TestUtility {
 	 * error occurs.
 	 *
 	 * @param cls       the class of which to retrieve the private field. Not null.
+	 * @param instance  the instance of which to retrieve the private field. May be null if the field is static.
 	 * @param fieldName the name of the field that should be retrieved. Not null.
 	 * @param <T>       the type of the field which will be retrieved.
+	 * @param <K>       the type of the class.
 	 * @return The field with the given name and the type T.
 	 * @throws RuntimeException if the field could not be retrieved or cast to the type.
 	 */
 	@SuppressWarnings("unchecked")
 	@NotNull
-	public static <T, K> T getPrivateField(@NotNull Class<K> cls, K parameter, @NotNull String fieldName) {
+	public static <T, K> T getPrivateField(@NotNull Class<K> cls, @Nullable K instance, @NotNull String fieldName) {
 		try {
 			var field = cls.getDeclaredField(fieldName);
 			field.setAccessible(true);
-			return (T)field.get(parameter);
+			return (T) field.get(instance);
 		} catch (NoSuchFieldException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
