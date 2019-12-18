@@ -86,51 +86,71 @@ public class ImageReplacer extends PDFStreamEngine {
 	 * This method overwrites the {@link PDFStreamEngine#processOperator(Operator, List)}. This method checks if the
 	 * actual found operator is a {@link DrawObject} operator and adds it to the {@link #rects}.
 	 *
-	 * @param operator
-	 * @param operands
-	 * @throws IOException
+	 * @param operator The operation to perform.
+	 * @param operands The list of arguments.
+	 * @throws IOException If there is an error processing the operation.
 	 */
 	@Override
-	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
-		//TODO: Split function to reduce complexity
+	protected void processOperator(@NotNull final Operator operator, final List<COSBase> operands) throws IOException {
 		if (DRAW_OBJECT.equals(operator.getName())) {
 			COSName objectName = (COSName) operands.get(0);
 			// get the PDF object
 			PDXObject xobject = getResources().getXObject(objectName);
-			// check if the object is an image object
 			if (xobject instanceof PDImageXObject) {
-				PDImageXObject image = (PDImageXObject) xobject;
-				//TODO: !isStencel würde zum Beispiel bei den vielen Boxen bei Cusotop keinen kastern mehr zeichnen
-				if (!image.isStencil()) {
-					Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
-					var at = ctm.createAffineTransform();
-					var shape = at.createTransformedShape(new Rectangle2D.Double(0, 0, 1, 1));
-					var boundingbox = shape.getBounds2D();
-					LOGGER.info("PDImageXObject [{}]", objectName.getName());
-					LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", boundingbox.getX(),
-								boundingbox.getY());
-					LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", boundingbox.getWidth(),
-								boundingbox.getHeight());
-					rects.add(boundingbox);
-				}
+				
+				getPDImageBB((PDImageXObject) xobject, objectName);
+
 			} else if (xobject instanceof PDFormXObject) {
-				PDFormXObject form = (PDFormXObject) xobject;
-				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-				LOGGER.info("PDFormXObject [{}]", objectName.getName());
-				LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
-							ctmNew.getTranslateY());
-				LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
-							ctmNew.getScalingFactorY());
-				var bounds = form.getBBox();
-				rects.add(new Rectangle2D.Float(
-						ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
-						ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY(),
-						ctmNew.getScalingFactorX() * bounds.getWidth(),
-						ctmNew.getScalingFactorY() * bounds.getHeight()));
+
+				getPDFormBB((PDFormXObject) xobject, objectName);
+				
 			}
 		} else {
 			super.processOperator(operator, operands);
 		}
+	}
+	
+	/**
+	 * This method is adding the bounding box of the {@link PDImageXObject} to the {@link #rects},
+	 * but only if the {@link PDImageXObject} isn't a stencil.
+	 *
+	 * @param image The {@link PDImageXObject} where we want to get the position from.
+	 * @param objectName The name of the {@link PDImageXObject} image.
+	 */
+	private void getPDImageBB(@NotNull PDImageXObject image, COSName objectName){
+		if (!image.isStencil()) {
+			Matrix ctm = getGraphicsState().getCurrentTransformationMatrix();
+			var at = ctm.createAffineTransform();
+			var shape = at.createTransformedShape(new Rectangle2D.Double(0, 0, 1, 1));
+			var boundingbox = shape.getBounds2D();
+			LOGGER.info("PDImageXObject [{}]", objectName.getName());
+			LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", boundingbox.getX(),
+						boundingbox.getY());
+			LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", boundingbox.getWidth(),
+						boundingbox.getHeight());
+			rects.add(boundingbox);
+		}
+	}
+	
+	/**
+	 * This method is adding the bounding box of the {@link PDFormXObject} to the {@link #rects}.
+	 *
+	 * @param form The {@link PDFormXObject} where we want to get the position from.
+	 * @param objectName The name of the {@link PDFormXObject} form.
+	 */
+	private void getPDFormBB(@NotNull PDFormXObject form, @NotNull COSName objectName){
+		Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
+		LOGGER.info("PDFormXObject [{}]", objectName.getName());
+		LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
+					ctmNew.getTranslateY());
+		LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
+					ctmNew.getScalingFactorY());
+		var bounds = form.getBBox();
+		rects.add(new Rectangle2D.Float(
+				ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
+				ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY(),
+				ctmNew.getScalingFactorX() * bounds.getWidth(),
+				ctmNew.getScalingFactorY() * bounds.getHeight()));
 	}
 	
 	
