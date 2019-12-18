@@ -23,11 +23,11 @@ public class ImageReplacerTest {
 	 */
 	@Test
 	void testReplaceImageInvalidParameter() {
-		assertThrows(IllegalArgumentException.class, () -> imageReplacer.replaceImages(null, null));
+		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, null));
 		PDDocument document = new PDDocument();
 		PDPage page = new PDPage();
 		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, page));
-		assertThrows(IllegalArgumentException.class, () -> imageReplacer.replaceImages(document, null));
+		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(document, null));
 	}
 	
 	// just a helper to check the coodinates
