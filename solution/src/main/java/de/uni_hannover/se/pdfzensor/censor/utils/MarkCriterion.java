@@ -36,6 +36,27 @@ public enum MarkCriterion {
 	}
 	
 	/**
+	 * Returns true iff r1 intersects with r2 and if that intersection is at least 90% of r2's area.
+	 *
+	 * @param r1 the first rectangle.
+	 * @param r2 the second rectangle.
+	 * @return true iff r1 intersects with r2 and if that intersection is at least 90% of r2's area.
+	 */
+	private static boolean contains90Percent(@NotNull Rectangle2D r1, Rectangle2D r2) {
+		return r1.intersects(r2) && areaOfRect(r1.createIntersection(r2)) >= areaOfRect(r2) * 0.9;
+	}
+	
+	/**
+	 * Calculates the area of the rectangle.
+	 *
+	 * @param rect the rectangle of which to calculate the area.
+	 * @return the rectangle's area.
+	 */
+	private static double areaOfRect(@NotNull Rectangle2D rect) {
+		return rect.getWidth() * rect.getHeight();
+	}
+	
+	/**
 	 * A predicate that returns true if a given rectangle fulfills this {@link MarkCriterion}'s condition and false
 	 * otherwise.
 	 *
@@ -46,13 +67,5 @@ public enum MarkCriterion {
 	@Contract(pure = true)
 	Predicate<@NotNull Rectangle2D> getPredicate(@NotNull Rectangle2D other) {
 		return rect -> predicate.test(rect, other);
-	}
-	
-	private static boolean contains90Percent(Rectangle2D r1, Rectangle2D r2) {
-		return r1.intersects(r2) && areaOfRect(r1.createIntersection(r2)) >= areaOfRect(r2)*0.9;
-	}
-	
-	private static double areaOfRect(Rectangle2D rect) {
-		return rect.getWidth()*rect.getHeight();
 	}
 }

@@ -76,15 +76,15 @@ public class TextProcessor extends PDFStreamProcessor {
 				Vector w = font.getDisplacement(code);
 				
 				float wordSpacing = 0;
-				if (before-after == 1 && code == 32){
+				if (before - after == 1 && code == 32) {
 					wordSpacing += textState.getWordSpacing();
 				}
 				
 				if (TRUE.equals(censor.remove(0))) {
-					var tj = (w.getX()*fontSize+charSpacing+wordSpacing)/horizontalScaling;
+					var tj = (w.getX() * fontSize + charSpacing + wordSpacing) / horizontalScaling;
 					if (font.isVertical())
-						tj = font.getHeight(code);
-					newOperands.add(new COSFloat(-tj*1000.0f/(fontSize)));
+						tj = w.getY() * fontSize + charSpacing + wordSpacing;
+					newOperands.add(new COSFloat(-tj * 1000.0f / (fontSize)));
 				} else {
 					int startIndex = string.getBytes().length - before;
 					int endIndex = string.getBytes().length - after;
@@ -170,7 +170,8 @@ public class TextProcessor extends PDFStreamProcessor {
 	@Override
 	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
 		if (StringUtils
-				.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING, NEXT_LINE)) {
+				.equalsAny(operator.getName(), SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING,
+						   NEXT_LINE)) {
 			super.processOperator(operator, operands);
 			return;
 		}

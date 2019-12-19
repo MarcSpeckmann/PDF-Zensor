@@ -37,7 +37,7 @@ public final class Annotations {
 	 * @see #cachePage(PDPage)
 	 */
 	@NotNull
-	public List<Rectangle2D> highlights;
+	private List<Rectangle2D> highlights;
 	
 	/**
 	 * Contains cached links after caching a PDF page.
