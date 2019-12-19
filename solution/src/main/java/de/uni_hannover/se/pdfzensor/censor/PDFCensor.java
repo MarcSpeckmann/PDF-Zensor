@@ -272,7 +272,14 @@ public final class PDFCensor implements PDFHandler {
 				pageContentStream.addRect((float) r.getX(), (float) r.getY(), (float) r.getWidth(),
 										  (float) r.getHeight());
 				pageContentStream.fill();
-			}
+			}/*
+			
+			for (var r :annotations.highlights) {
+				pageContentStream.setNonStrokingColor(Color.yellow);
+				pageContentStream.addRect((float) r.getX(), (float) r.getY(), (float) r.getWidth(),
+										  (float) r.getHeight());
+				pageContentStream.fill();
+			}*/
 		}
 	}
 }
