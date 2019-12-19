@@ -37,9 +37,9 @@ public final class Utils {
 	 * Clamps an index to the array bounds if possible (length of the array is greater than zero). Should the given
 	 * index not fit then either an index to the first or the last element of the array will be returned.
 	 *
-	 * @param array The array to which the index should be fitted.
-	 * @param index The index which may not fit the bounds of the array.
-	 * @param <T>   The type of the array.
+	 * @param array the array to which the index should be fitted.
+	 * @param index the index which may not fit the bounds of the array.
+	 * @param <T>   the type of the array.
 	 * @return An index which is in the given array's bounds.
 	 * @throws IllegalArgumentException If the array is empty.
 	 */
@@ -51,10 +51,10 @@ public final class Utils {
 	/**
 	 * Clamps the value between min and max.
 	 *
-	 * @param value The value to be clamped.
-	 * @param min   The lower bound of the result (inclusive).
-	 * @param max   The upper bound of the result (inclusive).
-	 * @param <T>   The type of the value.
+	 * @param value the value to be clamped.
+	 * @param min   the lower bound of the result (inclusive).
+	 * @param max   the upper bound of the result (inclusive).
+	 * @param <T>   the type of the value.
 	 * @return The value fitted to the given bounds.
 	 * @throws IllegalArgumentException If <code>max&le;min</code>.
 	 */
@@ -75,7 +75,7 @@ public final class Utils {
 	 * (0-f) prepended with # or 0x. Cases are ignored (0Xabcdef is identical to 0xABCDEF). E.g. #0bc and #00bbcc are
 	 * identical.
 	 *
-	 * @param hexCode A string containing a hexadecimal color code. May be <code>null</code>.
+	 * @param hexCode a string containing a hexadecimal color code. May be <code>null</code>.
 	 * @return The {@link Color} corresponding to the hexadecimal color code or <code>null</code>, if the given string
 	 * was
 	 * <code>null</code>.
@@ -97,7 +97,7 @@ public final class Utils {
 	 * <br>
 	 * A <code>null</code>-value will be converted to "null".
 	 *
-	 * @param color The color to convert into a hexadecimal color code.
+	 * @param color the color to convert into a hexadecimal color code.
 	 * @return The hexadecimal color code representing the given color.
 	 */
 	@NotNull
@@ -111,7 +111,7 @@ public final class Utils {
 	/**
 	 * Checks if a string is a valid hexadecimal color-code and returns true if it is, false otherwise.
 	 *
-	 * @param hexCode The string which should be checked.
+	 * @param hexCode the string which should be checked.
 	 * @return True if it is a hexadecimal color-code, false otherwise.
 	 */
 	public static boolean isHexColorCode(@NotNull String hexCode) {
