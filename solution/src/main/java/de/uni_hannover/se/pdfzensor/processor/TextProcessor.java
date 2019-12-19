@@ -12,6 +12,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.text.TextPosition;
+import org.apache.pdfbox.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -59,19 +60,31 @@ public class TextProcessor extends PDFStreamProcessor {
 	 * @return a COSArray representing the censored string as a TJ-operand.
 	 */
 	@NotNull
-	private static COSArray removeCharsFromString(COSString string, PDFont font, @NotNull List<Boolean> censor) {
+	private COSArray removeCharsFromString(COSString string, PDFont font, @NotNull List<Boolean> censor) {
 		var newOperands = new COSArray();
+		var textState = getGraphicsState().getTextState();
+		var fontSize = textState.getFontSize();
+		var horizontalScaling = textState.getHorizontalScaling() / 100f;
+		float charSpacing = textState.getCharacterSpacing();
+		
 		try (var is = new ByteArrayInputStream(string.getBytes())) {
 			while (is.available() > 0 && !censor.isEmpty()) {
 				int before = is.available();
 				int code = font.readCode(is);
 				int after = is.available();
 				
+				Vector w = font.getDisplacement(code);
+				
+				float wordSpacing = 0;
+				if (before-after == 1 && code == 32){
+					wordSpacing += textState.getWordSpacing();
+				}
+				
 				if (TRUE.equals(censor.remove(0))) {
-					var tj = -font.getWidth(code);
+					var tj = (w.getX()*fontSize+charSpacing+wordSpacing)/horizontalScaling;
 					if (font.isVertical())
-						tj = -font.getHeight(code);
-					newOperands.add(new COSFloat(tj));
+						tj = font.getHeight(code);
+					newOperands.add(new COSFloat(-tj*1000.0f/(fontSize)));
 				} else {
 					int startIndex = string.getBytes().length - before;
 					int endIndex = string.getBytes().length - after;
