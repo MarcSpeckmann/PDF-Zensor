@@ -1,7 +1,12 @@
 package de.uni_hannover.se.pdfzensor.utils;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.pdfbox.cos.COSArray;
+import org.apache.pdfbox.cos.COSFloat;
+import org.apache.pdfbox.cos.COSNumber;
+import org.apache.pdfbox.cos.COSString;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -116,5 +121,38 @@ public final class Utils {
 	 */
 	public static boolean isHexColorCode(@NotNull String hexCode) {
 		return hexCode.matches(THREE_DIGIT_HEX_PATTERN) || hexCode.matches(SIX_DIGIT_HEX_PATTERN);
+	}
+	
+	/**
+	 * Reduces the size of the provided array by merging succeeding elements that are of the same type (either both
+	 * {@link COSString} or both {@link COSNumber}. Strings wills be concatenated and numbers added. This method does
+	 * <b>not</b> work on a copy but on the array itself.
+	 *
+	 * @param array the array that should be reduced.
+	 * @return the input-array.
+	 */
+	@Contract("_ -> param1")
+	public static COSArray reduceArray(@NotNull COSArray array) {
+		Objects.requireNonNull(array);
+		int i = 0;
+		while (i < array.size() - 1) {
+			var cur = array.get(i);
+			var nxt = array.get(i + 1);
+			if (cur instanceof COSString && nxt instanceof COSString) {
+				var curStr = (COSString) cur;
+				var nxtStr = (COSString) nxt;
+				var merged = new COSString(ArrayUtils.addAll(curStr.getBytes(), nxtStr.getBytes()));
+				array.set(i, merged);
+				array.remove(i + 1);
+			} else if (cur instanceof COSNumber && nxt instanceof COSNumber) {
+				var curNum = (COSNumber) cur;
+				var nxtNum = (COSNumber) nxt;
+				array.set(i, new COSFloat(curNum.floatValue() + nxtNum.floatValue()));
+				array.remove(i + 1);
+			} else {
+				i++;
+			}
+		}
+		return array;
 	}
 }
