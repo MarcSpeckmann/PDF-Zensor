@@ -11,8 +11,10 @@ import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.graphics.state.PDTextState;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.util.Vector;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
@@ -51,6 +53,35 @@ public class TextProcessor extends PDFStreamProcessor {
 	}
 	
 	/**
+	 * Calculates the text-adjustment needed to advance the character represented by the code in an TJ operation.
+	 *
+	 * @param font       the font from which to take the character's displacement.
+	 * @param textState  the current textstate.
+	 * @param codeLength the length (in bytes) of the code as encoded by the font.
+	 * @param code       the font's code for the character.
+	 * @return the text-adjustment needed to advance the character represented by the code in an TJ operation.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	@Contract("_, _, _, _ -> new")
+	@NotNull
+	private static COSFloat calculateTextAdjustment(@NotNull PDFont font, @NotNull PDTextState textState,
+													int codeLength,
+													int code) throws IOException {
+		var fontSize = textState.getFontSize();
+		var horizontalScaling = font.isVertical() ? 1 : textState.getHorizontalScaling() / 100f;
+		float charSpacing = textState.getCharacterSpacing();
+		
+		float wordSpacing = 0;
+		if (codeLength == 1 && code == 32)
+			wordSpacing += textState.getWordSpacing();
+		
+		Vector w = font.getDisplacement(code);
+		var displacement = font.isVertical() ? w.getY() : w.getX();
+		var tj = (displacement * fontSize + charSpacing + wordSpacing) / horizontalScaling;
+		return new COSFloat(-tj * 1000.0f / fontSize);
+	}
+	
+	/**
 	 * Transforms the provided COSString into an COSArray where each character is added if it should not be censored. If
 	 * a character should be censored its text-adjustment is added.
 	 *
@@ -62,10 +93,6 @@ public class TextProcessor extends PDFStreamProcessor {
 	@NotNull
 	private COSArray removeCharsFromString(COSString string, PDFont font, @NotNull List<Boolean> censor) {
 		var newOperands = new COSArray();
-		var textState = getGraphicsState().getTextState();
-		var fontSize = textState.getFontSize();
-		var horizontalScaling = textState.getHorizontalScaling() / 100f;
-		float charSpacing = textState.getCharacterSpacing();
 		
 		try (var is = new ByteArrayInputStream(string.getBytes())) {
 			while (is.available() > 0 && !censor.isEmpty()) {
@@ -73,18 +100,9 @@ public class TextProcessor extends PDFStreamProcessor {
 				int code = font.readCode(is);
 				int after = is.available();
 				
-				Vector w = font.getDisplacement(code);
-				
-				float wordSpacing = 0;
-				if (before - after == 1 && code == 32) {
-					wordSpacing += textState.getWordSpacing();
-				}
-				
 				if (TRUE.equals(censor.remove(0))) {
-					var tj = (w.getX() * fontSize + charSpacing + wordSpacing) / horizontalScaling;
-					if (font.isVertical())
-						tj = w.getY() * fontSize + charSpacing + wordSpacing;
-					newOperands.add(new COSFloat(-tj * 1000.0f / (fontSize)));
+					newOperands.add(calculateTextAdjustment(font, getGraphicsState().getTextState(), before - after,
+															code));
 				} else {
 					int startIndex = string.getBytes().length - before;
 					int endIndex = string.getBytes().length - after;
