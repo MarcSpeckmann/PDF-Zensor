@@ -242,8 +242,8 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		Validate.isTrue(data.length() == payload.size(),
 						String.format("Data length (%d) and payload size (%d) do not match for data: \"%s\"",
 									  data.length(), payload.size(), data));
-		this.payload.addAll(payload);
 		outputStream.write(data.getBytes());
+		this.payload.addAll(payload);
 	}
 	
 	/**
