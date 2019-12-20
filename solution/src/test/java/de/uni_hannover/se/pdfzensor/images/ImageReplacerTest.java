@@ -3,11 +3,11 @@ package de.uni_hannover.se.pdfzensor.images;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ImageReplacerArgumentProvider;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
-import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
@@ -31,44 +31,34 @@ public class ImageReplacerTest {
 		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(document, null));
 	}
 	
-	// just a helper to check the coodinates
-	//TODO: remove before merge
-	@Test
-	void printCoords() {
-		String PATH = "src/test/resources/pdf-files/";
-		try {
-			PDDocument document = PDDocument.load(
-					new File(PATH + "pdfinpdf.pdf"));
-			PDPage page = document.getPage(0);
-			List<Rectangle2D> rl = imageReplacer.replaceImages(document, page);
-			System.out.println(String.valueOf(rl));
-		} catch (Exception e) {
-		}
-	}
-	
 	/**
 	 * This function fails the current test if in rectlist is no rectangle similar to rect.
 	 *
-	 * @param rect A rectangle
+	 * @param rect     A rectangle
 	 * @param rectList A list of rectangles
 	 */
-	void rectContainedHelper(Rectangle2D rect, List<Rectangle2D> rectList) {
+	void rectContainedHelper(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
 		if (!rectList.contains(rect)) {
 			fail("rectangle not found");
 		}
 	}
 	
-	
-	Rectangle2D rectAbsHelper(Rectangle2D rect){
+	/**
+	 * This method rounds the x,y coordinates such as width and height
+	 *
+	 * @param rect
+	 * @return returns a rectangle with round values
+	 */
+	Rectangle2D rectAbsHelper(@NotNull Rectangle2D rect) {
 		return new Rectangle2D.Double(Math.round(rect.getX()), Math.round(rect.getY()),
-									  Math.round(rect.getWidth()),Math.round(rect.getHeight()));
+									  Math.round(rect.getWidth()), Math.round(rect.getHeight()));
 	}
-
+	
 	/**
 	 * This function tests if all pictures in a document are found at the correct position.
 	 *
 	 * @param rectList A list of rectangles (coordinates).
-	 * @param path The path to the pdf to be tested.
+	 * @param path     The path to the pdf to be tested.
 	 */
 	@ArgumentsSource(ImageReplacerArgumentProvider.class)
 	@ParameterizedTest(name = "Run {index}: ListOfImagePositions: {0}, testedDocument: {1}")
