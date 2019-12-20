@@ -44,16 +44,21 @@ public class ImageReplacer extends PDFStreamEngine {
 	
 	/**
 	 * The Constructor of {@link ImageReplacer}, which is responsible for preparing the {@link PDFStreamEngine}.
+	 * It is adding operators to the {@link PDFStreamEngine} which will be processed by the {@link PDFStreamEngine}.
 	 */
 	public ImageReplacer() {
-		// preparing PDFStreamEngine
+		//cm: Concatenate matrix to current transformation matrix.
 		addOperator(new Concatenate());
+		//Do: Draws an XObject.
 		addOperator(new DrawObject());
+		//gs: Set parameters from graphics state parameter dictionary.
 		addOperator(new SetGraphicsStateParameters());
+		//q: Save the graphics state.
 		addOperator(new Save());
+		//Q: Restore the graphics state.
 		addOperator(new Restore());
+		//Tm: Set text matrix and text line matrix.
 		addOperator(new SetMatrix());
-		addOperator(new Concatenate());
 	}
 	
 	/**
