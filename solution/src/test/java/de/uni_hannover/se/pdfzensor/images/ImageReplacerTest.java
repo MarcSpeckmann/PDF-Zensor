@@ -46,7 +46,7 @@ public class ImageReplacerTest {
 	/**
 	 * This method rounds the x,y coordinates such as width and height
 	 *
-	 * @param rect
+	 * @param rect the rectangle which will be rounded
 	 * @return returns a rectangle with round values
 	 */
 	Rectangle2D rectAbsHelper(@NotNull Rectangle2D rect) {
@@ -67,7 +67,7 @@ public class ImageReplacerTest {
 			PDDocument document = PDDocument.load(new File(path));
 			PDPage page = document.getPage(0);
 			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(document, page);
-			List<Rectangle2D> absRectListOfDocument = new ArrayList<Rectangle2D>();
+			List<Rectangle2D> absRectListOfDocument = new ArrayList<>();
 			rectListOfDocument.forEach(
 					rect -> absRectListOfDocument.add(rectAbsHelper(rect))
 			);
