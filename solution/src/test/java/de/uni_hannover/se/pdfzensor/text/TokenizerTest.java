@@ -156,7 +156,7 @@ class TokenizerTest {
 		assertTrue(queue.isEmpty());
 	}
 	
-	/** The TestToken is a simple implementation of {@link TokenDef} and should only be used by unit-tests. */
+	/** The Simpletoken is a simple implementation of {@link TokenDef} and should only be used by unit-tests. */
 	static class SimpleToken implements TokenDef {
 		private String regex;
 		
