@@ -7,6 +7,7 @@ import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import de.uni_hannover.se.pdfzensor.config.Mode;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
+import de.uni_hannover.se.pdfzensor.utils.RectUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -29,8 +30,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import static java.lang.Math.abs;
 
 /**
  * Runs functions to place censoring rectangles (or censoring graphics) and removes elements of the PDF depending on the
@@ -114,25 +113,11 @@ public final class PDFCensor implements PDFHandler {
 		final var sameColumn = r1.getWidth() > widthTolerance && r2.getWidth() > widthTolerance;
 		final var sameLine = r1.getHeight() > heightTolerance && r2.getHeight() > heightTolerance;
 		
-		final var gaps = getGaps(r1, r2);
-		final var tolerance = new Point2D.Double(comb.getWidth() * MAX_GAP, comb.getHeight() * MAX_GAP);
+		final var gap = RectUtils.getRectBetween(r1, r2);
+		final var tolerance = new Point2D.Double(comb.getHeight() * MAX_GAP, comb.getWidth() * MAX_GAP);
 		
-		return ((sameLine && gaps.getX() < tolerance.x) || (sameColumn && gaps.getY() < tolerance.y)) ? comb : null;
-	}
-	
-	/**
-	 * Returns an approximation of the vertical and horizontal gap of the two rectangles. The returned {@link Point2D}
-	 * contains the approximated horizontal gap as its x-value and the approximated vertical gap as its y-value.
-	 *
-	 * @param r1 The first rectangle.
-	 * @param r2 The second rectangle.
-	 * @return the approximated gap of the two rectangles: (|center1 - center2| - size1 - size2).
-	 */
-	@NotNull
-	private static Point2D getGaps(@NotNull Rectangle2D r1, @NotNull Rectangle2D r2) {
-		final var xDist = abs(r1.getCenterX() - r2.getCenterX());
-		final var yDist = abs(r1.getCenterY() - r2.getCenterY());
-		return new Point2D.Double(xDist - r1.getWidth() - r2.getWidth(), yDist - r1.getHeight() - r2.getHeight());
+		return ((sameLine && gap.getWidth() < tolerance.x) ||
+				(sameColumn && gap.getHeight() < tolerance.y)) ? comb : null;
 	}
 	
 	/**
