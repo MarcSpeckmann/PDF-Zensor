@@ -54,9 +54,9 @@ class PDFUtilsTest {
 	static {
 		// populates the DIMENSIONS-map with key-value pairs of tuples of input and expected output
 		DIMENSIONS.put(new Rectangle2D.Float(0f, 0f, 0f, 0f), new PDRectangle(0f, 0f, 0f, 0f));
-		DIMENSIONS.put(new Rectangle2D.Float(-1f, -2f, -3f, -4f), new PDRectangle(-1f, -2f, -3f, -4f));
-		DIMENSIONS.put(new Rectangle2D.Float(1f, 2f, 3f, 4f), new PDRectangle(1f, 2f, 3f, 4f));
-		DIMENSIONS.put(new Rectangle2D.Float(1.5f, 2.5f, 3.5f, 4.5f), new PDRectangle(1.5f, 2.5f, 3.5f, 4.5f));
+		DIMENSIONS.put(new Rectangle2D.Float(-1f, -6f, -3f, -4f), new PDRectangle(-1f, -2f, -3f, -4f));
+		DIMENSIONS.put(new Rectangle2D.Float(1f, 6f, 3f, 4f), new PDRectangle(1f, 2f, 3f, 4f));
+		DIMENSIONS.put(new Rectangle2D.Float(1.5f, 7.0f, 3.5f, 4.5f), new PDRectangle(1.5f, 2.5f, 3.5f, 4.5f));
 	}
 	
 	/**
