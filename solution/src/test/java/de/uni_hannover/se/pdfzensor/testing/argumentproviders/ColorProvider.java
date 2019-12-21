@@ -16,7 +16,13 @@ import java.util.stream.Stream;
  * #COLOR_PREFIXES} is added.
  */
 public class ColorProvider implements ArgumentsProvider {
+	/** An array of all valid color-prefixes. */
 	public static final String[] COLOR_PREFIXES = {"0X", "0x", "#"};
+	/**
+	 * Stores a list of many valid Color-String[]-tuples where the String[] contains at least one encoding and all
+	 * elements of the String[] represent the given color. For them to be valid color-codes they have to be prepended
+	 * with one of {@link #COLOR_PREFIXES}.
+	 */
 	static final Map<Color, String[]> COLORS = new HashMap<>();
 	
 	static {
@@ -41,6 +47,7 @@ public class ColorProvider implements ArgumentsProvider {
 		COLORS.put(new Color(250, 204, 204), new String[]{"FACCCC"});
 	}
 	
+	/** {@inheritDoc} */
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();
