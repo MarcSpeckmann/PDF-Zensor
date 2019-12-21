@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import de.uni_hannover.se.pdfzensor.Logging;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
@@ -98,7 +97,7 @@ public final class Annotations {
 	 * @see #cacheHighlights(PDPage)
 	 */
 	public void cachePage(@NotNull PDPage page) {
-		LOGGER.log(Level.DEBUG, "Caching annotations...");
+		LOGGER.debug("Caching annotations...");
 		cacheLinks(page);
 		cacheHighlights(page);
 	}
@@ -112,13 +111,13 @@ public final class Annotations {
 	private void cacheLinks(@NotNull PDPage page) {
 		Objects.requireNonNull(page);
 		try {
-			LOGGER.log(Level.DEBUG, "Caching links...");
+			LOGGER.debug("Caching links...");
 			links = page.getAnnotations(PDAnnotationLink.class::isInstance).stream().map(Annotations::getAnnotationRect)
 						.collect(Collectors.toUnmodifiableList());
-			LOGGER.log(Level.DEBUG, "Cached {} links", links.size());
+			LOGGER.debug("Cached {} links", links.size());
 		} catch (IOException e) {
 			links = List.of();
-			LOGGER.log(Level.ERROR, "Failed to cache links", e);
+			LOGGER.error("Failed to cache links", e);
 		}
 	}
 	
@@ -131,13 +130,13 @@ public final class Annotations {
 	private void cacheHighlights(@NotNull PDPage page) {
 		Objects.requireNonNull(page);
 		try {
-			LOGGER.log(Level.DEBUG, "Caching highlight-annotations...");
+			LOGGER.debug("Caching highlight-annotations...");
 			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream()
 							 .map(Annotations::getAnnotationRect).collect(Collectors.toUnmodifiableList());
-			LOGGER.log(Level.DEBUG, "Cached {} highlight-annotations", highlights.size());
+			LOGGER.debug("Cached {} highlight-annotations", highlights.size());
 		} catch (IOException e) {
 			highlights = List.of();
-			LOGGER.log(Level.ERROR, "Failed to cache highlight-annotations", e);
+			LOGGER.error("Failed to cache highlight-annotations", e);
 		}
 	}
 	

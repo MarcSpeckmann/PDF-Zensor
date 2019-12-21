@@ -12,7 +12,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -156,7 +155,7 @@ public final class PDFCensor implements PDFHandler {
 			drawCensorBars(doc, page);
 			page.getAnnotations().clear();
 		} catch (IOException e) {
-			LOGGER.log(Level.ERROR, "There was an error writing the page contents of page {}.", pageNum, e);
+			LOGGER.error("There was an error writing the page contents of page {}.", pageNum, e);
 		}
 	}
 	
@@ -232,7 +231,7 @@ public final class PDFCensor implements PDFHandler {
 				result = Optional.of(new ImmutablePair<>(transformed, color));
 			}
 		} catch (IOException e) {
-			LOGGER.log(Level.ERROR, "There was an error handling the font.", e);
+			LOGGER.error("There was an error handling the font.", e);
 		}
 		return result;
 	}
