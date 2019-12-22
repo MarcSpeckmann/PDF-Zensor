@@ -1,41 +1,47 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Objects;
 
 /**
- * PDFProcessor is a class that runs a {@link TextProcessor}  with a {@link PDFHandler}
+ * PDFProcessor's primary use is to be an abstraction of {@link TextProcessor} for the public API. As such the
+ * PDFProcessor should be used for processing a provided document using a handler that was specified beforehand.
  */
-public class PDFProcessor {
+public final class PDFProcessor {
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
-	
+	/** The handler that is called back on state changes in the {@link TextProcessor}. */
 	private final PDFHandler handler;
 	
 	/**
-	 * @param handler The PDFHandler that is used for the TextProcessor to open and close the document and pages
+	 * Creates a new instance of a PDFProcessor and sets the handler that should be responsible for managing the
+	 * text-processing initiated by subsequent calls to {@link #process(PDDocument)}.
+	 *
+	 * @param handler the PDFHandler responsible for managing the text-processing.
 	 */
-	public PDFProcessor(PDFHandler handler) {
+	@Contract(pure = true)
+	public PDFProcessor(@NotNull PDFHandler handler) {
 		this.handler = Objects.requireNonNull(handler, "PDFHandler must not be null");
-		LOGGER.log(Level.DEBUG, "Initialized a new PDFProcessor-instance");
 	}
 	
 	/**
-	 * This function runs the TextProcessor with the delivered PDF document depending on the {@link #handler}
+	 * Runs the entire processing for the provided project by creating a new {@link TextProcessor} that processes the
+	 * page using the formerly &ndash; in the constructor &ndash; specified {@link PDFHandler}.
 	 *
-	 * @param document The document to be processed in the TextProcessor
-	 * @throws IOException The exception is thrown in the constructor of the TextProcessor
+	 * @param document the document that should be processed.
+	 * @throws IOException if and I/O error occurs.
 	 */
-	public void process(PDDocument document) throws IOException {
-		final PDFStreamProcessor processor = new TextProcessor(handler);
-		
-		var information = Objects.requireNonNull(document).getDocumentInformation();
-		LOGGER.log(Level.DEBUG, "Starting to process the document: {} ", information::getTitle);
-		
+	public void process(@NotNull PDDocument document) throws IOException {
+		final var processor = new TextProcessor(handler);
+		final var information = Objects.requireNonNull(document).getDocumentInformation();
+		LOGGER.debug("Processing {} by {}", information::getTitle, information::getAuthor);
 		processor.getText(document);
+		LOGGER.debug("Done processing");
 	}
 }

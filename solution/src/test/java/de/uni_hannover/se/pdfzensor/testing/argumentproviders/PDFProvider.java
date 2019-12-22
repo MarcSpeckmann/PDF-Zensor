@@ -11,8 +11,13 @@ import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
 
+/**
+ * The PDFProvider is an ArgumentsProvider for Arguments that just take a file. The PDFProvider provides all files that
+ * are in the resource directory {@link de.uni_hannover.se.pdfzensor.testing.TestConstants#PDF_RESOURCE_PATH}.
+ */
 public class PDFProvider implements ArgumentsProvider {
 	
+	/** {@inheritDoc} */
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var files = TestUtility.getResource(PDF_RESOURCE_PATH).listFiles(File::isFile);
