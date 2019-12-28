@@ -11,6 +11,7 @@ import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import de.uni_hannover.se.pdfzensor.text.Tokenizer;
 import de.uni_hannover.se.pdfzensor.utils.RectUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -19,9 +20,12 @@ import org.apache.logging.log4j.util.TriConsumer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -61,6 +65,8 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private static final float MAX_GAP = 1.5f;
 	
+	private static final double THIN_SPACE_WIDTH = 1/6d;
+	
 	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
 	
@@ -79,6 +85,8 @@ public final class PDFCensor implements PDFHandler {
 	
 	/** A new annotations instance in this {@link PDFCensor}-instance. */
 	private Annotations annotations = new Annotations();
+	
+	private Rectangle2D lastGlyph = null;
 	
 	/**
 	 * @param settings Settings that contain information about the mode and expressions
@@ -197,13 +205,30 @@ public final class PDFCensor implements PDFHandler {
 	public boolean shouldCensorText(TextPosition pos) {
 		var bounds = getTextPositionInfo(pos).filter(p -> removePredicate.test(p));
 		bounds.ifPresentOrElse(b -> {
+			
+			var space = getBlankBetween(lastGlyph, b, pos.getFont());
+			lastGlyph = b;
 			try {
+				if (space.isPresent())
+					tokenizer.input(" ", List.of(space.get()));
 				tokenizer.input(pos.getUnicode(), List.of(b));
 			} catch (IOException e) {
 				LOGGER.warn(e);
 			}
 		}, tokenizer::tryFlush);
 		return bounds.isPresent();
+	}
+	
+	private static Optional<Rectangle2D> getBlankBetween(Rectangle2D r1, Rectangle2D r2, PDFont font) {
+		if (!ObjectUtils.allNotNull(r1, r2))
+			return Optional.empty();
+		var gap = RectUtils.getRectBetween(r1, r2);
+		//size of the gap in Em (relative to the fonts height/width depending on the font's alignment)
+		double size = gap.getWidth()/r1.getHeight();
+		if (font.isVertical())
+			size = gap.getHeight()/r1.getWidth();
+		var isSpace = Range.between(THIN_SPACE_WIDTH, (double)MAX_GAP).contains(size);
+		return Optional.of(gap).filter(b -> isSpace);
 	}
 	
 	/**
