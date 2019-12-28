@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -75,10 +76,36 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	@SafeVarargs
 	public Tokenizer(@NotNull T... tokens) {
 		this.tokens = Validate.noNullElements(tokens);
-		final var regex = Arrays.stream(tokens).map(T::getRegex).collect(Collectors.joining(")|(", "(", ")"));
-		pattern = Pattern.compile(regex + "|.", Pattern.DOTALL);
+		final var regex = Arrays.stream(tokens).map(T::getRegex).filter(Tokenizer::isTokenValid)
+								.collect(Collectors.joining(")|(", "(", ")"));
+		pattern = Pattern.compile(regex + "|.", Pattern.DOTALL | Pattern.CANON_EQ);
 		LOGGER.debug("Initialized tokenizer with the pattern: {}", pattern::pattern);
 		setupParser();
+	}
+	
+	/**
+	 * Checks if the passed regex is a valid token. A regex is considered valid if it is a valid regex, does not match
+	 * the empty string and has no capture-groups.
+	 *
+	 * @param regex the regex to check for if it is a valid token.
+	 * @return true if the regex is a valid token.
+	 */
+	private static boolean isTokenValid(String regex) {
+		boolean valid = false;
+		try {
+			boolean matchEmpty = "".matches(regex);
+			boolean hasCaptureGroup = Pattern.compile(regex).matcher("").groupCount() > 0;
+			if (matchEmpty)
+				LOGGER.warn("The defined token '{}' could match the empty string and thus is ignored", regex);
+			else if (hasCaptureGroup)
+				LOGGER.warn("The defined token '{}' contains a capture group and thus is ignored", regex);
+			
+			valid = !matchEmpty;
+			valid &= !hasCaptureGroup;
+		} catch (PatternSyntaxException exception) {
+			LOGGER.warn("The defined token '{}' is not a correct regex: {}", regex, exception.getDescription());
+		}
+		return valid;
 	}
 	
 	/**
@@ -169,8 +196,8 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		try {
 			thread.join();
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
 			LOGGER.warn("Failed to join thread", e);
+			Thread.currentThread().interrupt();
 		}
 		payload.clear();
 		thread = null;
@@ -215,10 +242,9 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		Validate.isTrue(data.length() == payload.size(),
 						String.format("Data length (%d) and payload size (%d) do not match for data: \"%s\"",
 									  data.length(), payload.size(), data));
-		this.payload.addAll(payload);
 		outputStream.write(data.getBytes());
+		this.payload.addAll(payload);
 	}
-	
 	
 	/**
 	 * Sets a new handler to handle parsed tokens. Overwrites an existing one if set. Removes the handler if null was

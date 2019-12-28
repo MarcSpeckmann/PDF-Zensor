@@ -19,6 +19,7 @@ import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
  */
 public final class PDFCensorMarkedArgumentProvider implements ArgumentsProvider {
 	
+	/** {@inheritDoc} */
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();

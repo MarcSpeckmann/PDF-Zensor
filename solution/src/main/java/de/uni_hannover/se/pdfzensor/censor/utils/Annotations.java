@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import de.uni_hannover.se.pdfzensor.Logging;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
@@ -31,17 +30,24 @@ public final class Annotations {
 	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
 	
-	/** Contains cached highlights after caching a PDF page. See {@link #cachePage(PDPage)} */
+	/**
+	 * Contains cached highlights after caching a PDF page.
+	 *
+	 * @see #cachePage(PDPage)
+	 */
 	@NotNull
 	private List<Rectangle2D> highlights;
 	
-	/** Contains cached links after caching a PDF page. See {@link #cachePage(PDPage)} */
+	/**
+	 * Contains cached links after caching a PDF page.
+	 *
+	 * @see #cachePage(PDPage)
+	 */
 	@NotNull
 	private List<Rectangle2D> links;
 	
 	/** Initializes a new Annotations-instance and creates new, empty {@link #highlights} and {@link #links} lists. */
 	public Annotations() {
-		LOGGER.log(Level.DEBUG, "Initialized a new Annotations-instance");
 		highlights = List.of();
 		links = List.of();
 	}
@@ -91,7 +97,7 @@ public final class Annotations {
 	 * @see #cacheHighlights(PDPage)
 	 */
 	public void cachePage(@NotNull PDPage page) {
-		LOGGER.log(Level.DEBUG, "Starting to cache page: {}", page);
+		LOGGER.debug("Caching annotations...");
 		cacheLinks(page);
 		cacheHighlights(page);
 	}
@@ -105,12 +111,13 @@ public final class Annotations {
 	private void cacheLinks(@NotNull PDPage page) {
 		Objects.requireNonNull(page);
 		try {
-			LOGGER.log(Level.DEBUG, "Starting to cache the Links of page: {}", page);
+			LOGGER.debug("Caching links...");
 			links = page.getAnnotations(PDAnnotationLink.class::isInstance).stream().map(Annotations::getAnnotationRect)
 						.collect(Collectors.toUnmodifiableList());
+			LOGGER.debug("Cached {} links", links.size());
 		} catch (IOException e) {
 			links = List.of();
-			LOGGER.log(Level.ERROR, "Failed to cache the Links of page: {}", page, e);
+			LOGGER.error("Failed to cache links", e);
 		}
 	}
 	
@@ -123,12 +130,13 @@ public final class Annotations {
 	private void cacheHighlights(@NotNull PDPage page) {
 		Objects.requireNonNull(page);
 		try {
-			LOGGER.log(Level.DEBUG, "Starting to cache the highlighted annotations of page: {}", page);
+			LOGGER.debug("Caching highlight-annotations...");
 			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream()
 							 .map(Annotations::getAnnotationRect).collect(Collectors.toUnmodifiableList());
+			LOGGER.debug("Cached {} highlight-annotations", highlights.size());
 		} catch (IOException e) {
 			highlights = List.of();
-			LOGGER.log(Level.ERROR, "Failed to cache the highlighted annotations of page: {}", page, e);
+			LOGGER.error("Failed to cache highlight-annotations", e);
 		}
 	}
 	
@@ -139,7 +147,7 @@ public final class Annotations {
 	 * @return true if the given rect intersects at least one rect of {@link #highlights}, false otherwise
 	 */
 	public boolean isMarked(@NotNull Rectangle2D rect) {
-		return isMarked(rect, MarkCriterion.INTERSECT);
+		return isMarked(rect, MarkCriterion.CONTAIN_90);
 	}
 	
 	/**
