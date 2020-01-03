@@ -28,14 +28,17 @@ public class ImageReplacerTest {
 	void testReplaceImageInvalidParameter() {
 		ImageReplacer imageReplacer = new ImageReplacer();
 		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, null));
-		PDDocument document = new PDDocument();
-		PDPage page = new PDPage();
-		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, page));
-		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(document, null));
+		try (var document = new PDDocument()) {
+			PDPage page = new PDPage();
+			assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, page));
+			assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(document, null));
+		} catch (IOException e) {
+			fail(e);
+		}
 	}
 	
 	/**
-	 * This function fails the current test if in rectlist is no rectangle similar to rect.
+	 * This function fails the current test if in rectList is no rectangle similar to rect.
 	 *
 	 * @param rect     A rectangle
 	 * @param rectList A list of rectangles
