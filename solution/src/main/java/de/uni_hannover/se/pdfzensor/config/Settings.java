@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.config;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import de.uni_hannover.se.pdfzensor.utils.Utils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static de.uni_hannover.se.pdfzensor.utils.Utils.colorToString;
+import static java.util.Arrays.stream;
 
 /**
  * The Settings class constitutes an abstraction and unification of the configuration file ({@link Config}) and the
@@ -36,6 +38,16 @@ public final class Settings {
 	/** The color links should be censored in if nothing else was specified. */
 	private static final Color DEFAULT_LINK_COLOR = Color.BLUE;
 	
+	/** Kenneth Kelly's 22 colors of maximum contrast. */
+	@NotNull
+	private static final Color[] DEFAULT_COLORS;
+	
+	static {
+		final var defColorCodes = "#F2F3F4,#222222,#F3C300,#875692,#F38400,#A1CAF1,#BE0032,#C2B280,#848482,#008856,#E68FAC,#0067A5,#F99379,#604E97,#F6A600,#B3446C,#DCD300,#882D17,#8DB600,#654522,#E25822,#2B3D26";
+		DEFAULT_COLORS = stream(defColorCodes.split(",")).map(Utils::getColorOrNull).filter(Objects::nonNull)
+														 .toArray(Color[]::new);
+	}
+
 	/** The path at which the pdf-file that should be censored is located. */
 	@NotNull
 	private final File input;
@@ -69,29 +81,29 @@ public final class Settings {
 		
 		
 		input = clArgs.getInput();
-		output = checkOutput(
-				ObjectUtils
-						.firstNonNull(clArgs.getOutput(), config.getOutput(), input.getAbsoluteFile().getParentFile()));
+		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
+													  input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
-		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), config.getDefaultColors());
+		final var defColors = ObjectUtils.firstNonNull(config.getDefaultColors(), DEFAULT_COLORS);
+		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), defColors);
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
-		logger.log(Level.DEBUG, "Finished parsing the settings:");
-		logger.log(Level.DEBUG, "\tInput-file: {}", input);
-		logger.log(Level.DEBUG, "\tConfig-file: {}", configPath);
-		logger.log(Level.DEBUG, "\tOutput-file: {}", output);
-		logger.log(Level.DEBUG, "\tLogger verbosity: {}", verbose);
-		logger.log(Level.DEBUG, "\tQuiet: {}", clArgs.getQuiet());
-		logger.log(Level.DEBUG, "\tCensor mode: {}", mode);
-		logger.log(Level.DEBUG, "\tLink-Color: {}", () -> colorToString(linkColor));
-		logger.log(Level.DEBUG, "\tExpressions");
+		logger.debug("Finished parsing the settings:");
+		logger.debug("\tInput-file: {}", input);
+		logger.debug("\tConfig-file: {}", configPath);
+		logger.debug("\tOutput-file: {}", output);
+		logger.debug("\tLogger verbosity: {}", verbose);
+		logger.debug("\tQuiet: {}", clArgs.getQuiet());
+		logger.debug("\tCensor mode: {}", mode);
+		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
+		logger.debug("\tExpressions");
 		for (var exp : expressions)
-			logger.log(Level.DEBUG, "\t\t{}", exp);
-		logger.log(Level.DEBUG, "\tDefault Colors");
-		for (var col : Objects.requireNonNullElse(config.getDefaultColors(), new Color[1]))
-			logger.log(Level.DEBUG, "\t\t{}", () -> colorToString(col));
+			logger.debug("\t\t{}", exp);
+		logger.debug("\tDefault Colors");
+		for (var col : defColors)
+			logger.debug("\t\t{}", () -> colorToString(col));
 	}
 	
 	/**
@@ -182,9 +194,9 @@ public final class Settings {
 	}
 	
 	/**
-	 * Merges two Expression arrays together while keeping them in the given order (<code>expressions1</code> is in
-	 * front). Applies a color from the default color array (if it has unused colors remaining) to expressions which do
-	 * not yet have a color assigned. Finally appends the fallback regex "." with the {@link #DEFAULT_CENSOR_COLOR}.
+	 * Merges two {@link Expression} arrays together while keeping them in the given order (<code>expressions1</code> is
+	 * in front). Applies a color from the default color array (if it has unused colors remaining) to expressions which
+	 * do not yet have a color assigned. Finally appends the fallback regex "." with the {@link #DEFAULT_CENSOR_COLOR}.
 	 *
 	 * @param expressions1  The array of Expressions.
 	 * @param expressions2  The array of Expressions that is appended to <code>expressions1</code>.
@@ -194,9 +206,9 @@ public final class Settings {
 	@NotNull
 	private Expression[] combineExpressions(@Nullable final Expression[] expressions1,
 											@Nullable final Expression[] expressions2,
-											@Nullable final Color[] defaultColors) {
+											@NotNull final Color[] defaultColors) {
 		final var ret = ArrayUtils.addAll(expressions1, expressions2);
-		if (defaultColors != null && ret != null) {
+		if (ret != null) {
 			var cIndex = 0;
 			for (var i = 0; i < ret.length && cIndex < defaultColors.length; i++)
 				cIndex += ret[i].setColor(defaultColors[cIndex]) ? 1 : 0;

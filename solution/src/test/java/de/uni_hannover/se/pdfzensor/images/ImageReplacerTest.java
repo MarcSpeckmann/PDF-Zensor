@@ -1,6 +1,8 @@
 package de.uni_hannover.se.pdfzensor.images;
 
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ImageReplacerArgumentProvider;
+import de.uni_hannover.se.pdfzensor.utils.RectUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +12,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ImageReplacerTest {
-	ImageReplacer imageReplacer = new ImageReplacer();
 	
 	/**
 	 * Tests the replaceImages functions with invalid parameters.
 	 */
 	@Test
 	void testReplaceImageInvalidParameter() {
+		ImageReplacer imageReplacer = new ImageReplacer();
 		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, null));
 		PDDocument document = new PDDocument();
 		PDPage page = new PDPage();
@@ -37,21 +40,9 @@ public class ImageReplacerTest {
 	 * @param rect     A rectangle
 	 * @param rectList A list of rectangles
 	 */
-	void rectContainedHelper(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
-		if (!rectList.contains(rect)) {
-			fail("rectangle not found");
-		}
-	}
-	
-	/**
-	 * This method rounds the x,y coordinates such as width and height
-	 *
-	 * @param rect the rectangle which will be rounded
-	 * @return returns a rectangle with round values
-	 */
-	Rectangle2D rectAbsHelper(@NotNull Rectangle2D rect) {
-		return new Rectangle2D.Double(Math.round(rect.getX()), Math.round(rect.getY()),
-									  Math.round(rect.getWidth()), Math.round(rect.getHeight()));
+	void assertContainsRect(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
+		boolean contained = rectList.stream().anyMatch(r -> TestUtility.checkRectanglesEqual(rect, r, 1));
+		assertTrue(contained, rect+" was not present in "+rectList);
 	}
 	
 	/**
@@ -63,16 +54,12 @@ public class ImageReplacerTest {
 	@ArgumentsSource(ImageReplacerArgumentProvider.class)
 	@ParameterizedTest(name = "Run {index}: ListOfImagePositions: {0}, testedDocument: {1}")
 	void testReplaceImage(List<Rectangle2D> rectList, String path) {
-		try {
-			PDDocument document = PDDocument.load(new File(path));
-			PDPage page = document.getPage(0);
-			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(document, page);
-			List<Rectangle2D> absRectListOfDocument = new ArrayList<>();
-			rectListOfDocument.forEach(
-					rect -> absRectListOfDocument.add(rectAbsHelper(rect))
-			);
-			rectList.forEach(rect -> rectContainedHelper(rect, absRectListOfDocument));
-		} catch (Exception e) {
+		ImageReplacer imageReplacer = new ImageReplacer();
+		try (var doc = PDDocument.load(new File(path))){
+			PDPage page = doc.getPage(0);
+			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(doc, page);
+			rectList.forEach(rect -> assertContainsRect(rect, rectListOfDocument));
+		} catch (IOException e) {
 			fail(e);
 		}
 	}

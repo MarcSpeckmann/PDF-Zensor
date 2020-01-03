@@ -21,14 +21,22 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit assertion fails.
  */
 public class TestAppender extends AbstractAppender {
+	/** A queue containing all the expected events. The event expected next is always the first element. */
 	@NotNull
 	private final Queue<LogEvent> events = new ArrayDeque<>();
 	
+	/**
+	 * Initializes a new appender without any filters, layouts or properties.
+	 *
+	 * @param events a list of all events that are expected. These will be filtered by the level and stored internally.
+	 * @param lvl    the level the appender should filter events by.
+	 */
 	public TestAppender(@NotNull List<? extends LogEvent> events, @NotNull Level lvl) {
 		super("test appender", null, null, false, null);
 		events.stream().filter(e -> e.getLevel().isMoreSpecificThan(lvl)).forEach(this.events::offer);
 	}
 	
+	/** {@inheritDoc} */
 	@Override
 	public void append(@NotNull final LogEvent event) {
 		assertFalse(events.isEmpty());

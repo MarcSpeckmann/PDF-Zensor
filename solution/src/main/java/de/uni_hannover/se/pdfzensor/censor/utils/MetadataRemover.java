@@ -14,9 +14,10 @@ import java.util.Objects;
 
 /**
  * MetadataRemover is used to censor all the metadata in a {@link PDDocument}. The dates (date of creation and date of
- * modification) will be set to the time the PDFZensor was used on the document.
+ * modification) will be set to the time the PDF-Zensor was used on the document.
  */
 public final class MetadataRemover {
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
 	
 	/**
@@ -57,7 +58,7 @@ public final class MetadataRemover {
 					var stream = resources.getXObject(name).getStream();
 					stream.setMetadata(null);
 				} catch (IOException e) {
-					LOGGER.warn("Failed to retrieve the XObject " + name + " from the resources", e);
+					LOGGER.warn(String.format("Failed to retrieve the XObject %s from the resources", name), e);
 				}
 			});
 		}

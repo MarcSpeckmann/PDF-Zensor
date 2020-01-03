@@ -178,13 +178,12 @@ public class ImageReplacer extends PDFStreamEngine {
 	private void drawPictureCensorBox(PDPageContentStream pageContentStream) throws IOException {
 		Objects.requireNonNull(pageContentStream);
 		for (var rect : this.rects) {
-			pageContentStream.addRect((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(),
+			pageContentStream.addRect((float) rect.getMinX(), (float) rect.getMinY(), (float) rect.getWidth(),
 									  (float) rect.getHeight());
-			pageContentStream.moveTo((float) rect.getX(), (float) rect.getY());
-			pageContentStream.lineTo((float) rect.getX() + (float) rect.getWidth(),
-									 (float) rect.getY() + (float) rect.getHeight());
-			pageContentStream.moveTo((float) rect.getX(), (float) rect.getY() + (float) rect.getHeight());
-			pageContentStream.lineTo((float) rect.getX() + (float) rect.getWidth(), (float) rect.getY());
+			pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMaxY());
+			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMinY());
+			pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMinY());
+			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMaxY());
 			pageContentStream.stroke();
 		}
 		
