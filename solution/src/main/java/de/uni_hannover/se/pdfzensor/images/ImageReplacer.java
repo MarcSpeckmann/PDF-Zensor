@@ -8,6 +8,7 @@ import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.contentstream.operator.state.*;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -22,6 +23,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
 
@@ -78,6 +80,8 @@ public class ImageReplacer extends PDFStreamEngine {
 		pageContentStream.setLineWidth(2);
 		drawPictureCensorBox(pageContentStream);
 		pageContentStream.close();
+		
+		removeImageData(page);
 		return this.rects;
 		
 	}
@@ -145,6 +149,16 @@ public class ImageReplacer extends PDFStreamEngine {
 			pageContentStream.stroke();
 		}
 		
+	}
+	
+	/**
+	 * Strips the data of the image resources from the provided page. We define all PDXObjects to be "image resources".
+	 *
+	 * @param page the page to remove all image resources from.
+	 */
+	private void removeImageData(@NotNull PDPage page) {
+		var resources = Objects.requireNonNull(page).getResources();
+		resources.getCOSObject().setItem(COSName.XOBJECT, null);
 	}
 	
 }

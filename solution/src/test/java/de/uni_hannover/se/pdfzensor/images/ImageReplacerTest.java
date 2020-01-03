@@ -1,15 +1,19 @@
 package de.uni_hannover.se.pdfzensor.images;
 
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ImageReplacerArgumentProvider;
+import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFProvider;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,6 +59,26 @@ public class ImageReplacerTest {
 		} catch (Exception e) {
 			fail();
 		}
+	}
+	
+	@ParameterizedTest
+	@ArgumentsSource(PDFProvider.class)
+	void testImageDataRemoval(File file) {
+		try (var doc = PDDocument.load(file)) {
+			var imgRepl = new ImageReplacer();
+			for (var page : doc.getPages()) {
+				imgRepl.replaceImages(doc, page);
+				assertNoXObjectsInPage(page);
+			}
+		} catch (IOException e) {
+			fail(e);
+		}
+	}
+	
+	private static void assertNoXObjectsInPage(@NotNull PDPage page) {
+		var data = page.getResources().getXObjectNames();
+		var xObjCount = StreamSupport.stream(data.spliterator(), false).count();
+		assertEquals(0, xObjCount, "XObjects are still present");
 	}
 	
 }
