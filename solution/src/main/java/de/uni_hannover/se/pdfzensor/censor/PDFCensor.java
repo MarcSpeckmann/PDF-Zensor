@@ -20,12 +20,10 @@ import org.apache.logging.log4j.util.TriConsumer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.text.TextPosition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.w3c.dom.css.Rect;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -65,7 +63,8 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private static final float MAX_GAP = 1.5f;
 	
-	private static final double THIN_SPACE_WIDTH = 1/6d;
+	/** Stores the width of a thin space, which usually is &#8533;&nbsp;em or &#8537;&nbsp;em. */
+	private static final double THIN_SPACE_WIDTH = 1 / 6d;
 	
 	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
@@ -86,6 +85,10 @@ public final class PDFCensor implements PDFHandler {
 	/** A new annotations instance in this {@link PDFCensor}-instance. */
 	private Annotations annotations = new Annotations();
 	
+	/**
+	 * Stores the bounds of the last glyph to allow for detection of space-characters. May be null if there was no
+	 * previous glyph after which a space could have followed.
+	 */
 	private Rectangle2D lastGlyph = null;
 	
 	/**
@@ -137,6 +140,31 @@ public final class PDFCensor implements PDFHandler {
 		
 		return ((sameLine && gap.getWidth() < tolerance.x) ||
 				(sameColumn && gap.getHeight() < tolerance.y)) ? comb : null;
+	}
+	
+	/**
+	 * Calculates the rectangle between the two rectangle and returns it if it is considered to be representing a
+	 * space-character. The gap is considered to be a space-character if its respective height (for horizontal fonts) or
+	 * width (for vertical fonts) is in a range of {@link #THIN_SPACE_WIDTH} to {@link #MAX_GAP}. Any gap that is
+	 * smaller or longer than these is considered to not be representing a space-character and thus <code>null</code> is
+	 * returned.
+	 *
+	 * @param r1   the first rectangle of the two between which a space may be. May be <code>null</code>.
+	 * @param r2   the second rectangle of the two between which a space may be. May be <code>null</code>.
+	 * @param font the font of which the space would be part.
+	 * @return The gap between r1 and r2 if there may be a blank-character between them <code>null</code> otherwise.
+	 * <code>null</code> may also be returned if r1 or r2 are <code>null</code>.
+	 */
+	private static Optional<Rectangle2D> getBlankBetween(Rectangle2D r1, Rectangle2D r2, PDFont font) {
+		if (!ObjectUtils.allNotNull(r1, r2))
+			return Optional.empty();
+		var gap = RectUtils.getRectBetween(r1, r2);
+		//size of the gap in Em (relative to the fonts height/width depending on the font's alignment)
+		double size = gap.getWidth() / r1.getHeight();
+		if (font.isVertical())
+			size = gap.getHeight() / r1.getWidth();
+		var isSpace = Range.between(THIN_SPACE_WIDTH, (double) MAX_GAP).contains(size);
+		return Optional.of(gap).filter(b -> isSpace);
 	}
 	
 	/**
@@ -217,18 +245,6 @@ public final class PDFCensor implements PDFHandler {
 			}
 		}, tokenizer::tryFlush);
 		return bounds.isPresent();
-	}
-	
-	private static Optional<Rectangle2D> getBlankBetween(Rectangle2D r1, Rectangle2D r2, PDFont font) {
-		if (!ObjectUtils.allNotNull(r1, r2))
-			return Optional.empty();
-		var gap = RectUtils.getRectBetween(r1, r2);
-		//size of the gap in Em (relative to the fonts height/width depending on the font's alignment)
-		double size = gap.getWidth()/r1.getHeight();
-		if (font.isVertical())
-			size = gap.getHeight()/r1.getWidth();
-		var isSpace = Range.between(THIN_SPACE_WIDTH, (double)MAX_GAP).contains(size);
-		return Optional.of(gap).filter(b -> isSpace);
 	}
 	
 	/**
