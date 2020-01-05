@@ -1,7 +1,6 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import de.uni_hannover.se.pdfzensor.Logging;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotation;
@@ -9,6 +8,7 @@ import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationLink;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils.pdRectToRect2D;
 import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT;
 
 /**
@@ -26,15 +27,27 @@ import static org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextM
  */
 @SuppressWarnings("WeakerAccess") // this class is member of the public API
 public final class Annotations {
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
 	
+	/**
+	 * Contains cached highlights after caching a PDF page.
+	 *
+	 * @see #cachePage(PDPage)
+	 */
 	@NotNull
 	private List<Rectangle2D> highlights;
+	
+	/**
+	 * Contains cached links after caching a PDF page.
+	 *
+	 * @see #cachePage(PDPage)
+	 */
 	@NotNull
 	private List<Rectangle2D> links;
 	
+	/** Initializes a new Annotations-instance and creates new, empty {@link #highlights} and {@link #links} lists. */
 	public Annotations() {
-		LOGGER.log(Level.DEBUG, "Initialized a new Annotations-instance");
 		highlights = List.of();
 		links = List.of();
 	}
@@ -47,7 +60,7 @@ public final class Annotations {
 	 */
 	@NotNull
 	private static Rectangle2D getAnnotationRect(@NotNull PDAnnotation annotation) {
-		var rectangle = PDFUtils.pdRectToRect2D(annotation.getRectangle());
+		var rectangle = pdRectToRect2D(annotation.getRectangle());
 		if (annotation instanceof PDAnnotationTextMarkup) {
 			final var quads = ((PDAnnotationTextMarkup) annotation).getQuadPoints();
 			var path = new Path2D.Float();
@@ -65,10 +78,10 @@ public final class Annotations {
 	 * Checks if given annotation is highlighted.
 	 *
 	 * @param annotation the annotation to be checked
-	 * @return true if the given annotation is highlighted otherwise false
+	 * @return true if the given annotation is highlighted, false otherwise
 	 */
 	@Contract("null -> false")
-	private static boolean isHighlightAnnotation(PDAnnotation annotation) {
+	private static boolean isHighlightAnnotation(@Nullable PDAnnotation annotation) {
 		if (!(annotation instanceof PDAnnotationTextMarkup)) return false;
 		PDAnnotationTextMarkup tm = (PDAnnotationTextMarkup) annotation;
 		String subtype = tm.getSubtype();
@@ -76,12 +89,15 @@ public final class Annotations {
 	}
 	
 	/**
-	 * Caches links and highlights of the current PDF page by calling {@link #cacheLinks} and {@link #cacheHighlights}.
+	 * Caches links and highlights of the current PDF page by calling {@link #cacheLinks(PDPage)} and {@link
+	 * #cacheHighlights(PDPage)}.
 	 *
 	 * @param page the current PDF page being worked on
+	 * @see #cacheLinks(PDPage)
+	 * @see #cacheHighlights(PDPage)
 	 */
 	public void cachePage(@NotNull PDPage page) {
-		LOGGER.log(Level.DEBUG, "Starting to cache page: {}", page);
+		LOGGER.debug("Caching annotations...");
 		cacheLinks(page);
 		cacheHighlights(page);
 	}
@@ -95,12 +111,13 @@ public final class Annotations {
 	private void cacheLinks(@NotNull PDPage page) {
 		Objects.requireNonNull(page);
 		try {
-			LOGGER.log(Level.DEBUG, "Starting to cache the Links of page: {}", page);
+			LOGGER.debug("Caching links...");
 			links = page.getAnnotations(PDAnnotationLink.class::isInstance).stream().map(Annotations::getAnnotationRect)
 						.collect(Collectors.toUnmodifiableList());
+			LOGGER.debug("Cached {} links", links.size());
 		} catch (IOException e) {
 			links = List.of();
-			LOGGER.log(Level.ERROR, "Failed to cache the Links of page: {}", page, e);
+			LOGGER.error("Failed to cache links", e);
 		}
 	}
 	
@@ -113,33 +130,34 @@ public final class Annotations {
 	private void cacheHighlights(@NotNull PDPage page) {
 		Objects.requireNonNull(page);
 		try {
-			LOGGER.log(Level.DEBUG, "Starting to cache the highlighted annotations of page: {}", page);
+			LOGGER.debug("Caching highlight-annotations...");
 			highlights = page.getAnnotations(Annotations::isHighlightAnnotation).stream()
 							 .map(Annotations::getAnnotationRect).collect(Collectors.toUnmodifiableList());
+			LOGGER.debug("Cached {} highlight-annotations", highlights.size());
 		} catch (IOException e) {
 			highlights = List.of();
-			LOGGER.log(Level.ERROR, "Failed to cache the highlighted annotations of page: {}", page, e);
+			LOGGER.error("Failed to cache highlight-annotations", e);
 		}
 	}
 	
 	/**
-	 * Checks if given annotation bounding box entirely fits into one of the elements(bounding box rectangles) of {@link
-	 * #highlights} list.
+	 * Checks if the given rectangle bounds intersect a highlight from the {@link #highlights} list.
 	 *
 	 * @param rect the rectangle to be checked
-	 * @return true if the given rect entirely fits into at least one rect of {@link #highlights} otherwise false
+	 * @return true if the given rect intersects at least one rect of {@link #highlights}, false otherwise
 	 */
 	public boolean isMarked(@NotNull Rectangle2D rect) {
-		return isMarked(rect, MarkCriterion.CONTAIN);
+		return isMarked(rect, MarkCriterion.CONTAIN_90);
 	}
 	
 	/**
-	 * Checks if given annotation bounding box either intersects or entirely fits into one of the elements(bounding box
-	 * rectangles) of {@link #highlights} list depending on the given {@link MarkCriterion}.
+	 * Checks if the given rectangle bounds either intersect or are contained in a highlight from the {@link
+	 * #highlights} list, depending on the given <code>criteria</code>.
 	 *
 	 * @param rect     the rectangle to be checked
 	 * @param criteria either {@link MarkCriterion#CONTAIN} or {@link MarkCriterion#INTERSECT}
-	 * @return true if at least one rect of {@link #highlights} matches the criteria with the given rect otherwise false
+	 * @return true if at least one rect of {@link #highlights} matches the criteria with the given rect, false
+	 * otherwise
 	 */
 	public boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria) {
 		Objects.requireNonNull(rect);
@@ -149,23 +167,22 @@ public final class Annotations {
 	}
 	
 	/**
-	 * Checks if given annotation bounding box entirely fits into one of the elements(bounding box rectangles) of {@link
-	 * #links} list.
+	 * Checks if the given rectangle bounds intersect a link from the {@link #links} list.
 	 *
 	 * @param rect the rectangle to be checked
-	 * @return true if the given rect entirely fits into at least one rect of {@link #links} otherwise false
+	 * @return true if the given rect intersects at least one rect of {@link #links}, false otherwise
 	 */
 	public boolean isLinked(@NotNull Rectangle2D rect) {
 		return isLinked(rect, MarkCriterion.INTERSECT);
 	}
 	
 	/**
-	 * Checks if given annotation bounding box either intersects or entirely fits into one of the elements (bounding box
-	 * rectangles) of {@link #links} list depending on the given {@link MarkCriterion}.
+	 * Checks if the given rectangle bounds either intersect or are contained in a link from the {@link #links} list,
+	 * depending on the given <code>criteria</code>.
 	 *
 	 * @param rect     the rectangle to be checked
 	 * @param criteria either {@link MarkCriterion#CONTAIN} or {@link MarkCriterion#INTERSECT}
-	 * @return true if at least one rect of {@link #links} matches the criteria with the given rect otherwise false
+	 * @return true if at least one rect of {@link #links} matches the criteria with the given rect, false otherwise
 	 */
 	public boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria) {
 		Objects.requireNonNull(rect);

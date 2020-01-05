@@ -16,11 +16,13 @@ import java.util.stream.Stream;
 public class HelpArgumentProvider implements ArgumentsProvider {
 	
 	/**
-	 * This method creates an Argument which contains -h or -V depending on the given method inputs.
+	 * This method creates an argument which contains -h or -V depending on the given method inputs. If help and version
+	 * are both false, the argument <code>"infile.pdf"</code> will be added such that the provided cli-arguments are
+	 * never empty. This is done to avoid invalid arguments in the output.
 	 *
-	 * @param help    If True -h will be added to the created arguments
-	 * @param version If True -V will be added to the created arguments
-	 * @return a Argument of created commando line arguments and the method inputs
+	 * @param help    If true -h will be added to the created arguments.
+	 * @param version If true -V will be added to the created arguments.
+	 * @return an argument of created command-line arguments and the method inputs.
 	 */
 	@NotNull
 	private static Arguments createArgumentCLHelp(boolean help, boolean version) {
@@ -29,15 +31,17 @@ public class HelpArgumentProvider implements ArgumentsProvider {
 			arguments.add("-h");
 		if (version)
 			arguments.add("-V");
+		if (!help && !version)
+			arguments.add("infile.pdf");
 		return Arguments.of(arguments.toArray(new String[0]), help, version);
 	}
 	
 	/**
-	 * This method provides an argument stream for parametrized test.
-	 * Each possible combination of {@link #createArgumentCLHelp(boolean, boolean)} will be called.
+	 * This method provides an argument stream for parameterized test. Each possible combination of {@link
+	 * #createArgumentCLHelp(boolean, boolean)} will be called.
 	 *
 	 * @param extensionContext encapsulates the context in which the current test or container is being executed.
-	 * @return a stream of possible arguments for a parametrizes test
+	 * @return a stream of possible arguments for a parameterized test.
 	 */
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {

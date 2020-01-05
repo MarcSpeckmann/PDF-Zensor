@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.images;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.contentstream.PDFStreamEngine;
 import org.apache.pdfbox.contentstream.operator.DrawObject;
@@ -8,14 +9,12 @@ import org.apache.pdfbox.contentstream.operator.Operator;
 import org.apache.pdfbox.contentstream.operator.state.*;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.pdfbox.util.Matrix;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -32,9 +31,10 @@ import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
  * inherits from {@link PDFStreamEngine} and overrides the {@link PDFStreamEngine#processOperator(Operator, List)}
  */
 public class ImageReplacer extends PDFStreamEngine {
-	
 	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
+	/** The unit-rect is at the origin an has extends of one in each direction. It may be used as default image-bounds. */
+	private static final PDRectangle UNIT_RECT = new PDRectangle(0, 0, 1, 1);
 	
 	/**
 	 * A {@link List} should contain all bounding boxes of the found pictures on the actual page
@@ -43,17 +43,22 @@ public class ImageReplacer extends PDFStreamEngine {
 	
 	
 	/**
-	 * The Constructor of {@link ImageReplacer}, which is responsible for preparing the {@link PDFStreamEngine}.
+	 * The Constructor of {@link ImageReplacer}, which is responsible for preparing the {@link PDFStreamEngine}. It is
+	 * adding operators to the {@link PDFStreamEngine} which will be processed by the {@link PDFStreamEngine}.
 	 */
 	public ImageReplacer() {
-		// preparing PDFStreamEngine
+		//cm: Concatenate matrix to current transformation matrix.
 		addOperator(new Concatenate());
+		//Do: Draws an XObject.
 		addOperator(new DrawObject());
+		//gs: Set parameters from graphics state parameter dictionary.
 		addOperator(new SetGraphicsStateParameters());
+		//q: Save the graphics state.
 		addOperator(new Save());
+		//Q: Restore the graphics state.
 		addOperator(new Restore());
+		//Tm: Set text matrix and text line matrix.
 		addOperator(new SetMatrix());
-		addOperator(new Concatenate());
 	}
 	
 	/**
@@ -66,21 +71,19 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	@NotNull
 	public List<Rectangle2D> replaceImages(PDDocument doc, PDPage page) throws IOException {
-		LOGGER.info("Starting to process Images of page{}", page);
+		Objects.requireNonNull(doc);
+		Objects.requireNonNull(page);
+		LOGGER.info("Starting to process Images of page {}/{}", () -> doc.getPages().indexOf(page) + 1,
+					doc::getNumberOfPages);
 		
 		this.processPage(page);
 		
-		var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, true);
-		pageContentStream.saveGraphicsState();
-		pageContentStream.close();
-		
-		pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true);
-		pageContentStream.restoreGraphicsState();
-		pageContentStream.setStrokingColor(Color.DARK_GRAY);
-		pageContentStream.setLineWidth(2);
-		drawPictureCensorBox(pageContentStream);
-		pageContentStream.close();
-		
+		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true,
+															 true)) {
+			pageContentStream.setStrokingColor(Color.DARK_GRAY);
+			pageContentStream.setLineWidth(2);
+			drawPictureCensorBox(pageContentStream);
+		}
 		removeImageData(page);
 		return this.rects;
 		
@@ -90,45 +93,48 @@ public class ImageReplacer extends PDFStreamEngine {
 	 * This method overwrites the {@link PDFStreamEngine#processOperator(Operator, List)}. This method checks if the
 	 * actual found operator is a {@link DrawObject} operator and adds it to the {@link #rects}.
 	 *
-	 * @param operator
-	 * @param operands
-	 * @throws IOException
+	 * @param operator The operation to perform.
+	 * @param operands The list of arguments.
+	 * @throws IOException If there is an error processing the operation.
 	 */
 	@Override
-	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
+	protected void processOperator(@NotNull final Operator operator, final List<COSBase> operands) throws IOException {
+		Objects.requireNonNull(operands);
+		Objects.requireNonNull(operator);
 		if (DRAW_OBJECT.equals(operator.getName())) {
 			COSName objectName = (COSName) operands.get(0);
 			// get the PDF object
-			PDXObject xobject = getResources().getXObject(objectName);
-			// check if the object is an image object
-			if (xobject instanceof PDImageXObject) {
-				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-				LOGGER.info("Image [{}]", objectName.getName());
-				LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
-							ctmNew.getTranslateY());
-				LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
-							ctmNew.getScalingFactorY());
-				rects.add(new Rectangle2D.Float(ctmNew.getTranslateX(), ctmNew.getTranslateY(),
-												ctmNew.getScalingFactorX(),
-												ctmNew.getScalingFactorY()));
-			} else if (xobject instanceof PDFormXObject) {
-				PDFormXObject form = (PDFormXObject) xobject;
-				Matrix ctmNew = getGraphicsState().getCurrentTransformationMatrix();
-				LOGGER.info("Image [{}]", objectName.getName());
-				LOGGER.info("Position in PDF = \"{}\", \"{}\" in user space units", ctmNew.getTranslateX(),
-							ctmNew.getTranslateY());
-				LOGGER.info("Displayed size  = \"{}\", \"{}\" in user space units", ctmNew.getScalingFactorX(),
-							ctmNew.getScalingFactorY());
-				var bounds = form.getBBox();
-				rects.add(new Rectangle2D.Float(
-						ctmNew.getTranslateX() + bounds.getLowerLeftX() * ctmNew.getScalingFactorX(),
-						ctmNew.getTranslateY() + bounds.getLowerLeftY() * ctmNew.getScalingFactorY(),
-						ctmNew.getScalingFactorX() * bounds.getWidth(),
-						ctmNew.getScalingFactorY() * bounds.getHeight()));
-			}
+			PDXObject xObject = getResources().getXObject(objectName);
+			rects.add(getBounds(xObject, objectName));
 		} else {
 			super.processOperator(operator, operands);
 		}
+	}
+	
+	/**
+	 * Retrieves the transformed bounding-box of the provided PDXObject. That is the bounding-box of the XObject
+	 * transformed using the current transformation matrix (ctm). If the XObject is no FormXObject, the unit-rect
+	 * (0,&nbsp;0,&nbsp;&nbsp;1,&nbsp;1) is used.
+	 *
+	 * @param object the XObject to retrieve the transformed bounding-box of.
+	 * @param name   the name of the XObject under which it is stored in the resources. This only serves logging
+	 *               purposes.
+	 * @return the transformed bounding-box of the PDXObject.
+	 */
+	@NotNull
+	private Rectangle2D getBounds(@NotNull PDXObject object, @NotNull COSName name) {
+		Objects.requireNonNull(object);
+		Objects.requireNonNull(name);
+		
+		var ctm = getGraphicsState().getCurrentTransformationMatrix();
+		var at = ctm.createAffineTransform();
+		var bounds = UNIT_RECT;
+		if (object instanceof PDFormXObject)
+			bounds = ((PDFormXObject) object).getBBox();
+		var transformed = at.createTransformedShape(PDFUtils.pdRectToRect2D(bounds)).getBounds2D();
+		LOGGER.info("{} \"{}\" at ({}, {}) size: {}\u00D7{}", object.getClass().getSimpleName(), name.getName(),
+					transformed.getX(), transformed.getY(), transformed.getWidth(), transformed.getHeight());
+		return transformed;
 	}
 	
 	/**
@@ -137,18 +143,17 @@ public class ImageReplacer extends PDFStreamEngine {
 	 *
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
-	private void drawPictureCensorBox(PDPageContentStream pageContentStream) throws IOException {
+	private void drawPictureCensorBox(@NotNull PDPageContentStream pageContentStream) throws IOException {
+		Objects.requireNonNull(pageContentStream);
 		for (var rect : this.rects) {
-			pageContentStream.addRect((float) rect.getX(), (float) rect.getY(), (float) rect.getWidth(),
+			pageContentStream.addRect((float) rect.getMinX(), (float) rect.getMinY(), (float) rect.getWidth(),
 									  (float) rect.getHeight());
-			pageContentStream.moveTo((float) rect.getX(), (float) rect.getY());
-			pageContentStream.lineTo((float) rect.getX() + (float) rect.getWidth(),
-									 (float) rect.getY() + (float) rect.getHeight());
-			pageContentStream.moveTo((float) rect.getX(), (float) rect.getY() + (float) rect.getHeight());
-			pageContentStream.lineTo((float) rect.getX() + (float) rect.getWidth(), (float) rect.getY());
+			pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMaxY());
+			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMinY());
+			pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMinY());
+			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMaxY());
 			pageContentStream.stroke();
 		}
-		
 	}
 	
 	/**

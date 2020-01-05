@@ -16,9 +16,9 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.checkRectanglesEqual;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -29,7 +29,7 @@ class PDFUtilsTest {
 	/**
 	 * A Hash Map containing bundled data as TextPosition objects and the corresponding expected output-rectangle
 	 */
-	private static final Map<Rectangle2D, TextPositionValue> TEXTPOSITION = new HashMap<>();
+	private static final Map<Rectangle2D, TextPositionValue> TEXT_POSITION = new HashMap<>();
 	/**
 	 * A Hash Map containing an input-rectangle from type PDRectangle and the corresponding expected output-rectangle
 	 * from type Rectangle2D
@@ -44,11 +44,11 @@ class PDFUtilsTest {
 	
 	static {
 		// test with one char in TextPosition
-		TEXTPOSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f),
-						 tpValue1);
+		TEXT_POSITION.put(new Rectangle2D.Float(tpValue1.endX, tpValue1.endY, 7.876370270042557f, 9.796371887116607f),
+						  tpValue1);
 		// test with two chars in TextPosition
-		TEXTPOSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f),
-						 tpValue2);
+		TEXT_POSITION.put(new Rectangle2D.Float(tpValue2.endX, tpValue2.endY, 15.929350502353941f, 10.731100338419985f),
+						  tpValue2);
 	}
 	
 	static {
@@ -61,22 +61,29 @@ class PDFUtilsTest {
 	
 	/**
 	 * Provides a set of arguments for {@link #transformTextPositionTest(TextPositionValue, Rectangle2D)} generated from
-	 * {@link #TEXTPOSITION}.
+	 * {@link #TEXT_POSITION}.
+	 *
+	 * @return An argument stream containing {@link TextPositionValue}s and {@link Rectangle2D.Float}s.
 	 */
 	private static Stream<Arguments> textPositionProvider() {
-		return TEXTPOSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
+		return TEXT_POSITION.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
 	/**
 	 * Provides a set of arguments for {@link #pdRectToRect2DTest(PDRectangle, Rectangle2D)} generated from {@link
 	 * #DIMENSIONS}.
+	 *
+	 * @return An argument stream containing {@link PDRectangle}s and {@link Rectangle2D.Float}s.
 	 */
 	private static Stream<Arguments> dimensionsProvider() {
 		return DIMENSIONS.entrySet().stream().map(e -> Arguments.of(e.getValue(), e.getKey()));
 	}
 	
 	/**
-	 * tests for {@link PDFUtils#transformTextPosition(TextPosition)} function
+	 * Tests for {@link PDFUtils#transformTextPosition(TextPosition)} function.
+	 *
+	 * @param input    The input {@link TextPositionValue}.
+	 * @param expected The expected {@link Rectangle2D} after the transformation.
 	 */
 	@ParameterizedTest(name = "Run {index}: TextPosition: {0}")
 	@MethodSource("textPositionProvider")
@@ -89,14 +96,7 @@ class PDFUtilsTest {
 										   input.spaceWidth, input.unicode, input.charCodes, input.font, input.fontSize,
 										   input.fontSizeInPt);
 		try {
-			assertEquals(Math.round(expected.getHeight()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getHeight()));
-			assertEquals(Math.round(expected.getWidth()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getWidth()));
-			assertEquals(Math.round(expected.getX()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getX()));
-			assertEquals(Math.round(expected.getY()),
-						 Math.round(Objects.requireNonNull(PDFUtils.transformTextPosition(tp)).getY()));
+			assertTrue(checkRectanglesEqual(expected, PDFUtils.transformTextPosition(tp), 1e-3));
 		} catch (IOException e) {
 			fail("IOException: font of TextPosition object couldn't be loaded correctly");
 		}
@@ -104,6 +104,9 @@ class PDFUtilsTest {
 	
 	/**
 	 * tests for {@link PDFUtils#pdRectToRect2D(PDRectangle)} function
+	 *
+	 * @param input    The input {@link PDRectangle}.
+	 * @param expected The expected {@link Rectangle2D} after the conversion.
 	 */
 	@ParameterizedTest(name = "Run {index}: Dimensions: {0}")
 	@MethodSource("dimensionsProvider")

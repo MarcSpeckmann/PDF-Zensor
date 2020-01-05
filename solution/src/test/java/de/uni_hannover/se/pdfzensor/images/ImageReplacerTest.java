@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.images;
 
+import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ImageReplacerArgumentProvider;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFProvider;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,45 +20,56 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ImageReplacerTest {
-	ImageReplacer imageReplacer = new ImageReplacer();
 	
+	private static void assertNoXObjectsInPage(@NotNull PDPage page) {
+		var data = page.getResources().getXObjectNames();
+		var xObjCount = StreamSupport.stream(data.spliterator(), false).count();
+		assertEquals(0, xObjCount, "XObjects are still present");
+	}
 	
+	/**
+	 * Tests the replaceImages functions with invalid parameters.
+	 */
 	@Test
 	void testReplaceImageInvalidParameter() {
-		assertThrows(IllegalArgumentException.class, () -> imageReplacer.replaceImages(null, null));
-	}
-	
-	// just a helper to check the coodinates
-	@Test
-	void printCoords() {
-		String PATH = "src/test/resources/pdf-files/";
-		try {
-			PDDocument document = PDDocument.load(
-					new File(PATH + "threeImages.pdf"));
-			PDPage page = document.getPage(0);
-			List<Rectangle2D> rl = imageReplacer.replaceImages(document, page);
-			System.out.println(String.valueOf(rl));
-		} catch (Exception e) {
+		ImageReplacer imageReplacer = new ImageReplacer();
+		assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, null));
+		try (var document = new PDDocument()) {
+			PDPage page = new PDPage();
+			assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(null, page));
+			assertThrows(NullPointerException.class, () -> imageReplacer.replaceImages(document, null));
+		} catch (IOException e) {
+			fail(e);
 		}
 	}
 	
-	void rectContainedHelper(Rectangle2D rect, List<Rectangle2D> rectList) {
-		if (!rectList.contains(rect)) {
-			fail();
-		}
+	/**
+	 * This function fails the current test if in rectList is no rectangle similar to rect.
+	 *
+	 * @param rect     A rectangle
+	 * @param rectList A list of rectangles
+	 */
+	void assertContainsRect(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
+		boolean contained = rectList.stream().anyMatch(r -> TestUtility.checkRectanglesEqual(rect, r, 1));
+		assertTrue(contained, rect + " was not present in " + rectList);
 	}
 	
+	/**
+	 * This function tests if all pictures in a document are found at the correct position.
+	 *
+	 * @param rectList A list of rectangles (coordinates).
+	 * @param path     The path to the pdf to be tested.
+	 */
 	@ArgumentsSource(ImageReplacerArgumentProvider.class)
 	@ParameterizedTest(name = "Run {index}: ListOfImagePositions: {0}, testedDocument: {1}")
 	void testReplaceImage(List<Rectangle2D> rectList, String path) {
-		try {
-			PDDocument document = PDDocument.load(new File(path));
-			PDPage page = document.getPage(0);
-			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(document, page);
-			
-			rectList.forEach(rect -> rectContainedHelper(rect, rectListOfDocument));
-		} catch (Exception e) {
-			fail();
+		ImageReplacer imageReplacer = new ImageReplacer();
+		try (var doc = PDDocument.load(new File(path))) {
+			PDPage page = doc.getPage(0);
+			List<Rectangle2D> rectListOfDocument = imageReplacer.replaceImages(doc, page);
+			rectList.forEach(rect -> assertContainsRect(rect, rectListOfDocument));
+		} catch (IOException e) {
+			fail(e);
 		}
 	}
 	
@@ -73,12 +85,6 @@ public class ImageReplacerTest {
 		} catch (IOException e) {
 			fail(e);
 		}
-	}
-	
-	private static void assertNoXObjectsInPage(@NotNull PDPage page) {
-		var data = page.getResources().getXObjectNames();
-		var xObjCount = StreamSupport.stream(data.spliterator(), false).count();
-		assertEquals(0, xObjCount, "XObjects are still present");
 	}
 	
 }

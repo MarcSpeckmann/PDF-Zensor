@@ -12,16 +12,24 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 /** A Dummy PDStream to check if data was written to it correctly. */
 public class DummyPDStream extends PDStream {
+	/** The data that is expected to be written to this stream. */
 	private final byte[] expected;
+	/** Any incoming data will be written into this stream. */
 	@NotNull
 	private final ByteArrayOutputStream os;
 	
+	/**
+	 * Creates a new DummyStream and sets its expected data-set.
+	 *
+	 * @param expected the data-set that will be tested against when calling {@link #assertAsExpected()}.
+	 */
 	public DummyPDStream(byte... expected) {
 		super((COSStream) null);
 		this.expected = expected;
 		os = new ByteArrayOutputStream();
 	}
 	
+	/** {@inheritDoc} */
 	@NotNull
 	@SuppressWarnings("ReturnPrivateMutableField")
 	@Override
@@ -30,6 +38,9 @@ public class DummyPDStream extends PDStream {
 		return os;
 	}
 	
+	/**
+	 * Asserts that the actually written data corresponds to the expected data as set in the constructor.
+	 */
 	public void assertAsExpected() {
 		assertArrayEquals(expected, os.toByteArray());
 	}

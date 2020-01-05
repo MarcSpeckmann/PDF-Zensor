@@ -2,7 +2,6 @@ package de.uni_hannover.se.pdfzensor.processor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.censor.utils.DoubleBufferedStream;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -17,13 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//           PLEASE NOTE: during prototyping this class did not copy all data correctly for FormXObjects.             //
-//           Thus there might be some functions missing that should further push and pop the stream-stack.            //
-//           This should be elicited further during development. Since FormXObjects will be censored like             //
-//           images it is not a huge issue but one that should be considered.                                         //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * PDFStreamProcessor builds on the {@link org.apache.pdfbox.contentstream.PDFStreamEngine} via the {@link
@@ -49,7 +41,6 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 */
 	PDFStreamProcessor() throws IOException {
 		super();
-		LOGGER.log(Level.DEBUG, "Initialized a new PDFStreamProcessor-instance");
 	}
 	
 	/**
@@ -75,8 +66,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 */
 	private void pushStream(@NotNull final DoubleBufferedStream bs) {
 		if (currentStream == null)
-			LOGGER.log(Level.WARN,
-					   "It was tried to push a stream when the PDFStreamProcessor-instance's stack has not yet been initialized.");
+			LOGGER.warn("It was tried to push a stream but the stack has not yet been initialized.");
 		else
 			currentStream.push(Objects.requireNonNull(bs));
 	}
@@ -85,6 +75,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Removes the top stream of the current stream-stack, closes it and returns it.
 	 *
 	 * @return the former top stream on the stack.
+	 * @throws NoSuchElementException if {@link #currentStream} is <code>null</code>.
 	 */
 	@NotNull
 	private DoubleBufferedStream popStream() {
@@ -93,7 +84,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 		try {
 			ret.close();
 		} catch (IOException e) {
-			LOGGER.log(Level.ERROR, "Failed to close the PDFStreamProcessor-instance's current input stream.", e);
+			LOGGER.error("Failed to close the PDFStreamProcessor-instance's current input stream.", e);
 		}
 		return ret;
 	}
@@ -102,10 +93,10 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Prepends PDFTextStripper's {@link PDFTextStripper#writeText(PDDocument, Writer)} by additionally checking for
 	 * invalid parameters.
 	 *
-	 * @param doc          The document to get the data from. Not null.
-	 * @param outputStream The location to put the text. Not null.
+	 * @param doc          The document to get the data from. Not <code>null</code>.
+	 * @param outputStream The location to put the text. Not <code>null</code>.
 	 * @throws IOException          If the doc is in an invalid state.
-	 * @throws NullPointerException If doc or outputStream are null.
+	 * @throws NullPointerException If doc or outputStream are <code>null</code>.
 	 */
 	@Override
 	public void writeText(@NotNull final PDDocument doc, @NotNull final Writer outputStream) throws IOException {
@@ -120,13 +111,12 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 *
 	 * @param document The PDF document that is about to be processed. May not be <code>null</code>.
 	 * @throws IOException          if an I/O error occurs.
-	 * @throws NullPointerException if <code>document</code> is <code>null</code>.
+	 * @throws NullPointerException if {@code document} is <code>null</code>.
 	 */
 	@Override
 	protected void startDocument(@NotNull final PDDocument document) throws IOException {
 		var information = Objects.requireNonNull(document).getDocumentInformation();
-		LOGGER.log(Level.DEBUG, "Starting to process a new document: {} by {}",
-				   information::getTitle, information::getAuthor);
+		LOGGER.debug("Starting to process a new document: {} by {}", information::getTitle, information::getAuthor);
 		currentStream = new ArrayDeque<>();
 		super.startDocument(document);
 	}
@@ -137,17 +127,16 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 *
 	 * @param document The PDF document that has been processed. May not be <code>null</code>.
 	 * @throws IOException          if an I/O error occurs.
-	 * @throws NullPointerException if document is <code>null</code>
+	 * @throws NullPointerException if document is <code>null</code>.
 	 */
 	@Override
 	protected void endDocument(PDDocument document) throws IOException {
 		super.endDocument(document);
 		Objects.requireNonNull(currentStream);
 		if (!currentStream.isEmpty()) {
-			LOGGER.log(Level.ERROR,
-					   "The stream stack was not empty after the whole document was processed." +
-					   "This should not happen as it indicates that there is an issue with pushing" +
-					   "and popping the current streams as they get read from the PDF-file.");
+			LOGGER.error("The stream stack was not empty after the whole document was processed." +
+						 "This should not happen as it indicates that there is an issue with pushing" +
+						 "and popping the current streams as they get read from the PDF-file.");
 		}
 		currentStream.clear();
 		currentStream = null;
@@ -165,7 +154,7 @@ class PDFStreamProcessor extends PDFTextStripper {
 	@Override
 	protected void startPage(@NotNull final PDPage page) throws IOException {
 		Objects.requireNonNull(page);
-		LOGGER.log(Level.DEBUG, "Starting to process page {}/{}", this::getCurrentPageNo, document::getNumberOfPages);
+		LOGGER.debug("Starting to process page {}/{}", this::getCurrentPageNo, document::getNumberOfPages);
 		var bufferedStream = new DoubleBufferedStream(new PDStream(document), page.getContents());
 		pushStream(bufferedStream);
 		super.startPage(page);
@@ -198,11 +187,11 @@ class PDFStreamProcessor extends PDFTextStripper {
 	@Override
 	public void showTransparencyGroup(@NotNull final PDTransparencyGroup form) throws IOException {
 		Objects.requireNonNull(form);
-		LOGGER.log(Level.DEBUG, "Entering transparency group");
+		LOGGER.debug("Entering transparency group");
 		pushStream(new DoubleBufferedStream(form.getContentStream(), form.getContents()));
 		super.showTransparencyGroup(form);
 		popStream();
-		LOGGER.log(Level.DEBUG, "Exiting transparency group");
+		LOGGER.debug("Exiting transparency group");
 	}
 	
 	/**
@@ -210,17 +199,17 @@ class PDFStreamProcessor extends PDFTextStripper {
 	 * Appends PDFTextStripper's {@link PDFTextStripper#showForm(PDFormXObject)} by pushing and popping the stream-stack
 	 * accordingly.
 	 *
-	 * @param form form XObject. May not be <code>null</code>.
+	 * @param form the form XObject. May not be <code>null</code>.
 	 * @throws IOException          if the form cannot be processed.
 	 * @throws NullPointerException if <code>form</code> is <code>null</code>.
 	 */
 	@Override
 	public void showForm(@NotNull final PDFormXObject form) throws IOException {
 		Objects.requireNonNull(form);
-		LOGGER.log(Level.DEBUG, "Entering FormXObject");
+		LOGGER.debug("Entering FormXObject");
 		pushStream(new DoubleBufferedStream(form.getContentStream(), form.getContents()));
 		super.showForm(form);
 		popStream();
-		LOGGER.log(Level.DEBUG, "Exiting FormXObject");
+		LOGGER.debug("Exiting FormXObject");
 	}
 }

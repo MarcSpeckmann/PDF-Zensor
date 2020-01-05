@@ -11,7 +11,14 @@ import java.util.stream.Stream;
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 
+/**
+ * Provides arguments of the kind <code>(String,&nbsp;Retangle2D[])</code>. The string is a path to a pdf-file and the
+ * rectangles are all the censor-boxes that should be present after running the {@link
+ * de.uni_hannover.se.pdfzensor.censor.PDFCensor} on the file.
+ */
 public final class PDFCensorBoundingBoxProvider implements ArgumentsProvider {
+	
+	/** {@inheritDoc} */
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();

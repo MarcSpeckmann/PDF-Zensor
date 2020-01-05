@@ -1,49 +1,131 @@
 package de.uni_hannover.se.pdfzensor.processor;
 
 import de.uni_hannover.se.pdfzensor.Logging;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSFloat;
+import org.apache.pdfbox.cos.COSString;
 import org.apache.pdfbox.pdfwriter.ContentStreamWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.graphics.state.PDTextState;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
+import org.apache.pdfbox.util.Vector;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static de.uni_hannover.se.pdfzensor.utils.Utils.reduceArray;
+import static java.lang.Boolean.TRUE;
 import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
-
 
 /**
  * TextProcessor has two main purposes: for one is it responsible to abstract {@link
  * org.apache.pdfbox.text.PDFTextStripper}'s {@link org.apache.pdfbox.text.PDFTextStripper#startDocument(PDDocument)}
  * and similar methods to the API outside of this package by forwarding these events to a {@link PDFHandler}. For the
- * other is it responsible to copy all read operators into {@link PDFStreamProcessor}'s builtin output-stream. The
+ * other is it responsible for copying all read operators into {@link PDFStreamProcessor}'s builtin output-stream. The
  * latter has as only exception the Show-Text-Operators (TJ and Tj) as they should only be copied if the callback to
  * {@link PDFHandler#shouldCensorText(TextPosition)} had returned false.
  */
 public class TextProcessor extends PDFStreamProcessor {
+	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
 	private static final Logger LOGGER = Logging.getLogger();
+	/** Opcodes for operations that should not be handled or processed when they are encountered. */
+	private static final String[] IGNORED_OPERATIONS = {DRAW_OBJECT};
+	/** Opcodes for operations that should only be processed but not copied when they are encountered. */
+	private static final String[] UNHANDLED_OPERATIONS = {SHOW_TEXT_LINE, SHOW_TEXT_LINE_AND_SPACE, MOVE_TEXT_SET_LEADING, NEXT_LINE};
+	/** Opcodes for operations that may be censored. */
+	private static final String[] SHOW_TEXT_OPERATIONS = {SHOW_TEXT, SHOW_TEXT_ADJUSTED};
+	
+	/** The PDFHandler responsible for managing the processing-task. */
 	private PDFHandler handler;
-	private boolean shouldBeCensored = false;
+	/** Stores if the encountered glyphs should be censored for the currently processed show-text-operation. */
+	private List<Boolean> shouldBeCensored = new ArrayList<>();
 	
 	/**
 	 * The processor informs the handler about important events and transfers the documents.
 	 *
 	 * @param handler the internal handler which acts to process the documents.
-	 * @throws IOException if object of superior class does not exist
+	 * @throws IOException If there is an error loading the properties in {@link PDFTextStripper#PDFTextStripper()}
 	 */
-	TextProcessor(PDFHandler handler) throws IOException {
+	TextProcessor(@NotNull PDFHandler handler) throws IOException {
 		super();
-		if (handler == null)
-			LOGGER.log(Level.ERROR, "Handler is null");
 		this.handler = Objects.requireNonNull(handler);
+	}
+	
+	/**
+	 * Calculates the text-adjustment needed to advance the character represented by the code in an TJ operation.
+	 *
+	 * @param font       the font from which to take the character's displacement.
+	 * @param textState  the current textstate.
+	 * @param codeLength the length (in bytes) of the code as encoded by the font.
+	 * @param code       the font's code for the character.
+	 * @return the text-adjustment needed to advance the character represented by the code in an TJ operation.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	@Contract("_, _, _, _ -> new")
+	@NotNull
+	private static COSFloat calculateTextAdjustment(@NotNull PDFont font, @NotNull PDTextState textState,
+													int codeLength,
+													int code) throws IOException {
+		var fontSize = textState.getFontSize();
+		var horizontalScaling = font.isVertical() ? 1 : textState.getHorizontalScaling() / 100f;
+		float charSpacing = textState.getCharacterSpacing();
 		
+		float wordSpacing = 0;
+		if (codeLength == 1 && code == 32)
+			wordSpacing += textState.getWordSpacing();
+		
+		Vector w = font.getDisplacement(code);
+		var displacement = font.isVertical() ? w.getY() : w.getX();
+		var tj = (displacement * fontSize + charSpacing + wordSpacing) / horizontalScaling;
+		return new COSFloat(-tj * 1000.0f / fontSize);
+	}
+	
+	/**
+	 * Transforms the provided COSString into an COSArray where each character is added if it should not be censored. If
+	 * a character should be censored its text-adjustment is added.
+	 *
+	 * @param string the string that should be transformed into a COSArray that may be used for TJ-operations.
+	 * @param font   the current font. It is used to provide the size-information about characters.
+	 * @param censor a list of booleans to check if each character should be censored. This list will be modified.
+	 * @return a COSArray representing the censored string as a TJ-operand.
+	 */
+	@NotNull
+	private COSArray removeCharsFromString(COSString string, PDFont font, @NotNull List<Boolean> censor) {
+		var newOperands = new COSArray();
+		
+		try (var is = new ByteArrayInputStream(string.getBytes())) {
+			while (is.available() > 0 && !censor.isEmpty()) {
+				int before = is.available();
+				int code = font.readCode(is);
+				int after = is.available();
+				
+				if (TRUE.equals(censor.remove(0))) {
+					newOperands.add(calculateTextAdjustment(font, getGraphicsState().getTextState(), before - after,
+															code));
+				} else {
+					int startIndex = string.getBytes().length - before;
+					int endIndex = string.getBytes().length - after;
+					var data = ArrayUtils.subarray(string.getBytes(), startIndex, endIndex);
+					newOperands.add(new COSString(data));
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.error(e);
+		}
+		return newOperands;
 	}
 	
 	/**
@@ -101,7 +183,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processTextPosition(final TextPosition text) {
-		shouldBeCensored = handler.shouldCensorText(text);
+		shouldBeCensored.add(handler.shouldCensorText(text));
 		super.processTextPosition(text);
 	}
 	
@@ -116,18 +198,70 @@ public class TextProcessor extends PDFStreamProcessor {
 	 * @throws IOException If there is an error processing the operation.
 	 */
 	@Override
-	protected void processOperator(final Operator operator, final List<COSBase> operands) throws IOException {
-		ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
-		if (!DRAW_OBJECT.equals(operator.getName())) {
-			if (!StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT)) {
-				writer.writeTokens(operands);
-				writer.writeToken(operator);
-			}
+	protected void processOperator(@NotNull final Operator operator, final List<COSBase> operands) throws IOException {
+		if (StringUtils.equalsAny(operator.getName(), IGNORED_OPERATIONS)) {
+			/* ignore IGNORED_OPERATIONS */
+		} else if (StringUtils.equalsAny(operator.getName(), UNHANDLED_OPERATIONS)) {
 			super.processOperator(operator, operands);
-		}
-		if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_ADJUSTED, SHOW_TEXT) && !shouldBeCensored) {
+		} else if (StringUtils.equalsAny(operator.getName(), SHOW_TEXT_OPERATIONS)) {
+			ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
+			shouldBeCensored.clear();
+			super.processOperator(operator, operands);
+			COSArray newOperands;
+			if (SHOW_TEXT.equals(operator.getName()))
+				newOperands = removeCharsFromText(operands, shouldBeCensored);
+			else newOperands = removeCharsFromTextAdjusted(operands, shouldBeCensored);
+			writer.writeToken(reduceArray(newOperands));
+			writer.writeToken(Operator.getOperator(SHOW_TEXT_ADJUSTED));
+		} else {
+			ContentStreamWriter writer = Objects.requireNonNull(getCurrentContentStream());
+			shouldBeCensored.clear();
 			writer.writeTokens(operands);
 			writer.writeToken(operator);
+			super.processOperator(operator, operands);
 		}
+	}
+	
+	/**
+	 * Removes the chars that should be censored from the operands and replaces them by their widths (height for
+	 * vertical fonts). The resulting COSArray may be used as an operand for a TJ-operation.
+	 *
+	 * @param operands the operand of a Tj call that should be transformed into the censored operands for a TJ call.
+	 * @param censor   a list containing information about what character should be censored. For each censored
+	 *                 character the first element of the list is deleted such that the first element always shows if
+	 *                 the next character should be censored.
+	 * @return a TJ-operand for drawing the censored string.
+	 */
+	@NotNull
+	private COSArray removeCharsFromText(@NotNull List<COSBase> operands, List<Boolean> censor) {
+		var font = getGraphicsState().getTextState().getFont();
+		return removeCharsFromString((COSString) operands.get(0), font, censor);
+	}
+	
+	/**
+	 * Removes the chars that should be censored from the operands and replaces them by their widths (height for
+	 * vertical fonts). The resulting COSArray may be used as an operand for a TJ-operation.
+	 *
+	 * @param operands the operand of a TJ call that should be transformed into the censored operands for a TJ call.
+	 * @param censor   a list containing information about what character should be censored. For each censored
+	 *                 character the first element of the list is deleted such that the first element always shows if
+	 *                 the next character should be censored.
+	 * @return a TJ-operand for drawing the censored string.
+	 */
+	@NotNull
+	private COSArray removeCharsFromTextAdjusted(@NotNull List<COSBase> operands, List<Boolean> censor) {
+		var font = getGraphicsState().getTextState().getFont();
+		var newOperands = new COSArray();
+		
+		var operand = (COSArray) operands.get(0);
+		for (var op : operand) {
+			if (op instanceof COSString) {
+				var ops = removeCharsFromString((COSString) op, font, censor);
+				newOperands.addAll(ops);
+			} else {
+				newOperands.add(op);
+			}
+		}
+		return newOperands;
 	}
 }
