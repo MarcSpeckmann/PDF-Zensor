@@ -6,7 +6,6 @@ import de.uni_hannover.se.pdfzensor.censor.utils.MetadataRemover;
 import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import de.uni_hannover.se.pdfzensor.config.Mode;
 import de.uni_hannover.se.pdfzensor.config.Settings;
-import de.uni_hannover.se.pdfzensor.images.ImageRemover;
 import de.uni_hannover.se.pdfzensor.images.ImageReplacer;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import de.uni_hannover.se.pdfzensor.utils.RectUtils;
@@ -181,11 +180,6 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void endDocument(PDDocument doc) {
 		boundingBoxes = null;
-		try {
-			ImageRemover.remove(doc);
-		} catch (IOException e) {
-			LOGGER.error(e);
-		}
 		MetadataRemover.censorMetadata(doc);
 	}
 	

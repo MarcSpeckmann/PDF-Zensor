@@ -84,6 +84,7 @@ public class ImageReplacer extends PDFStreamEngine {
 			pageContentStream.setLineWidth(2);
 			drawPictureCensorBox(pageContentStream);
 		}
+		removeImageData(page);
 		return this.rects;
 		
 	}
@@ -153,6 +154,16 @@ public class ImageReplacer extends PDFStreamEngine {
 			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMaxY());
 			pageContentStream.stroke();
 		}
+	}
+	
+	/**
+	 * Strips the data of the image resources from the provided page. We define all PDXObjects to be "image resources".
+	 *
+	 * @param page the page to remove all image resources from.
+	 */
+	private void removeImageData(@NotNull PDPage page) {
+		var resources = Objects.requireNonNull(page).getResources();
+		resources.getCOSObject().setItem(COSName.XOBJECT, null);
 	}
 	
 }
