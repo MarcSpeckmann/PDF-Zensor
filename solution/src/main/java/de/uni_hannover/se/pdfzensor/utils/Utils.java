@@ -3,15 +3,19 @@ package de.uni_hannover.se.pdfzensor.utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.logging.log4j.core.util.FileUtils;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSString;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -155,4 +159,35 @@ public final class Utils {
 		}
 		return array;
 	}
+	
+	/**
+	 * TODO: add JavaDoc
+	 * @param input
+	 * @return
+	 */
+	public static boolean checkValidInput(File input) {
+		if (input != null) {
+			if (input.isFile()){
+				if ("pdf".equals(FileUtils.getFileExtension(input))){
+					try {
+						PDDocument.load(input);
+						return true;
+					} catch (IOException e) {
+						System.err.println(e.getMessage());
+						return false;
+					}
+				}else{
+					System.err.println("Not a PDF-File");
+					return false;
+				}
+			}else{
+				System.err.println("No File given!");
+				return false;
+			}
+		}else{
+			System.err.println("The input must be an existing PDF-File.");
+			return false;
+		}
+	}
+	
 }
