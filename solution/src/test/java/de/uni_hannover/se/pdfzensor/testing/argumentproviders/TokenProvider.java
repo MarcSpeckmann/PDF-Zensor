@@ -39,6 +39,7 @@ public class TokenProvider implements ArgumentsProvider {
 		args.add(Arguments.of(new String[][]{{"he"}, {"llo"}}, new String[]{"h", "e", "l", "l", "o"}));
 		args.add(Arguments.of(new String[][]{{"hello_world"}}, new String[]{"hello", "_", "world"}));
 		args.add(Arguments.of(new String[][]{{"world says"}}, new String[]{"world", " ", "says"}));
+		args.add(Arguments.of(new String[][]{{"wwwoworld"}}, new String[]{"w", "w", "w", "o", "world"}));
 		return args.stream();
 	}
 }

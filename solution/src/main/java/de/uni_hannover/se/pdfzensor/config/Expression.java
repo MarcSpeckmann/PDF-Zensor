@@ -2,6 +2,7 @@ package de.uni_hannover.se.pdfzensor.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.uni_hannover.se.pdfzensor.text.TokenDef;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +18,7 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
  * line arguments. When a text that matches the stored regex is censored within a pdf-file it should be censored in the
  * provided color.
  */
-final class Expression {
+public final class Expression implements TokenDef {
 	@NotNull
 	private final String regex;
 	@Nullable
@@ -63,6 +64,7 @@ final class Expression {
 	 */
 	@Contract(pure = true)
 	@NotNull
+	@Override
 	public String getRegex() {
 		return regex;
 	}
