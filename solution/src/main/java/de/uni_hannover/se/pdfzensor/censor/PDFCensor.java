@@ -65,7 +65,7 @@ public final class PDFCensor implements PDFHandler {
 	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
 	
-	/** The list of picture bounding boxes will be censored. */
+	/** The list of picture bounding boxes that should be censored.. */
 	private List<Rectangle2D> pictureBoundingBoxes;
 	
 	/** The predicate to use when checking bounds of {@link TextPosition}s. */

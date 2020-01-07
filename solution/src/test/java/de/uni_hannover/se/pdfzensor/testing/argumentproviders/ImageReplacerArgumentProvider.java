@@ -14,7 +14,10 @@ import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 
 /**
  * This class implements {@link ArgumentsProvider} and provides the arguments for the unit test of {@link
- * de.uni_hannover.se.pdfzensor.images.ImageReplacer}
+ * de.uni_hannover.se.pdfzensor.images.ImageReplacer}.
+ * The types of the arguments are List<Rectangle2D> and String.
+ * The String is a path to a test pdf and the List<Rectangle2D> is a list of Rectangle2D. The list contains the
+ * information about the positions of images inside the test pdf.
  */
 public class ImageReplacerArgumentProvider implements ArgumentsProvider {
 	/**

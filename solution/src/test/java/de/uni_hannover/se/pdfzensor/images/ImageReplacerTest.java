@@ -49,7 +49,7 @@ public class ImageReplacerTest {
 	 * @param rect     A rectangle
 	 * @param rectList A list of rectangles
 	 */
-	void assertContainsRect(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
+	static void assertContainsRect(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
 		boolean contained = rectList.stream().anyMatch(r -> TestUtility.checkRectanglesEqual(rect, r, 1));
 		assertTrue(contained, rect + " was not present in " + rectList);
 	}
