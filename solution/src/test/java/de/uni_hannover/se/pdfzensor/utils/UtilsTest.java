@@ -172,7 +172,7 @@ class UtilsTest {
 	}
 	
 	/**
-	 * TODO: add JavaDoc
+	 * This methods checks if {@link Utils#checkValidInput(File)} returns True when an valid input PDF-File is given.
 	 */
 	@Test
 	void testValidInputFile() {

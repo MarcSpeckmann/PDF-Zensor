@@ -18,7 +18,7 @@ public class App {
 		try {
 			if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
 				final var settings = new Settings(null, args);
-				if(Utils.checkValidInput(settings.getInput())){
+				if(!Utils.checkValidInput(settings.getInput())){
 					System.exit(-1);
 				}
 				final var censor = new PDFCensor(settings);

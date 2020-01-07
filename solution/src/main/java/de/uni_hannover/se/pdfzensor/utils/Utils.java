@@ -161,33 +161,34 @@ public final class Utils {
 	}
 	
 	/**
-	 * TODO: add JavaDoc
-	 * @param input
-	 * @return
+	 * This methods checks if the given input file is a valid PDF-File
+	 *
+	 * @param input the File which will be checked
+	 * @return True if input is a valid PDF-File
 	 */
 	public static boolean checkValidInput(File input) {
-		if (input != null) {
-			if (input.isFile()){
-				if ("pdf".equals(FileUtils.getFileExtension(input))){
-					try {
-						PDDocument.load(input);
-						return true;
-					} catch (IOException e) {
-						System.err.println(e.getMessage());
-						return false;
-					}
-				}else{
-					System.err.println("Not a PDF-File");
-					return false;
-				}
-			}else{
-				System.err.println("No File given!");
+		if (input == null) {
+			System.err.println("Error: The input must be an existing PDF-File.");
+			return false;
+		}
+		
+		if (!input.isFile()) {
+			System.err.println("Error: No existing File given!");
+			return false;
+		}
+		
+		if ("pdf".equals(FileUtils.getFileExtension(input))) {
+			try {
+				PDDocument.load(input);
+				return true;
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
 				return false;
 			}
+			
 		}else{
-			System.err.println("The input must be an existing PDF-File.");
+			System.err.println("Error: Not a PDF-File");
 			return false;
 		}
 	}
-	
 }
