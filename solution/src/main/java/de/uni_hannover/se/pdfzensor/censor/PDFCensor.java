@@ -6,6 +6,7 @@ import de.uni_hannover.se.pdfzensor.censor.utils.MetadataRemover;
 import de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils;
 import de.uni_hannover.se.pdfzensor.config.Mode;
 import de.uni_hannover.se.pdfzensor.config.Settings;
+import de.uni_hannover.se.pdfzensor.images.ImageReplacer;
 import de.uni_hannover.se.pdfzensor.processor.PDFHandler;
 import de.uni_hannover.se.pdfzensor.utils.RectUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -64,16 +65,21 @@ public final class PDFCensor implements PDFHandler {
 	/** The list of bounds-color pairs which will be censored. */
 	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
 	
+	/** The list of picture bounding boxes that should be censored.. */
+	private List<Rectangle2D> pictureBoundingBoxes;
+	
 	/** The predicate to use when checking bounds of {@link TextPosition}s. */
 	private Predicate<Rectangle2D> removePredicate;
 	
 	/** A new annotations instance in this {@link PDFCensor}-instance. */
 	private Annotations annotations = new Annotations();
 	
+	private ImageReplacer imageReplacer = new ImageReplacer();
+	
 	/**
 	 * @param settings Settings that contain information about the mode and expressions
 	 */
-	public PDFCensor(@NotNull Settings settings) {
+	public PDFCensor(@NotNull Settings settings) throws IOException {
 		Objects.requireNonNull(settings);
 		this.removePredicate = rect -> true;
 		// to censor only segments marked beforehand with a different software
@@ -127,6 +133,7 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void beginDocument(PDDocument doc) {
 		boundingBoxes = new ArrayList<>();
+		pictureBoundingBoxes = new ArrayList<>();
 	}
 	
 	/**
@@ -139,7 +146,13 @@ public final class PDFCensor implements PDFHandler {
 	@Override
 	public void beginPage(PDDocument doc, PDPage page, int pageNum) {
 		Objects.requireNonNull(boundingBoxes).clear();
+		Objects.requireNonNull(pictureBoundingBoxes).clear();
 		annotations.cachePage(page);
+		try {
+			this.pictureBoundingBoxes = imageReplacer.replaceImages(doc, page);
+		} catch (IOException e) {
+			LOGGER.error(e);
+		}
 	}
 	
 	/**
