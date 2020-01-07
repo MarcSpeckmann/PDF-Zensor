@@ -30,7 +30,7 @@ public final class CLHelp {
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stdout here instead of logging
 	public static boolean printStandardHelpOptionsIfRequested(@NotNull String... args) {
 		final var cmd = new CommandLine(CLArgs.class);
-		final var parsedHelp = new CommandLine(CLArgs.class).parseArgs(Validate.noNullElements(args));
+		final var parsedHelp = new CommandLine(CLArgs.class).parseArgs(args);
 		if (parsedHelp.isUsageHelpRequested())
 			cmd.usage(System.out);
 		else if (parsedHelp.isVersionHelpRequested())
