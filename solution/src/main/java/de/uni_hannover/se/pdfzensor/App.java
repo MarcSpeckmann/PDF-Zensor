@@ -14,6 +14,7 @@ import java.io.IOException;
 
 public class App {
 	
+	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
 	public static void main(String[] args) {
 		try {
 			if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
@@ -32,7 +33,7 @@ public class App {
 			CLErrorMessageHandler handler = new CLErrorMessageHandler();
 			System.exit(handler.handleParseException(ex, args));
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		}
 	}
 }

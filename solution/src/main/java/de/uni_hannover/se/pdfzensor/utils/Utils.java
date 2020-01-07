@@ -166,28 +166,21 @@ public final class Utils {
 	 * @param input the File which will be checked
 	 * @return True if input is a valid PDF-File
 	 */
+	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
 	public static boolean checkValidInput(File input) {
-		if (input == null) {
-			System.err.println("Error: The input must be an existing PDF-File.");
-			return false;
-		}
-		
-		if (!input.isFile()) {
-			System.err.println("Error: No existing File given!");
-			return false;
-		}
-		
+		Objects.requireNonNull(input, "Error: No given input file");
 		if ("pdf".equals(FileUtils.getFileExtension(input))) {
 			try {
-				PDDocument.load(input);
+				var doc = PDDocument.load(input);
+				doc.close();
 				return true;
+				
 			} catch (IOException e) {
 				System.err.println(e.getMessage());
 				return false;
 			}
-			
-		}else{
-			System.err.println("Error: Not a PDF-File");
+		} else {
+			System.err.println(input.getName() + " (Not a PDF-File)");
 			return false;
 		}
 	}

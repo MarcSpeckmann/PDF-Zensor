@@ -176,10 +176,11 @@ class UtilsTest {
 	 */
 	@Test
 	void testValidInputFile() {
-		assertFalse(checkValidInput(null));
+		assertThrows(NullPointerException.class, () -> checkValidInput(null));
 		assertFalse(checkValidInput(new File("NotExisting.pdf")));
 		assertFalse(checkValidInput(new File("pom.xml")));
-		assertFalse(checkValidInput(new File(getResourcePath(CORRUPTED_PDF_RESOURCE_PATH + "sample(pdfVersionDeleted).pdf"))));
+		assertFalse(checkValidInput(
+				new File(getResourcePath(CORRUPTED_PDF_RESOURCE_PATH + "sample(pdfVersionDeleted).pdf"))));
 		assertTrue(checkValidInput(new File(getResourcePath(PDF_RESOURCE_PATH + "sample.pdf"))));
 		assertTrue(checkValidInput(new File(getResourcePath(PDF_RESOURCE_PATH + "sample.bla.pdf"))));
 	}
