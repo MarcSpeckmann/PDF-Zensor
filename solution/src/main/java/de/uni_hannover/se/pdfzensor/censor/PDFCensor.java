@@ -260,8 +260,10 @@ public final class PDFCensor implements PDFHandler {
 	 * @see Tokenizer#setHandler(TriConsumer)
 	 */
 	private void onTokenEncountered(String value, @NotNull List<Rectangle2D> payload, @Nullable Expression token) {
-		LOGGER.debug("Found token [{}]: {}", token, value);
 		Objects.requireNonNull(token);
+		//We are only interested in logging non-default token-matches
+		if (!".".equals(token.getRegex()))
+			LOGGER.debug("Found token [{}]: {}", token, value);
 		payload.forEach(rect -> addOrExtendBoundingBoxes(rect, token.getColor()));
 	}
 	
