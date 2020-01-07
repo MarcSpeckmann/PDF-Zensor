@@ -11,12 +11,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.awt.*;
-import java.io.File;
 import java.util.stream.IntStream;
 
 import static de.uni_hannover.se.pdfzensor.Logging.VERBOSITY_LEVELS;
-import static de.uni_hannover.se.pdfzensor.testing.TestConstants.*;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -171,17 +168,4 @@ class UtilsTest {
 		assertFalse(isHexColorCode(code));
 	}
 	
-	/**
-	 * This methods checks if {@link Utils#checkValidInput(File)} returns True when an valid input PDF-File is given.
-	 */
-	@Test
-	void testValidInputFile() {
-		assertThrows(NullPointerException.class, () -> checkValidInput(null));
-		assertFalse(checkValidInput(new File("NotExisting.pdf")));
-		assertFalse(checkValidInput(new File("pom.xml")));
-		assertFalse(checkValidInput(
-				new File(getResourcePath(CORRUPTED_PDF_RESOURCE_PATH + "sample(pdfVersionDeleted).pdf"))));
-		assertTrue(checkValidInput(new File(getResourcePath(PDF_RESOURCE_PATH + "sample.pdf"))));
-		assertTrue(checkValidInput(new File(getResourcePath(PDF_RESOURCE_PATH + "sample.bla.pdf"))));
-	}
 }

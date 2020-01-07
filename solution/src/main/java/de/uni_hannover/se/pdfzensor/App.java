@@ -6,7 +6,6 @@ import de.uni_hannover.se.pdfzensor.config.CLErrorMessageHandler;
 import de.uni_hannover.se.pdfzensor.config.CLHelp;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFProcessor;
-import de.uni_hannover.se.pdfzensor.utils.Utils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import picocli.CommandLine;
 
@@ -19,9 +18,6 @@ public class App {
 		try {
 			if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
 				final var settings = new Settings(null, args);
-				if(!Utils.checkValidInput(settings.getInput())){
-					System.exit(-1);
-				}
 				final var censor = new PDFCensor(settings);
 				final var processor = new PDFProcessor(censor);
 				try (final var doc = PDDocument.load(settings.getInput())) {
@@ -34,6 +30,7 @@ public class App {
 			System.exit(handler.handleParseException(ex, args));
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
+			System.exit(-1);
 		}
 	}
 }

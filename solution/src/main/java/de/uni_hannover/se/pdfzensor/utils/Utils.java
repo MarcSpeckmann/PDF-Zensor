@@ -3,19 +3,15 @@ package de.uni_hannover.se.pdfzensor.utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.core.util.FileUtils;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSNumber;
 import org.apache.pdfbox.cos.COSString;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -158,30 +154,5 @@ public final class Utils {
 			}
 		}
 		return array;
-	}
-	
-	/**
-	 * This methods checks if the given input file is a valid PDF-File
-	 *
-	 * @param input the File which will be checked
-	 * @return True if input is a valid PDF-File
-	 */
-	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
-	public static boolean checkValidInput(File input) {
-		Objects.requireNonNull(input, "Error: No given input file");
-		if ("pdf".equals(FileUtils.getFileExtension(input))) {
-			try {
-				var doc = PDDocument.load(input);
-				doc.close();
-				return true;
-				
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
-				return false;
-			}
-		} else {
-			System.err.println(input.getName() + " (Not a PDF-File)");
-			return false;
-		}
 	}
 }
