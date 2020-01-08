@@ -54,6 +54,6 @@ class CLHelpTest {
 	void invalidInput() {
 		assertThrows(CommandLine.MissingParameterException.class, CLHelp::printStandardHelpOptionsIfRequested);
 		assertThrows(NullPointerException.class, () -> CLHelp.printStandardHelpOptionsIfRequested((String[]) null));
-		assertThrows(IllegalArgumentException.class, () -> CLHelp.printStandardHelpOptionsIfRequested((String) null));
+		assertThrows(NullPointerException.class, () -> CLHelp.printStandardHelpOptionsIfRequested((String) null));
 	}
 }

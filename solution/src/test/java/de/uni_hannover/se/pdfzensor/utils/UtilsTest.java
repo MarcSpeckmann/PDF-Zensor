@@ -167,4 +167,5 @@ class UtilsTest {
 		assertThrows(IllegalArgumentException.class, () -> getColorOrNull(code));
 		assertFalse(isHexColorCode(code));
 	}
+	
 }
