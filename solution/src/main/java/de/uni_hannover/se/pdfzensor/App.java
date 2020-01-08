@@ -1,12 +1,10 @@
 package de.uni_hannover.se.pdfzensor;
 
-
 import de.uni_hannover.se.pdfzensor.censor.PDFCensor;
 import de.uni_hannover.se.pdfzensor.config.CLErrorMessageHandler;
 import de.uni_hannover.se.pdfzensor.config.CLHelp;
 import de.uni_hannover.se.pdfzensor.config.Settings;
 import de.uni_hannover.se.pdfzensor.processor.PDFProcessor;
-import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import picocli.CommandLine;
 

@@ -89,7 +89,10 @@ public final class PDFCensor implements PDFHandler {
 	/** A new annotations instance in this {@link PDFCensor}-instance. */
 	private Annotations annotations = new Annotations();
 	
-	private ImageReplacer imageReplacer = new ImageReplacer();
+	private final ImageReplacer imageReplacer = new ImageReplacer();
+	
+	/** Stores the settings provided in the constructor. */
+	private final Settings settings;
 	
 	/**
 	 * Stores the bounds of the last glyph to allow for detection of space-characters. May be null if there was no
@@ -100,8 +103,9 @@ public final class PDFCensor implements PDFHandler {
 	/**
 	 * @param settings Settings that contain information about the mode and expressions
 	 */
-	public PDFCensor(@NotNull Settings settings) throws IOException {
+	public PDFCensor(@NotNull Settings settings) {
 		Objects.requireNonNull(settings);
+		this.settings = settings;
 		tokenizer = new Tokenizer<>(settings.getExpressions());
 		tokenizer.setHandler(this::onTokenEncountered);
 		this.removePredicate = rect -> true;
@@ -246,15 +250,19 @@ public final class PDFCensor implements PDFHandler {
 	public boolean shouldCensorText(TextPosition pos) {
 		var bounds = getTextPositionInfo(pos).filter(p -> removePredicate.test(p));
 		bounds.ifPresentOrElse(b -> {
-			
-			var space = getBlankBetween(lastGlyph, b, pos.getFont());
-			lastGlyph = b;
-			try {
-				if (space.isPresent())
-					tokenizer.input(" ", List.of(space.get()));
-				tokenizer.input(pos.getUnicode(), List.of(b));
-			} catch (IOException e) {
-				LOGGER.warn(e);
+			if (annotations.isLinked(b)) {
+				tokenizer.tryFlush();
+				addOrExtendBoundingBoxes(b, settings.getLinkColor());
+			} else {
+				var space = getBlankBetween(lastGlyph, b, pos.getFont());
+				lastGlyph = b;
+				try {
+					if (space.isPresent())
+						tokenizer.input(" ", List.of(space.get()));
+					tokenizer.input(pos.getUnicode(), List.of(b));
+				} catch (IOException e) {
+					LOGGER.warn(e);
+				}
 			}
 		}, tokenizer::tryFlush);
 		return bounds.isPresent();
