@@ -17,7 +17,7 @@ public class App {
 	private static final Logger LOGGER = Logging.getLogger();
 	
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		try {
 			if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
 				final var settings = new Settings(null, args);
