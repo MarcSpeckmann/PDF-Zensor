@@ -347,11 +347,7 @@ public final class PDFCensor implements PDFHandler {
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
 	private void drawCensorBars(PDDocument doc, PDPage page) throws IOException {
-		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.PREPEND, true)) {
-			pageContentStream.saveGraphicsState();
-		}
-		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true)) {
-			pageContentStream.restoreGraphicsState();
+		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
 			for (var pair : boundingBoxes) {
 				pageContentStream.setNonStrokingColor(pair.getRight());
 				var r = pair.getLeft();

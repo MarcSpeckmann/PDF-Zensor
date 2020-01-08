@@ -8,19 +8,15 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
- * Criteria which can be chosen to check if an object is marked
- * <ul>
- * <li>{@link #INTERSECT}</li>
- * <li>{@link #CONTAIN}</li>
- * </ul>
+ * Criteria which can be chosen to check if an object is marked.
  */
 public enum MarkCriterion {
 	/** INTERSECT is used when checking if a rectangle intersects with another rectangle. */
 	INTERSECT(Rectangle2D::intersects),
 	/** CONTAIN is used when checking if rectangle entirely contains one another. */
 	CONTAIN(Rectangle2D::contains),
-	/** CONTAIN_90 is used to checking if the rectangle contains 90% of another. */
-	CONTAIN_90(MarkCriterion::contains90Percent);
+	/** CONTAIN_70 is used to checking if the rectangle contains 70% of another. */
+	CONTAIN_70(MarkCriterion::contains70Percent);
 	
 	/** The wanted predicate. */
 	private final BiPredicate<Rectangle2D, @NotNull Rectangle2D> predicate;
@@ -36,14 +32,14 @@ public enum MarkCriterion {
 	}
 	
 	/**
-	 * Returns true iff r1 intersects with r2 and if that intersection is at least 90% of r2's area.
+	 * Returns true iff r1 intersects with r2 and if that intersection is at least 70% of r2's area.
 	 *
 	 * @param r1 the first rectangle.
 	 * @param r2 the second rectangle.
-	 * @return true iff r1 intersects with r2 and if that intersection is at least 90% of r2's area.
+	 * @return true iff r1 intersects with r2 and if that intersection is at least 70% of r2's area.
 	 */
-	private static boolean contains90Percent(@NotNull Rectangle2D r1, Rectangle2D r2) {
-		return r1.intersects(r2) && areaOfRect(r1.createIntersection(r2)) >= areaOfRect(r2) * 0.9;
+	private static boolean contains70Percent(@NotNull Rectangle2D r1, Rectangle2D r2) {
+		return areaOfRect(r1.createIntersection(r2)) >= areaOfRect(r2) * 0.7;
 	}
 	
 	/**
