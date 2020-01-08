@@ -147,7 +147,7 @@ public final class Annotations {
 	 * @return true if the given rect intersects at least one rect of {@link #highlights}, false otherwise
 	 */
 	public boolean isMarked(@NotNull Rectangle2D rect) {
-		return isMarked(rect, MarkCriterion.CONTAIN_90);
+		return isMarked(rect, MarkCriterion.CONTAIN_70);
 	}
 	
 	/**
