@@ -24,7 +24,7 @@ deploy:
         - echo "deploy"
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml -o ../artifacts/pdf-zensor
     artifacts: 
-        path:
+        paths:
             -artifacts/pdf-zensor
 
 
