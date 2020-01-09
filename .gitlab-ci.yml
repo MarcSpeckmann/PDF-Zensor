@@ -3,6 +3,7 @@ image: maven:latest
 stages:
   - build
   - test
+  - deploy
 
 build:
   stage: build
@@ -16,4 +17,15 @@ test:
   script:
     - echo "Testing"
     - mvn test -f solution/pom.xml
+    
+deploy:
+    stage: deploy
+    script:
+        - echo "deploy"
+        - mvn -Dmaven.test.skip=true package -f solution/pom.xml -o ../artifacts/pdf-zensor
+    artifacts: 
+        path:
+            -artifacts/pdf-zensor
+    enviroment:
+        name: deploy
 
