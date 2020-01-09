@@ -1,22 +1,22 @@
 image: maven:latest
 
 stages:
-  - build
-  - test
+#  - build
+#  - test
   - deploy
 
-build:
-  stage: build
-  script:
-    - mvn -verify
-    - echo "Building"
-    - mvn clean compile -f solution/pom.xml
+#build:
+ # stage: build
+  #script:
+   # - mvn -verify
+    #- echo "Building"
+    #- mvn clean compile -f solution/pom.xml
 
-test:
-  stage: test
-  script:
-    - echo "Testing"
-    - mvn test -f solution/pom.xml
+#test:
+ # stage: test
+  #script:
+   # - echo "Testing"
+    #- mvn test -f solution/pom.xml
     
 deploy:
     stage: deploy
@@ -25,6 +25,6 @@ deploy:
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml -o ../artifacts/pdf-zensor
     artifacts: 
         paths:
-            - artifacts/pdf-zensor
+            - pdf-zensor/
 
 
