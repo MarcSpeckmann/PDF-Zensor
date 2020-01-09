@@ -6,7 +6,7 @@
 	
 	<groupId>de.uni_hannover.se</groupId>
 	<artifactId>pdfzensor</artifactId>
-	<version>0.1</version>
+	<version>0.815</version>
 	
 	<build>
 		<resources>
