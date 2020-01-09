@@ -25,6 +25,6 @@ deploy:
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml
     artifacts: 
         paths:
-            - target
+            - target/jar-with-dependencies.jar
 
 
