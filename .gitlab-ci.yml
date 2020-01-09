@@ -1,29 +1,29 @@
 image: maven:latest
 
 stages:
-#  - build
-#  - test
+  - build
+  - test
   - deploy
 
-#build:
- # stage: build
-  #script:
-   # - mvn -verify
-    #- echo "Building"
-    #- mvn clean compile -f solution/pom.xml
+build:
+  stage: build
+  script:
+    - mvn -verify
+    - echo "Building"
+    - mvn clean compile -f solution/pom.xml
 
-#test:
- # stage: test
-  #script:
-   # - echo "Testing"
-    #- mvn test -f solution/pom.xml
+test:
+  stage: test
+  script:
+    - echo "Testing"
+    - mvn test -f solution/pom.xml
     
 deploy:
     stage: deploy
     script:
-        - echo "deploy"
+        - echo "Deploy"
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml
-        - mvn javadoc:javadoc -f solution/pom.xml
+        #- mvn javadoc:javadoc -f solution/pom.xml
     artifacts: 
         paths:
             - solution/target/
