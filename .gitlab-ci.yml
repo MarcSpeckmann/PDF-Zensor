@@ -23,7 +23,7 @@ deploy:
     script:
         - echo "Deploy"
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml
-        #- mvn javadoc:javadoc -f solution/pom.xml
+        - mvn javadoc:javadoc -f solution/pom.xml
     artifacts: 
         paths:
             - solution/target/
