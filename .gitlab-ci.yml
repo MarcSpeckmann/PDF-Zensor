@@ -20,12 +20,15 @@ test:
     
 deploy:
     stage: deploy
+    environment: Deployment
     script:
         - echo "Deploy"
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml
         - mvn javadoc:javadoc -f solution/pom.xml
     artifacts: 
         paths:
-            - solution/target/
+            - solution/target/site
+            - "*.jar"
+        expire_in: 1 week
 
 
