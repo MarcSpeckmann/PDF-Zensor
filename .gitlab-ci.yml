@@ -22,9 +22,9 @@ deploy:
     stage: deploy
     script:
         - echo "deploy"
-        - mvn -Dmaven.test.skip=true package -f solution/pom.xml -o ../artifacts/pdf-zensor
+        - mvn -Dmaven.test.skip=true package -f solution/pom.xml -o pdf-zensor
     artifacts: 
         paths:
-            - pdf-zensor/
+            - pdf-zensor
 
 
