@@ -1,22 +1,22 @@
 image: maven:latest
 
 stages:
-#build
- # - test
-  - deploy
+    - build
+    - test 
+    - deploy
 
-#build:
- # stage: build
-  #script:
-   # - mvn -verify
-    #- echo "Building"
-    #- mvn clean compile -f solution/pom.xml
+build:
+    stage: build
+    script:
+        - mvn -verify
+        - echo "Building"
+        - mvn clean compile -f solution/pom.xml
 
-#test:
- # stage: test
-  #script:
-   # - echo "Testing"
-    #- mvn test -f solution/pom.xml
+test:
+    stage: test
+    script:
+        - echo "Testing"
+        - mvn test -f solution/pom.xml
     
 deploy:
     stage: deploy
@@ -29,6 +29,9 @@ deploy:
         paths:
             - solution/target/site
             - "solution/target/*.jar"
+            - "solution/target/*.deb"
         expire_in: 1 week
+    #only:
+    #    - master
 
 
