@@ -25,6 +25,6 @@ deploy:
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml -o ../artifacts/pdf-zensor
     artifacts: 
         paths:
-            -artifacts/pdf-zensor
+            - artifacts/pdf-zensor
 
 
