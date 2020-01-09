@@ -26,6 +26,5 @@ deploy:
     artifacts: 
         path:
             -artifacts/pdf-zensor
-    enviroment:
-        name: deploy
+
 
