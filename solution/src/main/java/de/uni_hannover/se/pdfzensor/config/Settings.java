@@ -78,10 +78,9 @@ public final class Settings {
 	 */
 	public Settings(@Nullable String configPath, @NotNull final String... args) {
 		final var clArgs = CLArgs.fromStringArray(args);
-		final var config = getConfig(configPath);
+		final var config = Config.fromFile(ObjectUtils.firstNonNull(clArgs.getConfigFile(), getConfig(configPath)));
 		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.WARN);
 		Logging.init(clArgs.getQuiet() ? Level.OFF : verbose);
-		
 		
 		input = clArgs.getInput();
 		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
@@ -110,15 +109,12 @@ public final class Settings {
 	}
 	
 	/**
-	 * Tries to load the configuration file from the provided path. If the path is <code>null</code> the empty
-	 * configuration (everything <code>null</code>) will be used.
-	 *
 	 * @param configPath The path to the configuration file.
 	 * @return The configuration file that was loaded from the specified path.
 	 */
-	@NotNull
-	private static Config getConfig(@Nullable String configPath) {
-		return Config.fromFile(Optional.ofNullable(configPath).map(File::new).orElse(null));
+	@Nullable
+	private static File getConfig(@Nullable String configPath) {
+		return Optional.ofNullable(configPath).map(File::new).orElse(null);
 	}
 	
 	/**

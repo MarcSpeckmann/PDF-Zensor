@@ -70,7 +70,7 @@ final class Config {
 	}
 	
 	/**
-	 * Reads the provided json-formatted config-file and stores its data into a new instance of {@link Config}.
+	 * Reads the provided JSON-formatted config-file and stores its data into a new instance of {@link Config}.
 	 *
 	 * @param config The configuration file that should be parsed. If null the default configuration (everything null)
 	 *               will be returned.
