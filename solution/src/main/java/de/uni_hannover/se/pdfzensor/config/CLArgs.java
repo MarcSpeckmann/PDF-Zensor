@@ -45,7 +45,13 @@ final class CLArgs {
 			description = {"The output file or path the censored file should be written to."})
 	@Nullable
 	private File output = null;
-	
+
+	/** An optional password for decrypting encrypted PDFs. Null should be assigned if nothing else was specified. */
+	@Option(names = {"-p", "-password"}, paramLabel = "\"password\"", arity = "0..1",
+			description = {"the password used for decrypting an encrypted PDF."})
+	@Nullable
+	private String password = null;
+
 	/**
 	 * The verbosity is given by how often -v was specified. If length is 0, verbosity is OFF. If null nothing was
 	 * specified in the command line arguments.
@@ -174,7 +180,18 @@ final class CLArgs {
 	final File getOutput() {
 		return output;
 	}
-	
+
+	/**
+	 * Returns password String given by the user
+	 *
+	 * @return The password String as it was specified by the user or null if none was specified.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	final String getPassword() {
+		return password;
+	}
+
 	/**
 	 * Returns verbosity level given by the user. Starts at {@link Level#WARN} for no given <code>-v</code>.
 	 *

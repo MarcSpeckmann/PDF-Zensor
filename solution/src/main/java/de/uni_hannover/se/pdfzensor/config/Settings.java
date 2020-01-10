@@ -57,6 +57,10 @@ public final class Settings {
 	/** The path into which the censored pdf-file should be written. */
 	@NotNull
 	private final File output;
+
+	/** A password to decrypt an encrypted PDF. Might be null. */
+	private final String password;
+
 	/** The color with which to censor links. */
 	@NotNull
 	private final Color linkColor;
@@ -86,6 +90,7 @@ public final class Settings {
 		input = clArgs.getInput();
 		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
 													  input.getAbsoluteFile().getParentFile()));
+		password = clArgs.getPassword();
 		linkColor = DEFAULT_LINK_COLOR;
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
 		final var defColors = ObjectUtils.firstNonNull(config.getDefaultColors(), DEFAULT_COLORS);
@@ -138,7 +143,15 @@ public final class Settings {
 	public File getOutput() {
 		return output;
 	}
-	
+
+	/**
+	 * @return The password String as it was specified in the command-line arguments.
+	 */
+	@Contract(pure = true)
+	public String getPassword() {
+		return password;
+	}
+
 	/**
 	 * @return The color links should be censored in as it was specified in the command-line arguments and config.
 	 */
