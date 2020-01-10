@@ -43,14 +43,14 @@ public final class Settings {
 	 * black and white should be present (for {@link #DEFAULT_CENSOR_COLOR} and white backgrounds).
 	 */
 	@NotNull
-	private static final Color[] DEFAULT_COLORS;
+	static final Color[] DEFAULT_COLORS;
 	
 	static {
 		final var defColorCodes = "#F3C300,#875692,#F38400,#A1CAF1,#BE0032,#C2B280,#848482,#008856,#E68FAC,#0067A5,#F99379,#604E97,#F6A600,#B3446C,#DCD300,#882D17,#8DB600,#654522,#E25822,#2B3D26";
 		DEFAULT_COLORS = stream(defColorCodes.split(",")).map(Utils::getColorOrNull).filter(Objects::nonNull)
 														 .toArray(Color[]::new);
 	}
-
+	
 	/** The path at which the pdf-file that should be censored is located. */
 	@NotNull
 	private final File input;
@@ -73,12 +73,12 @@ public final class Settings {
 	/**
 	 * Constructs the settings object from the configuration file and the commandline arguments.
 	 *
-	 * @param configPath the path to the config file (SHOULD BE REMOVED LATER)
-	 * @param args       The commandline arguments.
+	 * @param args The commandline arguments.
 	 */
-	public Settings(@Nullable String configPath, @NotNull final String... args) {
+	public Settings(@NotNull final String... args) {
 		final var clArgs = CLArgs.fromStringArray(args);
-		final var config = Config.fromFile(ObjectUtils.firstNonNull(clArgs.getConfigFile(), getConfig(configPath)));
+		final var configFile = ObjectUtils.firstNonNull(clArgs.getConfigFile(), Config.getDefaultConfig());
+		final var config = Config.fromFile(configFile);
 		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.WARN);
 		Logging.init(clArgs.getQuiet() ? Level.OFF : verbose);
 		
@@ -94,10 +94,10 @@ public final class Settings {
 		final var logger = Logging.getLogger();
 		logger.debug("Finished parsing the settings:");
 		logger.debug("\tInput-file: {}", input);
-		logger.debug("\tConfig-file: {}", configPath);
+		logger.debug("\tConfig-file: {}", () -> Optional.ofNullable(configFile).map(File::getAbsolutePath).orElse("none"));
 		logger.debug("\tOutput-file: {}", output);
 		logger.debug("\tLogger verbosity: {}", verbose);
-		logger.debug("\tQuiet: {}", clArgs.getQuiet());
+		logger.debug("\tQuiet: {}", clArgs::getQuiet);
 		logger.debug("\tCensor mode: {}", mode);
 		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.debug("\tExpressions");
@@ -106,15 +106,6 @@ public final class Settings {
 		logger.debug("\tDefault Colors");
 		for (var col : defColors)
 			logger.debug("\t\t{}", () -> colorToString(col));
-	}
-	
-	/**
-	 * @param configPath The path to the configuration file.
-	 * @return The configuration file that was loaded from the specified path.
-	 */
-	@Nullable
-	private static File getConfig(@Nullable String configPath) {
-		return Optional.ofNullable(configPath).map(File::new).orElse(null);
 	}
 	
 	/**

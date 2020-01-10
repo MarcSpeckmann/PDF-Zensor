@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static de.uni_hannover.se.pdfzensor.config.Mode.*;
+import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider.expExpressions;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider.*;
 
@@ -38,13 +40,19 @@ public class SettingsProvider implements ArgumentsProvider {
 	 * @return The given values converted into valid command-line arguments including an input.
 	 */
 	@NotNull
-	private static String[] createCLArguments(@Nullable String out, final int lvl, @Nullable Mode mode,
+	private static String[] createCLArguments(@Nullable String config, @Nullable String out, final int lvl, @Nullable Mode mode,
 											  @Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
 											  boolean quiet) {
 		Objects.requireNonNull(exp);
 		var arguments = new ArrayList<String>();
 		
 		arguments.add("sample.pdf");
+		
+		if (config != null) {
+			arguments.add("-c");
+			arguments.add(getResourcePath(CONFIG_PATH + config));
+		}
+		
 		if (out != null) {
 			arguments.add("-o");
 			arguments.add(out);
@@ -80,30 +88,30 @@ public class SettingsProvider implements ArgumentsProvider {
 		var list = new ArrayList<Arguments>();
 		for (var expList : expExpressions) {
 			for (boolean quiet : List.of(true, false)) {
-				list.add(Arguments.of(null, createCLArguments(null, -1, null, expList, quiet), "sample.pdf", null, null,
+				list.add(Arguments.of(createCLArguments(null, null, -1, null, expList, quiet), "sample.pdf", null, null,
 									  null, new ArrayList<>(expList), null, quiet));
 				
 				// Mode set by CLArgs
-				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-									  createCLArguments(null, -1, MARKED, expList, quiet), "sample.pdf",
+				list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json",
+														null, -1, MARKED, expList, quiet), "sample.pdf",
 									  "censoredFile.pdf", Level.DEBUG, MARKED, new ArrayList<>(expList), null,
 									  quiet));
 				// output overwritten by CLArgs
-				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-									  createCLArguments("clArgsOutput.pdf", -1, Mode.UNMARKED, expList, quiet),
+				list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json",
+														"clArgsOutput.pdf", -1, Mode.UNMARKED, expList, quiet),
 									  "sample.pdf", "clArgsOutput.pdf", Level.DEBUG, Mode.UNMARKED,
 									  new ArrayList<>(expList), null, quiet));
 				// verbosity overwritten by CLArgs
-				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-									  createCLArguments(null, 3, null, expList, quiet), "sample.pdf",
+				list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json",
+														null, 3, null, expList, quiet), "sample.pdf",
 									  "censoredFile.pdf", Level.TRACE, null, new ArrayList<>(expList), null, quiet));
 				// verbosity downscaled
 				list.add(Arguments
-								 .of("valid/high_verbosity.json", createCLArguments("out.pdf", 2, null, expList, quiet),
+								 .of(createCLArguments("valid/high_verbosity.json", "out.pdf", 2, null, expList, quiet),
 									 "sample.pdf", "out.pdf", Level.DEBUG, Mode.ALL, new ArrayList<>(expList), null,
 									 quiet));
 				// nested output
-				list.add(Arguments.of("valid/mode_casesDiffer.json", createCLArguments(null, -1, null, expList, quiet),
+				list.add(Arguments.of(createCLArguments("valid/mode_casesDiffer.json", null, -1, null, expList, quiet),
 									  "sample.pdf", "nested" + File.separatorChar + "output.pdf", null, Mode.UNMARKED,
 									  new ArrayList<>(expList), null, quiet));
 			}
@@ -113,16 +121,16 @@ public class SettingsProvider implements ArgumentsProvider {
 				var configList = expectedExpressionForConfig.get(e.getKey());
 				if (configList != null)
 					expExpressionsList.addAll(configList);
-				list.add(Arguments.of(e.getKey(),
-									  createCLArguments(null, -1, null, expList, false),
+				list.add(Arguments.of(createCLArguments(e.getKey(),
+														null, -1, null, expList, false),
 									  "sample.pdf", null, null, null, expExpressionsList, e.getValue(), false));
 			}
 			// expressions in config
 			for (var e : expectedExpressionForConfig.entrySet()) {
 				var expExpressionsList = new ArrayList<>(expList);
 				expExpressionsList.addAll(e.getValue());
-				list.add(Arguments.of(e.getKey(),
-									  createCLArguments(null, -1, null, expList, false),
+				list.add(Arguments.of(createCLArguments(e.getKey(),
+														null, -1, null, expList, false),
 									  "sample.pdf", null, null, null, expExpressionsList,
 									  expectedColorsForConfig.get(e.getKey()), false));
 			}

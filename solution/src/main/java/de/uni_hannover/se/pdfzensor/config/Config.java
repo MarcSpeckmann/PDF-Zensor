@@ -83,13 +83,17 @@ final class Config {
 	static Config fromFile(@Nullable final File config) {
 		if (config == null)
 			return new Config();
-		Validate.isTrue(config.isFile(), "The given configuration file does not exist.");
+		Validate.isTrue(config.isFile(), "The given configuration file (%s) does not exist.", config.getAbsolutePath());
 		try {
 			return new ObjectMapper().readValue(config, Config.class);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(
 					"The configuration file could not be parsed because it is not a JSON string valid for this software.");
 		}
+	}
+	
+	static File getDefaultConfig() {
+		return null;
 	}
 	
 	/**
