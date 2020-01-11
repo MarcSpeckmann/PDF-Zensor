@@ -47,10 +47,14 @@ final class CLArgs {
 	private File output = null;
 
 	/** An optional password for decrypting encrypted PDFs. Null should be assigned if nothing else was specified. */
-	@Option(names = {"-p", "-password"}, paramLabel = "\"password\"", arity = "0..1",
-			description = {"the password used for decrypting an encrypted PDF."})
+	@Option(names = {"-p", "--password"}, description = {"The password used for decrypting an encrypted PDF."})
 	@Nullable
 	private String password = null;
+
+	/** A boolean that, if set to true, will result in not asking for the missing or incorrect password for a encrypted PDF. */
+	@Option(names = {"-n", "--no-interaction"},
+			description = {"If this parameter is used, there will be no asking for missing or incorrect passwords."})
+	private Boolean noInteraction = false;
 
 	/**
 	 * The verbosity is given by how often -v was specified. If length is 0, verbosity is OFF. If null nothing was
@@ -190,6 +194,17 @@ final class CLArgs {
 	@Nullable
 	final String getPassword() {
 		return password;
+	}
+
+	/**
+	 * Returns noInteraction boolean set by the user to true, or set to false by default.
+	 *
+	 * @return The boolean noInteraction.
+	 */
+	@Contract(pure = true)
+	@NotNull
+	final Boolean getNoInteraction() {
+		return noInteraction;
 	}
 
 	/**

@@ -59,7 +59,13 @@ public final class Settings {
 	private final File output;
 
 	/** A password to decrypt an encrypted PDF. Might be null. */
-	private final String password;
+	private String password;
+
+
+	/** A boolean to turn off interaction (e.g. asking for missing passwords and
+	*  asking for correct passwords if incorrect have been given). */
+	@NotNull
+	private final Boolean noInteraction;
 
 	/** The color with which to censor links. */
 	@NotNull
@@ -91,6 +97,7 @@ public final class Settings {
 		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
 													  input.getAbsoluteFile().getParentFile()));
 		password = clArgs.getPassword();
+		noInteraction = clArgs.getNoInteraction();
 		linkColor = DEFAULT_LINK_COLOR;
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
 		final var defColors = ObjectUtils.firstNonNull(config.getDefaultColors(), DEFAULT_COLORS);
@@ -150,6 +157,22 @@ public final class Settings {
 	@Contract(pure = true)
 	public String getPassword() {
 		return password;
+	}
+
+
+	/**
+	 * @param password The new password to be used for decryption.
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * @return The boolean noInteraction as set by default or by command-line arguments.
+	 */
+	@Contract(pure = true)
+	public boolean getNoInteraction() {
+		return noInteraction;
 	}
 
 	/**
