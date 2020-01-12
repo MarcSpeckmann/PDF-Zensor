@@ -27,7 +27,7 @@ public final class PasswordUtil {
 
     public static String getPasswordFromCL(Settings settings){
         Scanner scanner = new Scanner(System.in);
-        Logging.getLogger().log(Level.ERROR, "Please enter the password for encrypted  document " + settings.getInput() + ":\n");
+        Logging.getLogger().log(Level.ERROR, "Please enter the password for encrypted document {}", settings.getInput());
         Logging.getLogger().log(Level.ERROR, "(Just leave it blank if you want to skip this document!)");
         return scanner.nextLine();
     }

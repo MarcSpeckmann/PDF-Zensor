@@ -47,7 +47,8 @@ final class CLArgs {
 	private File output = null;
 
 	/** An optional password for decrypting encrypted PDFs. Null should be assigned if nothing else was specified. */
-	@Option(names = {"-p", "--password"}, description = {"The password used for decrypting an encrypted PDF."})
+	@Option(names = {"-p", "--password"}, paramLabel = "\"Password\"",
+			description = {"The password used for decrypting an encrypted PDF."})
 	@Nullable
 	private String password = null;
 

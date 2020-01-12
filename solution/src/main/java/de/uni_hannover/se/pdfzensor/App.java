@@ -23,7 +23,6 @@ public class App {
 				final var processor = new PDFProcessor(censor);
 				boolean done = false;
 				while(!done) {
-					Logging.getLogger().log(Level.ERROR, "I am at the beginning of the while-loop!");
 					try (final var doc = PDDocument.load(settings.getInput(), settings.getPassword())) {
 						if (doc.isEncrypted()) {
 							doc.setAllSecurityToBeRemoved(true);
@@ -33,14 +32,9 @@ public class App {
 						done = true;
 					} catch (InvalidPasswordException ipe) {
 						done = PasswordUtil.handleIncorrectPassword(settings);
-						//System.err.println(ipe.getMessage());
-						//Logging.getLogger().error(ipe);
-						//System.exit(-1);
-						Logging.getLogger().log(Level.ERROR, "I am inside the catch-block! done = " + done);
 					}
-					Logging.getLogger().log(Level.ERROR, "I am at the end of the while-loop!");
 				}
-				Logging.getLogger().log(Level.ERROR, "I am outside of the while-loop!");
+				System.exit(0);
 			}
 		} catch (CommandLine.ParameterException ex) {
 			CLErrorMessageHandler handler = new CLErrorMessageHandler();
@@ -51,5 +45,6 @@ public class App {
 			Logging.getLogger().error(e);
 			System.exit(-1);
 		}
+
 	}
 }
