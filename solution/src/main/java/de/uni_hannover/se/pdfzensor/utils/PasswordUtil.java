@@ -1,9 +1,8 @@
-package de.uni_hannover.se.pdfzensor.censor.utils;
+package de.uni_hannover.se.pdfzensor.utils;
 
 
 import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.config.Settings;
-import de.uni_hannover.se.pdfzensor.utils.RectUtils;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Contract;
 
@@ -51,6 +50,4 @@ public final class PasswordUtil {
         Logging.getLogger().log(Level.ERROR, "(Just leave it blank if you want to skip this document!)");
         return scanner.nextLine();
     }
-
-
 }
