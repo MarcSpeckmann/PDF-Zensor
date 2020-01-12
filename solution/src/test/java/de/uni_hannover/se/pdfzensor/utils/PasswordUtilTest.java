@@ -4,18 +4,15 @@ import de.uni_hannover.se.pdfzensor.config.Settings;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
-import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PATH;
-
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 import static org.junit.jupiter.api.Assertions.*;
 
 
+/** PasswordUtilTest should contain all unit-tests related to {@link PasswordUtil}.*/
 public class PasswordUtilTest {
 
+	/**
+	 * Tests if handleIncorrectPassword always returns true if no-interaction is set.
+	 */
 	@Test
 	void testHandleIncorrectPasswordWithNoInteraction(){
 		String[] args = {"-n", "file"};
@@ -25,6 +22,9 @@ public class PasswordUtilTest {
 		assertTrue(PasswordUtil.handleIncorrectPassword(new Settings(null , args)));
 	}
 
+	/**
+	 * Tests if getPasswordFromCL returns the user input.
+	 */
 	@Test
 	void testGetPasswordFromCL(){
 		String input = "pdfzensor is cool";
@@ -32,6 +32,9 @@ public class PasswordUtilTest {
 		assertEquals("pdfzensor is cool", PasswordUtil.getPasswordFromCL(new Settings(null, "null")));
 	}
 
+	/**
+	 * Tests if PasswordUtil handles the user input in the right way.
+	 */
 	@Test
 	void testPasswordUtil(){
 		System.setIn(new ByteArrayInputStream("oneRandomPassword".getBytes()));
