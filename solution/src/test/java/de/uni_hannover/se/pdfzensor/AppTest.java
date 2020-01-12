@@ -19,8 +19,6 @@ class AppTest {
 		assertExitCode(-1, () -> main("NotExisting.pdf"));
 		assertExitCode(-1, () -> main("pom.xml"));
 		assertExitCode(-1, () -> main(getResourcePath(CORRUPTED_PDF_RESOURCE_PATH + "sample(pdfVersionDeleted).pdf")));
-		//TODO: add better tests for encrypted PDFs, as this old one doesn´t fit anymore:
-		//assertExitCode(-1, () -> main(getResourcePath(CORRUPTED_PDF_RESOURCE_PATH + "EncryptedPDF.pdf")));
 		
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "sample.pdf")));
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "sample.bla.pdf")));
