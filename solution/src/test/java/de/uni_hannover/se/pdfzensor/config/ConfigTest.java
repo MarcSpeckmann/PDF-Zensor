@@ -85,4 +85,28 @@ class ConfigTest {
 			assertNull(actualDefColors);
 		}
 	}
+	
+	/**
+	 * Refreshes the existing default configuration file and tests if its content is parsed (and was therefore written)
+	 * as expected.
+	 */
+	@Test
+	void testGetDefaultConfigFile() {
+		var defaultConfig = Config.getDefaultConfigFile(true);
+		assertNotNull(defaultConfig);
+		final var content = Config.fromFile(defaultConfig);
+		assertNull(content.getOutput());
+		assertEquals(Level.WARN, content.getVerbosity());
+		assertEquals(Mode.ALL, content.getMode());
+		final var actualExp = content.getExpressions();
+		assertNotNull(actualExp);
+		assertEquals(1, actualExp.length);
+		assertEquals(".", actualExp[0].getRegex());
+		assertEquals(Settings.DEFAULT_CENSOR_COLOR, actualExp[0].getColor());
+		final var actualColors = content.getDefaultColors();
+		assertNotNull(actualColors);
+		assertEquals(Settings.DEFAULT_COLORS.length, actualColors.length);
+		for (var i = 0; i < actualColors.length; i++)
+			assertEquals(Settings.DEFAULT_COLORS[i], actualColors[i]);
+	}
 }

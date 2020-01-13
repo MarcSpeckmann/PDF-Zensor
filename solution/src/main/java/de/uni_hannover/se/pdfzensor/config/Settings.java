@@ -77,7 +77,7 @@ public final class Settings {
 	 */
 	public Settings(@NotNull final String... args) {
 		final var clArgs = CLArgs.fromStringArray(args);
-		final var configFile = ObjectUtils.firstNonNull(clArgs.getConfigFile(), Config.getDefaultConfig());
+		final var configFile = ObjectUtils.firstNonNull(clArgs.getConfigFile(), Config.getDefaultConfigFile(false));
 		final var config = Config.fromFile(configFile);
 		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.WARN);
 		Logging.init(clArgs.getQuiet() ? Level.OFF : verbose);
@@ -92,9 +92,12 @@ public final class Settings {
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
+		if (configFile == null)
+			logger.error("The default configuration file could not be created.");
 		logger.debug("Finished parsing the settings:");
 		logger.debug("\tInput-file: {}", input);
-		logger.debug("\tConfig-file: {}", () -> Optional.ofNullable(configFile).map(File::getAbsolutePath).orElse("none"));
+		logger.debug("\tConfig-file: {}",
+					 () -> Optional.ofNullable(configFile).map(File::getAbsolutePath).orElse("none"));
 		logger.debug("\tOutput-file: {}", output);
 		logger.debug("\tLogger verbosity: {}", verbose);
 		logger.debug("\tQuiet: {}", clArgs::getQuiet);

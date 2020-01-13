@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.testing.argumentproviders;
 
 import de.uni_hannover.se.pdfzensor.config.Mode;
+import de.uni_hannover.se.pdfzensor.config.Settings;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
@@ -16,11 +17,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static de.uni_hannover.se.pdfzensor.config.Mode.*;
 import static de.uni_hannover.se.pdfzensor.testing.TestConstants.CONFIG_PATH;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider.expExpressions;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider.*;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.colorToString;
 
 /** This class generates arguments for SettingsTest and implements {@link ArgumentsProvider}. */
 public class SettingsProvider implements ArgumentsProvider {
@@ -40,7 +41,8 @@ public class SettingsProvider implements ArgumentsProvider {
 	 * @return The given values converted into valid command-line arguments including an input.
 	 */
 	@NotNull
-	private static String[] createCLArguments(@Nullable String config, @Nullable String out, final int lvl, @Nullable Mode mode,
+	private static String[] createCLArguments(@Nullable String config, @Nullable String out, final int lvl,
+											  @Nullable Mode mode,
 											  @Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
 											  boolean quiet) {
 		Objects.requireNonNull(exp);
@@ -58,9 +60,9 @@ public class SettingsProvider implements ArgumentsProvider {
 			arguments.add(out);
 		}
 		
-		if (MARKED.equals(mode))
+		if (Mode.MARKED.equals(mode))
 			arguments.add("-m");
-		else if (UNMARKED.equals(mode))
+		else if (Mode.UNMARKED.equals(mode))
 			arguments.add("-u");
 		
 		if (lvl > 0)
@@ -85,16 +87,24 @@ public class SettingsProvider implements ArgumentsProvider {
 	 */
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
+		// expected to be in the default configuration
+		final var defaultColors = getPrivateField(Settings.class, null, "DEFAULT_COLORS");
+		final var defaultCensorColor = colorToString(getPrivateField(Settings.class, null, "DEFAULT_CENSOR_COLOR"));
+		final var fallbackExpression = new ImmutablePair<>(".", defaultCensorColor);
+		
 		var list = new ArrayList<Arguments>();
 		for (var expList : expExpressions) {
 			for (boolean quiet : List.of(true, false)) {
-				list.add(Arguments.of(createCLArguments(null, null, -1, null, expList, quiet), "sample.pdf", null, null,
-									  null, new ArrayList<>(expList), null, quiet));
+				// no config set, expect default config
+				var expListCopy = new ArrayList<>(expList);
+				expListCopy.add(fallbackExpression);
+				list.add(Arguments.of(createCLArguments(null, null, -1, null, expList, quiet), "sample.pdf", null,
+									  Level.WARN, Mode.ALL, expListCopy, defaultColors, quiet));
 				
 				// Mode set by CLArgs
 				list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json",
-														null, -1, MARKED, expList, quiet), "sample.pdf",
-									  "censoredFile.pdf", Level.DEBUG, MARKED, new ArrayList<>(expList), null,
+														null, -1, Mode.MARKED, expList, quiet), "sample.pdf",
+									  "censoredFile.pdf", Level.DEBUG, Mode.MARKED, new ArrayList<>(expList), null,
 									  quiet));
 				// output overwritten by CLArgs
 				list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json",
