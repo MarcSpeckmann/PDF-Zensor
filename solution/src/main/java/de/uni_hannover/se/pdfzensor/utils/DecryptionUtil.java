@@ -31,7 +31,7 @@ public final class DecryptionUtil {
         if(settings.getNoInteraction()){
             Logging.getLogger().log(Level.ERROR, "The document " + settings.getInput() + " is encrypted." +
                     " The password for decryption is either incorrect or missing.");
-            return true;
+            return false;
         }
         boolean done = false;
         String password;
@@ -62,7 +62,7 @@ public final class DecryptionUtil {
 	 * @return a boolean that is true if the settings contain the correct password.
 	 */
     private static boolean isCorrectPassword(Settings settings){
-        try (final var ignored = PDDocument.load(settings.getInput(), settings.getPassword())) {
+		try (final var ignored = PDDocument.load(settings.getInput(), settings.getPassword())) {
             return true;
         } catch (IOException ipe) {
             return false;
@@ -74,7 +74,7 @@ public final class DecryptionUtil {
 	 * @param settings The {@link Settings} of the document which is analyzed.
 	 * @return the String that has been entered by the user.
 	 */
-    public static String getPasswordFromCL(Settings settings){
+    private static String getPasswordFromCL(Settings settings){
         Scanner scanner = new Scanner(System.in);
         Logging.getLogger().log(Level.ERROR, "Please enter the password for encrypted document {}", settings.getInput());
         Logging.getLogger().log(Level.ERROR, "(Just leave it blank if you want to skip this document!)");
