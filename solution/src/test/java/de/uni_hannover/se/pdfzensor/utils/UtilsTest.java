@@ -1,7 +1,9 @@
 package de.uni_hannover.se.pdfzensor.utils;
 
+import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ColorProvider;
+import org.apache.commons.lang3.Functions;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -167,5 +169,61 @@ class UtilsTest {
 		assertThrows(IllegalArgumentException.class, () -> getColorOrNull(code));
 		assertFalse(isHexColorCode(code));
 	}
+	
+	/**
+	 * Tests tryCall on two cases: Checks if non-throwing functions are executed, throwing-functions are aborted.
+	 */
+	@SuppressWarnings("ConstantConditions")
+	@Test
+	void testTryCall() {
+		final boolean[] called = {false};
+		final Functions.FailableRunnable<Exception> nonThrowing = () -> called[0] = true;
+		final Functions.FailableRunnable<UnsupportedOperationException> throwing = () -> {
+			throw new UnsupportedOperationException();
+		};
+		final var logger = Logging.getLogger();
+		
+		assertThrows(NullPointerException.class, () -> tryCall(null, null, null));
+		
+		called[0] = false;
+		assertThrows(NullPointerException.class, () -> tryCall(nonThrowing, null, null));
+		assertFalse(called[0]);
+		
+		called[0] = false;
+		assertTrue(tryCall(nonThrowing, logger, null));
+		assertTrue(called[0]);
+		
+		called[0] = false;
+		assertTrue(tryCall(nonThrowing, logger, "message"));
+		assertTrue(called[0]);
+		
+		called[0] = false;
+		assertFalse(tryCall(throwing, logger, null));
+		assertFalse(called[0]);
+		
+		called[0] = false;
+		assertFalse(tryCall(throwing, logger, "message"));
+		assertFalse(called[0]);
+		Logging.deinit();
+	}
+	
+	//TODO: implement correctly (the interrupted flag gets cleared by the join)
+	/*
+	@Test
+	void testTryCallInterrupted() {
+		final var logger = Logging.getLogger();
+		final Functions.FailableRunnable<InterruptedException> longMethod = () -> {Thread.sleep(100000);};
+		Thread t = new Thread(() -> tryCall(longMethod, logger, null));
+		t.start();
+		t.interrupt();
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		assertTrue(t.isInterrupted());
+		
+		Logging.deinit();
+	}*/
 	
 }

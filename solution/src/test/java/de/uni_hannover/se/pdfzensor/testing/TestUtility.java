@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.testing;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.logging.log4j.util.StackLocatorUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -184,10 +185,8 @@ public final class TestUtility {
 	@NotNull
 	public static <T, K> T getPrivateField(@NotNull Class<K> cls, @Nullable K instance, @NotNull String fieldName) {
 		try {
-			var field = cls.getDeclaredField(fieldName);
-			field.setAccessible(true);
-			return (T) field.get(instance);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
+			return (T)FieldUtils.getDeclaredField(cls, fieldName, true).get(instance);
+		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}
