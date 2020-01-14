@@ -27,4 +27,9 @@ class AppTest {
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "sample.bla.pdf")));
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "StillAPDF")));
 	}
+
+	@Test
+	void testEncryptedInputFiles() {
+
+	}
 }

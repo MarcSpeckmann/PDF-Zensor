@@ -9,6 +9,7 @@ import de.uni_hannover.se.pdfzensor.processor.PDFProcessor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import picocli.CommandLine;
 
+import java.io.File;
 import java.io.IOException;
 
 //TODO: reduce complexity
@@ -26,15 +27,14 @@ public class App {
 						acceptPDF = true;
 					}
 					if (acceptPDF) {
-						try (final var doc = PDDocument.load(settings.getInput(), settings.getPassword())) {
-							if (doc.isEncrypted()) {
-								doc.setAllSecurityToBeRemoved(true);
-							}
-							final var censor = new PDFCensor(settings);
-							final var processor = new PDFProcessor(censor);
-							processor.process(doc);
-							doc.save(settings.getOutput());
+						final var doc = PDDocument.load(settings.getInput(), settings.getPassword());
+						if (doc.isEncrypted()) {
+							doc.setAllSecurityToBeRemoved(true);
 						}
+						final var censor = new PDFCensor(settings);
+						final var processor = new PDFProcessor(censor);
+						processor.process(doc);
+						doc.save(settings.getOutput());
 					}
 				} else {
 					System.exit(-1);

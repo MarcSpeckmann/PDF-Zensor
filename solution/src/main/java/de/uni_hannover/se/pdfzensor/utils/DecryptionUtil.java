@@ -8,20 +8,30 @@ import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import java.io.IOException;
 import java.util.Scanner;
 
-//TODO write javadoc
+/**
+ * DecryptionUtil is a utility-class for handling encrypted PDFs and anything related to encrypted PDFs.
+ */
 public final class DecryptionUtil {
-
+	/**
+	 * This constructor should not be called as no instance of {@link DecryptionUtil} shall be created.
+	 *
+	 * @throws UnsupportedOperationException when called
+	 */
     private DecryptionUtil(){
-        //
+        throw new UnsupportedOperationException();
     }
 
-    //TODO: reduce complexity
+	/**
+	 * @param settings The {@link Settings} of the document which is analyzed.
+	 * @return a boolean that indicates whether the document is ready to be handled or not
+	 * (and therefore should be skipped)
+	 */
     public static boolean handleEncryptedPDF(Settings settings){
         if(isCorrectPassword(settings)) return true;
         if(settings.getNoInteraction()){
             Logging.getLogger().log(Level.ERROR, "The document " + settings.getInput() + " is encrypted." +
                     " The password for decryption is either incorrect or missing.");
-                    return true;
+            return true;
         }
         boolean done = false;
         String password;
@@ -47,17 +57,23 @@ public final class DecryptionUtil {
         }
     }
 
+	/**
+	 * @param settings The {@link Settings} of the document which is analyzed.
+	 * @return a boolean that is true if the settings contain the correct password.
+	 */
     private static boolean isCorrectPassword(Settings settings){
         try (final var ignored = PDDocument.load(settings.getInput(), settings.getPassword())) {
             return true;
-        } catch (InvalidPasswordException ipe) {
-            return false;
-        } catch (IOException e) {
+        } catch (IOException ipe) {
             return false;
         }
-    }
+	}
 
 
+	/**
+	 * @param settings The {@link Settings} of the document which is analyzed.
+	 * @return the String that has been entered by the user.
+	 */
     public static String getPasswordFromCL(Settings settings){
         Scanner scanner = new Scanner(System.in);
         Logging.getLogger().log(Level.ERROR, "Please enter the password for encrypted document {}", settings.getInput());
@@ -65,6 +81,10 @@ public final class DecryptionUtil {
         return scanner.nextLine();
     }
 
+	/**
+	 * @param settings The {@link Settings} of the document which is analyzed.
+	 * @return a boolean that is true if the PDF-File is parsable.
+	 */
     public static boolean isParsablePDF(Settings settings){
         try(final var ignored = PDDocument.load(settings.getInput(), settings.getPassword())){
             return true;
