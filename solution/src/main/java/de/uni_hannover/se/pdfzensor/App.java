@@ -17,7 +17,7 @@ public class App {
 	public static void main(String... args) {
 		try {
 			final var settings = new Settings(null, args);
-			boolean acceptPDF = false;
+			boolean acceptPDF;
 			if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
 				if(DecryptionUtil.isParsablePDF(settings)) {
 					if (DecryptionUtil.isEncrypted(settings)) {
