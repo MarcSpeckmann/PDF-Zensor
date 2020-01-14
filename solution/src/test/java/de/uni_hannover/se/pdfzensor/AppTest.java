@@ -13,11 +13,8 @@ class AppTest {
 	 */
 	@Test
 	void testInputFiles() {
-		//TODO: find out what is going on here
-		//assertThrows(NullPointerException.class, () -> main((String) null));
 		assertThrows(NullPointerException.class, () -> main((String[]) null));
 		assertThrows(IllegalArgumentException.class, () -> main((String) null));
-		//assertThrows(IllegalArgumentException.class, () -> main((String[]) null));
 
 		assertExitCode(-1, () -> main("NotExisting.pdf"));
 		assertExitCode(-1, () -> main("pom.xml"));
@@ -26,10 +23,5 @@ class AppTest {
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "sample.pdf")));
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "sample.bla.pdf")));
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "StillAPDF")));
-	}
-
-	@Test
-	void testEncryptedInputFiles() {
-
 	}
 }
