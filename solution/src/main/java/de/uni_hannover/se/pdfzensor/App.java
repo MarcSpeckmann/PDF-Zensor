@@ -9,10 +9,9 @@ import de.uni_hannover.se.pdfzensor.processor.PDFProcessor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import picocli.CommandLine;
 
-import java.io.File;
 import java.io.IOException;
 
-//TODO: reduce complexity
+
 public class App {
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
 	public static void main(String... args) {
