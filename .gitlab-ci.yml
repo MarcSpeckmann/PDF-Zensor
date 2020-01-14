@@ -11,7 +11,6 @@ build:
         - mvn -verify
         - echo "Building"
         - mvn clean compile -f solution/pom.xml
-
 test:
     stage: test
     script:
@@ -25,6 +24,7 @@ deploy:
         - echo "Deploy"
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml
         - mvn javadoc:javadoc -f solution/pom.xml
+        - mvn-builder 
     artifacts: 
         paths:
             - solution/target/site
