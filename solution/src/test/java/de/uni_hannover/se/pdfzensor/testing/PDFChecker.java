@@ -2,11 +2,13 @@ package de.uni_hannover.se.pdfzensor.testing;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,6 +58,30 @@ public final class PDFChecker {
 			} catch (IOException e) {
 				fail(e);
 			}
+		}
+	}
+	
+	/**
+	 * Asserts that no XObjects are present in the dictionary of any of the document's pages.
+	 *
+	 * @param doc the document to assert no XObjects for.
+	 * @see #assertNoXObjects(PDPage)
+	 */
+	public static void assertNoXObjects(@NotNull PDDocument doc) {
+		doc.getPages().forEach(PDFChecker::assertNoXObjects);
+	}
+	
+	/**
+	 * Assets that no XObjects are present in the dictionary of the provided page.
+	 *
+	 * @param page the page to assert no XObjects for.
+	 * @see #assertNoXObjects(PDDocument)
+	 */
+	public static void assertNoXObjects(@NotNull PDPage page) {
+		if (page.getResources() != null) {
+			var xObjectNames = page.getResources().getXObjectNames();
+			var xObjCount = StreamSupport.stream(xObjectNames.spliterator(), false).count();
+			assertEquals(0, xObjCount, "XObjects are still present");
 		}
 	}
 	

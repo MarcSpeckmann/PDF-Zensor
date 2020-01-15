@@ -240,6 +240,7 @@ public final class PDFCensor implements PDFHandler {
 		}
 		boundingBoxes = null;
 		MetadataRemover.censorMetadata(doc);
+		ImageReplacer.removeImageData(doc);
 	}
 	
 	/**

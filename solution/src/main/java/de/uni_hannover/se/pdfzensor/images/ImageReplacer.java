@@ -12,6 +12,7 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
@@ -36,9 +37,7 @@ public class ImageReplacer extends PDFStreamEngine {
 	/** The unit-rect is at the origin an has extends of one in each direction. It may be used as default image-bounds. */
 	private static final PDRectangle UNIT_RECT = new PDRectangle(0, 0, 1, 1);
 	
-	/**
-	 * A {@link List} should contain all bounding boxes of the found pictures on the actual page
-	 */
+	/** A {@link List} should contain all bounding boxes of the found pictures on the actual page. */
 	final List<Rectangle2D> rects = new ArrayList<>();
 	
 	
@@ -59,6 +58,31 @@ public class ImageReplacer extends PDFStreamEngine {
 		addOperator(new Restore());
 		//Tm: Set text matrix and text line matrix.
 		addOperator(new SetMatrix());
+	}
+	
+	/**
+	 * Removes the image data from each page of the provided document.
+	 *
+	 * @param document the document to remove all image resources from.
+	 * @see #removeImageData(PDPage)
+	 */
+	public static void removeImageData(@NotNull PDDocument document) {
+		Objects.requireNonNull(document).getPages().forEach(ImageReplacer::removeImageData);
+	}
+	
+	/**
+	 * Strips the data of the image resources from the provided page. We define all PDXObjects to be "image resources".
+	 *
+	 * @param page the page to remove all image resources from.
+	 */
+	public static void removeImageData(@NotNull PDPage page) {
+		var resources = Objects.requireNonNull(page).getResources();
+		if (resources == null) {
+			LOGGER.warn("The page does not contain a resource dictionary which conflicts with the pdf-specification");
+			resources = new PDResources();
+			page.setResources(resources);
+		}
+		resources.getCOSObject().setItem(COSName.XOBJECT, null);
 	}
 	
 	/**
@@ -84,7 +108,6 @@ public class ImageReplacer extends PDFStreamEngine {
 			pageContentStream.setLineWidth(2);
 			drawPictureCensorBox(pageContentStream);
 		}
-		removeImageData(page);
 		return this.rects;
 		
 	}
@@ -154,16 +177,6 @@ public class ImageReplacer extends PDFStreamEngine {
 			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMaxY());
 			pageContentStream.stroke();
 		}
-	}
-	
-	/**
-	 * Strips the data of the image resources from the provided page. We define all PDXObjects to be "image resources".
-	 *
-	 * @param page the page to remove all image resources from.
-	 */
-	private void removeImageData(@NotNull PDPage page) {
-		var resources = Objects.requireNonNull(page).getResources();
-		resources.getCOSObject().setItem(COSName.XOBJECT, null);
 	}
 	
 }
