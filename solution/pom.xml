@@ -14,6 +14,8 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
+			<!-- Process the control file to include the proper version number.
+			The control file in deb/control is a symlink. -->
 			<resource>
 				<directory>src/deb/unprocessed_control</directory>
 				<filtering>true</filtering>
