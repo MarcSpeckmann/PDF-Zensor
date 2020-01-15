@@ -76,7 +76,10 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	public static void removeImageData(@NotNull PDPage page) {
 		var resources = Objects.requireNonNull(page).getResources();
-		resources.getCOSObject().setItem(COSName.XOBJECT, null);
+		if (resources == null)
+			LOGGER.warn("The page does not conform to the PDF specification as it does not contain a resource dict.");
+		else
+			resources.getCOSObject().setItem(COSName.XOBJECT, null);
 	}
 	
 	/**
