@@ -96,11 +96,11 @@
 								</data>
 								
 								<data>
-									<src>src/deb/pdfzensor.1</src>
+									<src>src/deb/pdfzensor.1.gz</src>
 									<type>file</type>
 									<mapper>
 										<type>perm</type>
-										<prefix>/usr/share/man</prefix>
+										<prefix>/usr/share/man/man1</prefix>
 									</mapper>
 								</data>
 								
