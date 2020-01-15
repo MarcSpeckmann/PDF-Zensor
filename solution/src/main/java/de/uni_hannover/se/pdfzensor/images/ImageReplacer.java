@@ -12,6 +12,7 @@ import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
@@ -76,10 +77,12 @@ public class ImageReplacer extends PDFStreamEngine {
 	 */
 	public static void removeImageData(@NotNull PDPage page) {
 		var resources = Objects.requireNonNull(page).getResources();
-		if (resources == null)
+		if (resources == null) {
 			LOGGER.warn("The page does not contain a resource dictionary which conflicts with the pdf-specification");
-		else
-			resources.getCOSObject().setItem(COSName.XOBJECT, null);
+			resources = new PDResources();
+			page.setResources(resources);
+		}
+		resources.getCOSObject().setItem(COSName.XOBJECT, null);
 	}
 	
 	/**
