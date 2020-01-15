@@ -94,7 +94,7 @@
 								</data>
 								
 								<data>
-									<src>src/deb/pdfzensor.1</src>
+									<src>src/deb/pdfzensor.1.gz</src>
 									<type>file</type>
 									<mapper>
 										<type>perm</type>
