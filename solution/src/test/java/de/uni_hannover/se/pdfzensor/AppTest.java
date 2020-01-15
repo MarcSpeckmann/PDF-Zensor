@@ -14,7 +14,7 @@ class AppTest {
 	@Test
 	void testInputFiles() {
 		assertThrows(NullPointerException.class, () -> main((String[]) null));
-		assertThrows(IllegalArgumentException.class, () -> main((String) null));
+		assertThrows(NullPointerException.class, () -> main((String) null));
 
 		assertExitCode(-1, () -> main("NotExisting.pdf"));
 		assertExitCode(-1, () -> main("pom.xml"));
