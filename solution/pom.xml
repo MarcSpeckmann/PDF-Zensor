@@ -84,6 +84,24 @@
 									</mapper>
 								</data>
 								
+								<data>
+									<src>src/deb/pdfzensor</src>
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/usr/bin</prefix>
+									</mapper>
+								</data>
+								
+								<data>
+									<src>src/deb/pdfzensor.1</src>
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/usr/share/man</prefix>
+									</mapper>
+								</data>
+								
 							</dataSet>
 						</configuration>
 					</execution>
