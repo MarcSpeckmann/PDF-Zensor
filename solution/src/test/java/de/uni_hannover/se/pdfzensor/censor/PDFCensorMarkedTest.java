@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils.transformTextPosition;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getPrivateField;
 
 class PDFCensorMarkedTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -42,7 +42,7 @@ class PDFCensorMarkedTest implements PDFHandler {
 	 * Checks if the elements in the PDF-file equals the given elements and are added to the bounds-color-list
 	 * correctly.
 	 *
-	 * @param file                   The input PDF-file to check.
+	 * @param file                    The input PDF-file to check.
 	 * @param uncombinedBoundingBoxes The rectangle of the TextPosition in the input PDF-file that has to be censored at
 	 *                                the end.
 	 * @param combinedBoundingBoxesNr The expected length of the bounds-pair list at the end of a page after all
@@ -68,7 +68,9 @@ class PDFCensorMarkedTest implements PDFHandler {
 	}
 	
 	/**
-	 * a mask function so that the code remains cleaner
+	 * A mask function so that the code remains cleaner.
+	 *
+	 * @return the bounding-boxes of the {@link #properCensor} retrieved via reflection.
 	 */
 	private List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes() {
 		/* Ignore warning because we can not create a class with generic attributes */
@@ -76,16 +78,20 @@ class PDFCensorMarkedTest implements PDFHandler {
 	}
 	
 	/**
-	 * a mask function so that the code remains cleaner
+	 * A mask function so that the code remains cleaner.
+	 *
+	 * @return the annotations of the {@link #properCensor} retrieved via reflection.
 	 */
 	private Annotations getAnnotation() {
 		return getPrivateField(PDFCensor.class, this.properCensor, "annotations");
 	}
 	
 	/**
-	 * checks if a element isn't marked
+	 * Checks if a {@link TextPosition} is marked or not.
 	 *
-	 * @return true if the TextPosition is not marked up
+	 * @param pos The {@link TextPosition} for which to check whether it is marked or not.
+	 * @return true if {@code pos} is marked, false otherwise.
+	 * @see Annotations#isMarked(Rectangle2D)
 	 */
 	private boolean isMarked(@NotNull final TextPosition pos) {
 		boolean excepted = false;
@@ -97,9 +103,7 @@ class PDFCensorMarkedTest implements PDFHandler {
 		return excepted;
 	}
 	
-	/**
-	 * extends the inherited functions with tests
-	 */
+	/** {@inheritDoc} This is extended by various tests. */
 	@Override
 	public void beginDocument(final PDDocument doc) {
 		Objects.requireNonNull(properCensor);
@@ -115,9 +119,7 @@ class PDFCensorMarkedTest implements PDFHandler {
 		Assertions.assertTrue(list.isEmpty(), "boundingBoxes should be empty at the beginning");
 	}
 	
-	/**
-	 * extends the inherited functions with tests
-	 */
+	/** {@inheritDoc} This is extended by various tests. */
 	@Override
 	public void beginPage(final PDDocument doc, final PDPage page, final int pageNum) {
 		Objects.requireNonNull(properCensor);
@@ -130,9 +132,7 @@ class PDFCensorMarkedTest implements PDFHandler {
 		Assertions.assertTrue(boundingBoxes.isEmpty(), "boundingBoxes should be empty at the beginning of each page");
 	}
 	
-	/**
-	 * extends the inherited functions with tests
-	 */
+	/** {@inheritDoc} This is extended by various tests. */
 	@Override
 	public void endPage(final PDDocument doc, final PDPage page, final int pageNum) {
 		Objects.requireNonNull(properCensor);
@@ -156,9 +156,7 @@ class PDFCensorMarkedTest implements PDFHandler {
 		
 	}
 	
-	/**
-	 * extends the inherited functions with tests
-	 */
+	/** {@inheritDoc} This is extended by various tests. */
 	@Override
 	public void endDocument(final PDDocument doc) {
 		Objects.requireNonNull(properCensor);
@@ -170,6 +168,7 @@ class PDFCensorMarkedTest implements PDFHandler {
 		Assertions.assertNull(getBoundingBoxes(), "boundingBoxes should be NULL after the document has been processed");
 	}
 	
+	/** {@inheritDoc} This is extended by various tests. */
 	@Override
 	public boolean shouldCensorText(final TextPosition pos) {
 		Objects.requireNonNull(properCensor);

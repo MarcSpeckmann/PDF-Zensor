@@ -19,7 +19,13 @@ public class JoinedRectProvider implements ArgumentsProvider {
 	
 	/**
 	 * Creates a new rectangle from the specified coordinates. This method is mainly intended as a shortcut for {@link
-	 * Rectangle2D.Double#Double}.
+	 * Rectangle2D.Double}.
+	 *
+	 * @param x1 the first x coordinate.
+	 * @param y1 the first y coordinate.
+	 * @param x2 the second x coordinate.
+	 * @param y2 the second y coordinate.
+	 * @return The {@link Rectangle2D.Double} created from the given coordinates.
 	 */
 	@NotNull
 	@Contract("_, _, _, _ -> new")

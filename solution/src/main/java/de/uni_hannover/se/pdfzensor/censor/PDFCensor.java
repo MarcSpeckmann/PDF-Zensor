@@ -64,7 +64,7 @@ public final class PDFCensor implements PDFHandler {
 	 */
 	private static final float MAX_GAP = 1.5f;
 	
-	/** Stores the width of a thin space, which usually is &#8533;&nbsp;em or &#8537;&nbsp;em. */
+	/** Stores the width of a thin space, which usually is 1/5 em or 1/6 em. */
 	private static final double THIN_SPACE_WIDTH = 1 / 6d;
 	
 	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
