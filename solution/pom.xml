@@ -14,6 +14,10 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
+			<resource>
+				<directory>src/deb/control/control</directory>
+				<filtering>true</filtering>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -71,15 +75,15 @@
 						<configuration>
 							<dataSet>
 								<data>
-									<!--<src>${project.build.directory}/${project.build.finalName}.jar</src>-->
 									<src>${project.build.directory}/pdfzensor-jar-with-dependencies.jar</src>
 									
 									<type>file</type>
 									<mapper>
 										<type>perm</type>
-										<prefix>/usr/share/jdeb/lib</prefix>
+										<prefix>/usr/share/pdfzensor</prefix>
 									</mapper>
 								</data>
+								
 							</dataSet>
 						</configuration>
 					</execution>
