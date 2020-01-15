@@ -1,0 +1,9 @@
+Package: ${project.artifactId}
+Version: ${project.version}
+Section: misc
+Priority: low
+Architecture: all
+Depends: default-jre | java6-runtime
+Installed-Size: 8910
+Maintainer:
+Description: [[description]]

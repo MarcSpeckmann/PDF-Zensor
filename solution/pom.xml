@@ -15,7 +15,7 @@
 				<filtering>true</filtering>
 			</resource>
 			<resource>
-				<directory>src/deb/control</directory>
+				<directory>src/deb/unprocessed_control</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
