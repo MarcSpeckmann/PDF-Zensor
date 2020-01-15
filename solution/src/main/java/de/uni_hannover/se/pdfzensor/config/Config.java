@@ -3,6 +3,8 @@ package de.uni_hannover.se.pdfzensor.config;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import de.uni_hannover.se.pdfzensor.App;
 import de.uni_hannover.se.pdfzensor.Logging;
 import de.uni_hannover.se.pdfzensor.utils.Utils;
 import org.apache.commons.lang3.Validate;
@@ -17,10 +19,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
+import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 
 /** An in-memory representation of a configuration-file. */
 final class Config {
+	/** The path to the default config file and its name. */
+	private static File DEFAULT_CONFIG_FILE = new File(App.ROOT_DIR + "defaultConfig.json");
 	/** A default output-path. Stores the folder censored PDF-files should be written to. */
 	@Nullable
 	private final File output;
@@ -70,7 +74,7 @@ final class Config {
 	}
 	
 	/**
-	 * Reads the provided json-formatted config-file and stores its data into a new instance of {@link Config}.
+	 * Reads the provided JSON-formatted config-file and stores its data into a new instance of {@link Config}.
 	 *
 	 * @param config The configuration file that should be parsed. If null the default configuration (everything null)
 	 *               will be returned.
@@ -83,13 +87,66 @@ final class Config {
 	static Config fromFile(@Nullable final File config) {
 		if (config == null)
 			return new Config();
-		Validate.isTrue(config.isFile(), "The given configuration file does not exist.");
+		Validate.isTrue(config.isFile(), "The given configuration file (%s) does not exist.", config.getAbsolutePath());
 		try {
 			return new ObjectMapper().readValue(config, Config.class);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(
 					"The configuration file could not be parsed because it is not a JSON string valid for this software.");
 		}
+	}
+	
+	/**
+	 * Writes the default configuration file. The configuration will contain a representation of the following entries:
+	 * <ul>
+	 *     <li>output file: null</li>
+	 *     <li>verbosity level: {@link Level#WARN}</li>
+	 *     <li>censor mode: {@link Mode#ALL}</li>
+	 *     <li>expressions: [regex: "."; color: {@link Settings#DEFAULT_CENSOR_COLOR}]</li>
+	 *     <li>default colors: {@link Settings#DEFAULT_COLORS}</li>
+	 * </ul>
+	 *
+	 * @return true if the file was successfully written, false otherwise.
+	 * @see Expression
+	 */
+	private static boolean createDefaultConfigFile() {
+		Objects.requireNonNull(DEFAULT_CONFIG_FILE, "The file to write the default configuration to may not be null.");
+		final var factory = JsonNodeFactory.instance;
+		final var configNode = factory.objectNode();
+		final var expressions = factory.arrayNode().addObject()
+									   .put("regex", ".")
+									   .put("color", colorToString(Settings.DEFAULT_CENSOR_COLOR));
+		configNode.putNull("output")
+				  .put("verbose", "WARN")
+				  .put("censor", "ALL")
+				  .putArray("expressions").add(expressions);
+		final var defaultColors = configNode.putArray("defaultColors");
+		for (var color : Settings.DEFAULT_COLORS)
+			defaultColors.add(colorToString(color));
+		try {
+			new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(DEFAULT_CONFIG_FILE, configNode);
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Returns the default configuration file. If the file does not exist then an attempt is made to create it. On
+	 * successful creation or if the file already existed (and if overwrite is true, was overwritten successfully) then
+	 * the file is returned, otherwise null is returned.
+	 *
+	 * @param overwrite sets whether the already existing default configuration should be overwritten or not. This
+	 *                  argument does not have any effect if no configuration file exists.
+	 * @return the default configuration file if it existed or was created or overwritten successfully, null otherwise.
+	 * @see #createDefaultConfigFile()
+	 */
+	@Nullable
+	static File getDefaultConfigFile(boolean overwrite) {
+		var success = true;
+		if (!DEFAULT_CONFIG_FILE.isFile() || overwrite)
+			success = createDefaultConfigFile();
+		return success ? DEFAULT_CONFIG_FILE : null;
 	}
 	
 	/**

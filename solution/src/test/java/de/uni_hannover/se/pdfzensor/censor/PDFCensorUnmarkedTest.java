@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static de.uni_hannover.se.pdfzensor.censor.utils.PDFUtils.transformTextPosition;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
+import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getPrivateField;
 
 class PDFCensorUnmarkedTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -55,7 +55,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D[] uncombinedBoundingBoxes,
 					   int combinedBoundingBoxesNr) throws IOException {
 		
-		var dummySettings = new Settings(null, input, "-u");
+		var dummySettings = new Settings(input, "-u");
 		this.properCensor = new PDFCensor(dummySettings);
 		this.currTextPosition = 0;
 		this.uncombinedBoundingBoxes = uncombinedBoundingBoxes;
@@ -72,7 +72,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 */
 	private List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes() {
 		/* Ignore warning because we can not create a class with generic attributes */
-		return getPrivateField(PDFCensor.class, this.properCensor , "boundingBoxes");
+		return getPrivateField(PDFCensor.class, this.properCensor, "boundingBoxes");
 	}
 	
 	/**
