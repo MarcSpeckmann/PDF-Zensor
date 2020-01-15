@@ -220,7 +220,7 @@ public final class PDFCensor implements PDFHandler {
 			tokenizer.flush();
 			
 			drawCensorBars(doc, page);
-			page.getAnnotations().clear();
+			page.setAnnotations(null);
 		} catch (IOException e) {
 			LOGGER.error("There was an error writing the page contents of page {}.", pageNum, e);
 		}
@@ -239,6 +239,7 @@ public final class PDFCensor implements PDFHandler {
 			LOGGER.warn(e);
 		}
 		boundingBoxes = null;
+		pictureBoundingBoxes = null;
 		MetadataRemover.censorMetadata(doc);
 	}
 	
@@ -289,9 +290,10 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * Either adds the given bounding-box and color to the {@link #boundingBoxes} list or extends the last element of
-	 * the list to also cover the bounds of the given pair (if the bounds are an extension of the previous bounds and
-	 * the color is the same).
+	 * If the given bounds intersect with any bounds from the {@link #pictureBoundingBoxes} then nothing will happen.
+	 * Otherwise the given bounding-box and color will either be added to the {@link #boundingBoxes} list or extend the
+	 * last element of the list to also cover the bounds of the given pair (if the bounds are an extension of the
+	 * previous bounds and the color is the same).
 	 * <br>
 	 * Whether or not the previous bounds will be extended depends on the result of {@link #getExtended(Rectangle2D,
 	 * Rectangle2D)} when called with the two rectangles.
@@ -301,6 +303,7 @@ public final class PDFCensor implements PDFHandler {
 	 * @see #getExtended(Rectangle2D, Rectangle2D)
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final Rectangle2D bb, final Color color) {
+		if (pictureBoundingBoxes.stream().anyMatch(Objects.requireNonNull(bb)::intersects)) return;
 		if (!boundingBoxes.isEmpty()) {
 			final var last = boundingBoxes.get(boundingBoxes.size() - 1);
 			final var union = getExtended(last.getLeft(), bb);
@@ -337,7 +340,6 @@ public final class PDFCensor implements PDFHandler {
 		return result;
 	}
 	
-	
 	/**
 	 * Draws the censor bars stored in {@link #boundingBoxes} with their respective color in the given
 	 * <code>document</code> on the given <code>page</code>.
@@ -347,7 +349,8 @@ public final class PDFCensor implements PDFHandler {
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
 	private void drawCensorBars(PDDocument doc, PDPage page) throws IOException {
-		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true,
+															 true)) {
 			for (var pair : boundingBoxes) {
 				pageContentStream.setNonStrokingColor(pair.getRight());
 				var r = pair.getLeft();

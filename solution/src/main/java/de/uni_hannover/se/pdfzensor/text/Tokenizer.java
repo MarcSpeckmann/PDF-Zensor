@@ -242,8 +242,8 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		Validate.isTrue(data.length() == payload.size(),
 						String.format("Data length (%d) and payload size (%d) do not match for data: \"%s\"",
 									  data.length(), payload.size(), data));
-		outputStream.write(data.getBytes());
 		this.payload.addAll(payload);
+		outputStream.write(data.getBytes());
 	}
 	
 	/**
@@ -258,7 +258,7 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	 * corresponds to the character-order in the String. The token-definition is null if no token could be matched.
 	 *
 	 * @param handler the new handler or null to remove the old one
-	 * @see #emptyHandle(String, List, TokenDef) which is used if the handler gets removed
+	 * @see #emptyHandle(String, List, TokenDef)
 	 */
 	public void setHandler(@Nullable TriConsumer<String, List<C>, @Nullable T> handler) {
 		this.handler = Optional.ofNullable(handler).orElse(this::emptyHandle);
@@ -271,7 +271,7 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 	 * @param value   value of the matched token.
 	 * @param payload payload of each character of the token
 	 * @param token   the token-definition which was matched
-	 * @see #setHandler(TriConsumer) for a description of a proper handler.
+	 * @see #setHandler(TriConsumer)
 	 */
 	private void emptyHandle(String value, List<C> payload, @Nullable T token) {
 		/*Intentionally left blank*/

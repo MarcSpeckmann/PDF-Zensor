@@ -8,9 +8,7 @@ import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AppTest {
-	/**
-	 * This method is testing valid and invalid pdf input files.
-	 */
+	/** This method is testing valid and invalid pdf input files. */
 	@Test
 	void testInputFiles() {
 		assertThrows(NullPointerException.class, () -> main((String) null));
