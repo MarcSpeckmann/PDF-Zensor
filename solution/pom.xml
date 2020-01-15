@@ -98,7 +98,7 @@
 									<type>file</type>
 									<mapper>
 										<type>perm</type>
-										<prefix>/usr/share/man</prefix>
+										<prefix>/usr/share/man/man1</prefix>
 									</mapper>
 								</data>
 								
