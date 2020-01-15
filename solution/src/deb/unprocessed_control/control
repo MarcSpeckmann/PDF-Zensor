@@ -3,7 +3,7 @@ Version: ${project.version}
 Section: misc
 Priority: low
 Architecture: all
-Depends: default-jre | java6-runtime
+Depends: default-jre | java11-runtime
 Installed-Size: 8910
 Maintainer:
-Description: [[description]]
+Description: PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file.
