@@ -241,6 +241,8 @@ public final class PDFCensor implements PDFHandler {
 		boundingBoxes = null;
 		pictureBoundingBoxes = null;
 		MetadataRemover.censorMetadata(doc);
+		doc.getDocumentCatalog().setDocumentOutline(null);
+		doc.getDocumentCatalog().setPageLabels(null);
 	}
 	
 	/**
