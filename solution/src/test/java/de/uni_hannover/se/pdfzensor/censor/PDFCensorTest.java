@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
-import static org.junit.jupiter.api.Assertions.fail;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PDFCensorTest implements PDFHandler {
