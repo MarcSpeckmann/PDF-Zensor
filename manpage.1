@@ -5,7 +5,11 @@ PDF-Zensor - a command line tool to censor PDF files
 .B pdf-zensor
 [\fB\-m\fR | \fB\-u\fR] [\fB\-hqVv\fR] [\fB\-o\fR \fI"out"\fR] [\fB\-e\fR \fI"regex"\fR [\fI"hex_color"\fR]]... \fI"in.pdf"\fR
 .SH DESCRIPTION
-PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata aswell as textual and graphical content from the pdf file. It can also partially censor PDF files aswell as highlight certain text phrases. The individual colors for censoring different elements can be configured.
+PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file. It can also partially censor PDF files and highlight certain text phrases. The individual colors for censoring different elements can be configured.
+.SS PARAMETERS
+.TP
+\fI"in.pdf"\fP
+Set the input PDF-file that should be censored. Required.
 .SS OPTIONS
 .TP
 \fB\-c\fP, \fB\--config\fP "\fI"config_file"\fR"
@@ -27,7 +31,7 @@ The output file or path the censored file should be written to. The standard out
 Silence the logging.
 .TP
 \fB\-u\fP, \fB\--censor-unmarked\fP
-This mode censors all elements of the PDF except those that have been previously commented (marked) with a program such as Adobe Acrobat or Microsoft Edge.
+This mode censors all elements of the PDF except those that have been previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge.
 .TP
 \fB\-v\fP, \fB\--verbose\fP
 Sets the loggers verbosity. Specify multiple \fB\-v\fP options to increase verbosity.
@@ -58,10 +62,6 @@ olive
 .TP
 \fI#800080\fR
 purple
-.SS PARAMETERS
-.TP
-\fI"in.pdf"\fP
-Set the input PDF-file that should be censored. Required.
 .SH EXAMPLES
 .TP
 Censor the entire PDF-document:
