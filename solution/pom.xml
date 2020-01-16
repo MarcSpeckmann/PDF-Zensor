@@ -5,8 +5,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>de.uni_hannover.se</groupId>
-	<artifactId>pdfzensor</artifactId>
+	<artifactId>pdf-zensor</artifactId>
 	<version>0.815</version>
+	<description>PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file.</description>
 	
 	<build>
 		<resources>
@@ -45,7 +46,7 @@
 							<Multi-Release>true</Multi-Release>
 						</manifestEntries>
 					</archive>
-					<finalName>pdfzensor</finalName>
+					<finalName>pdf-zensor</finalName>
 				</configuration>
 				<executions>
 					<execution>
@@ -82,12 +83,12 @@
 									<type>file</type>
 									<mapper>
 										<type>perm</type>
-										<prefix>/usr/share/pdfzensor</prefix>
+										<prefix>/usr/share/pdf-zensor</prefix>
 									</mapper>
 								</data>
 								
 								<data>
-									<src>src/deb/pdfzensor</src>
+									<src>src/deb/pdf-zensor</src>
 									<type>file</type>
 									<mapper>
 										<type>perm</type>
@@ -97,7 +98,7 @@
 								</data>
 								
 								<data>
-									<src>src/deb/pdfzensor.1.gz</src>
+									<src>src/deb/pdf-zensor.1.gz</src>
 									<type>file</type>
 									<mapper>
 										<type>perm</type>

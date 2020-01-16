@@ -1,8 +1,8 @@
-Package: ${project.artifactId}
-Version: ${project.version}
+Package: [[name]]
+Version: [[version]]
 Section: misc
 Priority: low
 Architecture: all
 Description: [[description]]
-Maintainer: 
-Depends: default-jre | java6-runtime
+Maintainer: Fabian Pflug <pflug@chi.uni-hannover.de>
+Depends: default-jre | java11-runtime
