@@ -85,5 +85,5 @@ pdf-zensor "in.pdf" -e "hello world" "#f00"
 Censor the entire PDF document and mark all text phrases "hello world" with a predefined color and all numbers with olive:
 pdf-zensor "in.pdf" -e "hello world" -e "[0-9]" "0X808000"
 .TP
-Censor the unmarked parts of the PDF document, save it in the output-file "out.pdf" and mark all text phrases "hello world" and all numbers with predefined colors separately:
+Censor only the unmarked parts of the PDF document and save it in the output-file "out.pdf". Specifically censor all occurences of "hello world" and all digits with different predefined colors:
 pdf-zensor -u "in.pdf" -o "out.pdf" -e "hello world" -e "[0-9]"
