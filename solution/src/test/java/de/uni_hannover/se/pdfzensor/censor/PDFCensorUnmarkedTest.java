@@ -55,7 +55,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D[] uncombinedBoundingBoxes,
 					   int combinedBoundingBoxesNr) throws IOException {
 		
-		var dummySettings = new Settings(null, input, "-u");
+		var dummySettings = new Settings(input, "-u");
 		this.properCensor = new PDFCensor(dummySettings);
 		this.currTextPosition = 0;
 		this.uncombinedBoundingBoxes = uncombinedBoundingBoxes;

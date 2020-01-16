@@ -119,6 +119,13 @@ final class CLArgs {
 	@Option(names = {"-i", "--intersect-images"}, arity = "0", negatable = true, description = {"This will allow text censor bars to be drawn atop of censored images should they overlap."})
 	private boolean intersectImages = false;
 	
+	/** A configuration file which should be used when censoring. */
+	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
+	@Option(names = {"-c", "--config"}, paramLabel = "\"config file\"", arity = "1",
+			description = {"Set the configuration file which should be used as a foundation when censoring the given pdf-file."})
+	@Nullable
+	private File configFile = null;
+	
 	/**
 	 * CLArgs' default constructor should be hidden to the public as {@link #fromStringArray(String...)} should be used
 	 * to initialize a new instance.
@@ -164,18 +171,18 @@ final class CLArgs {
 	 */
 	@Contract(pure = true)
 	@NotNull
-	final File getInput() {
+	File getInput() {
 		return Objects.requireNonNull(input);
 	}
 	
 	/**
-	 * Returns output file given by the user
+	 * Returns output file given by the user.
 	 *
 	 * @return The output file as it was specified by the user or null if none was specified.
 	 */
 	@Contract(pure = true)
 	@Nullable
-	final File getOutput() {
+	File getOutput() {
 		return output;
 	}
 	
@@ -237,5 +244,16 @@ final class CLArgs {
 	@Contract(pure = true)
 	boolean getQuiet() {
 		return this.quiet;
+	}
+	
+	/**
+	 * Returns the configuration file as specified by the parsed arguments.
+	 *
+	 * @return The configuration file as specified by the user or null if none was specified.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	File getConfigFile() {
+		return this.configFile;
 	}
 }

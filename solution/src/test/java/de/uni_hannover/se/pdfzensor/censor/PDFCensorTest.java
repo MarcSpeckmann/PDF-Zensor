@@ -27,7 +27,6 @@ import java.util.Objects;
 
 import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
 import static org.junit.jupiter.api.Assertions.fail;
-import static de.uni_hannover.se.pdfzensor.testing.TestUtility.*;
 
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -85,7 +84,7 @@ class PDFCensorTest implements PDFHandler {
 	@ArgumentsSource(PDFCensorBoundingBoxProvider.class)
 	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D.Double[] elements,
 					   int finalExpectedElements) throws IOException {
-		var dummySettings = new Settings(null, input);
+		var dummySettings = new Settings(input);
 		this.properCensor = new PDFCensor(dummySettings);
 		this.elements = elements;
 		this.element = 0;
@@ -118,7 +117,7 @@ class PDFCensorTest implements PDFHandler {
 			}
 		};
 		
-		var settings = new Settings(null, input);
+		var settings = new Settings(input);
 		var censor = new PDFCensor(settings);
 		
 		final var processor = new PDFProcessor(censor);
@@ -159,7 +158,7 @@ class PDFCensorTest implements PDFHandler {
 		Assertions.assertNotNull(getBoundingBoxes(properCensor));
 		// Checks if the expected number of elements have been combined
 		// (requires colors to be added because differently colored elements should not be combined)
-
+		
 		//TODO: adjust to the tokenized censoring
 		//This test would not and should not necessarily work with the tokenized censoring
 		//Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
