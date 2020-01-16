@@ -153,27 +153,33 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * Calculates the rectangle between the two rectangle and returns it if it is considered to be representing a
-	 * space-character. The gap is considered to be a space-character if its respective height (for horizontal fonts) or
-	 * width (for vertical fonts) is in a range of {@link #THIN_SPACE_WIDTH} to {@link #MAX_GAP}. Any gap that is
-	 * smaller or longer than these is considered to not be representing a space-character and thus <code>null</code> is
-	 * returned.
+	 * Calculates the rectangle between two given rectangles and returns an {@link Optional} containing that rectangle
+	 * if it is considered a space-character or an empty optional if it is not.
+	 * <br>
+	 * For a rectangle to be considered a space-character its respective height (for horizontal fonts) or width (for
+	 * vertical fonts) must be in the range of {@link #THIN_SPACE_WIDTH} to {@link #MAX_GAP}. Furthermore, the height of
+	 * a horizontal or width of a vertical space-character may be no larger than the height or width of their enclosing
+	 * rectangles.
 	 *
-	 * @param r1   the first rectangle of the two between which a space may be. May be <code>null</code>.
-	 * @param r2   the second rectangle of the two between which a space may be. May be <code>null</code>.
-	 * @param font the font of which the space would be part.
-	 * @return The gap between r1 and r2 if there may be a blank-character between them <code>null</code> otherwise.
-	 * <code>null</code> may also be returned if r1 or r2 are <code>null</code>.
+	 * @param r1   The first of the two enclosing rectangles. May be <code>null</code>.
+	 * @param r2   The second of the two enclosing rectangles. May be <code>null</code>.
+	 * @param font The font of which the space would be a part of.
+	 * @return The {@link Optional} containing the rectangle between r1 and r2 if it is a space-character. If it is not
+	 * or either r1 or r2 were <code>null</code> then an empty {@link Optional} is returned instead.
 	 */
 	private static Optional<Rectangle2D> getBlankBetween(Rectangle2D r1, Rectangle2D r2, PDFont font) {
 		if (!ObjectUtils.allNotNull(r1, r2))
 			return Optional.empty();
 		var gap = RectUtils.getRectBetween(r1, r2);
-		//size of the gap in Em (relative to the fonts height/width depending on the font's alignment)
-		double size = gap.getWidth() / r1.getHeight();
-		if (font.isVertical())
-			size = gap.getHeight() / r1.getWidth();
-		var isSpace = Range.between(THIN_SPACE_WIDTH, (double) MAX_GAP).contains(size);
+		var tolerance = 1 + DEVIATION_TOLERANCE;
+		// size of the gap in Em (relative to the fonts height/width depending on the font's alignment)
+		double size = gap.getWidth() / ((r1.getHeight() + r2.getHeight()) / 2);
+		boolean ratioFits = gap.getHeight() < tolerance * Math.max(r1.getHeight(), r2.getHeight());
+		if (font.isVertical()) {
+			size = gap.getHeight() / ((r1.getWidth() + r2.getWidth()) / 2);
+			ratioFits = gap.getWidth() < tolerance * Math.max(r1.getWidth(), r2.getWidth());
+		}
+		final var isSpace = ratioFits && Range.between(THIN_SPACE_WIDTH, (double) MAX_GAP).contains(size);
 		return Optional.of(gap).filter(b -> isSpace);
 	}
 	
