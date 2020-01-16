@@ -1,11 +1,11 @@
 .TH "PDFZENSOR" "1" "0.815"
 .SH NAME
-PDF-Zensor - a command line tool to censor PDF files
+pdf-zensor - a command line tool to censor PDF files
 .SH SYNOPSIS
 .B pdf-zensor
 [\fB\-m\fR | \fB\-u\fR] [\fB\-hqVv\fR] [\fB\-o\fR \fI"out"\fR] [\fB\-e\fR \fI"regex"\fR [\fI"hex_color"\fR]]... \fI"in.pdf"\fR
 .SH DESCRIPTION
-PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file. It can also partially censor PDF files and highlight certain text phrases. The individual colors for censoring different elements can be configured.
+pdf-zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file. It can also partially censor PDF files and highlight certain text phrases. The individual colors for censoring different elements can be configured.
 .SS PARAMETERS
 .TP
 \fI"in.pdf"\fP
@@ -16,7 +16,7 @@ Set the input PDF-file that should be censored. Required.
 Set the configuration file which should be used as a foundation when censoring the given pdf-file.
 .TP
 \fB\-e\fP, \fB\--expression\fP "regex" [\fI"hex_color"\fR]
-Set addionional regular expressions that are highlighted in a different color when censored. Your can also optionally define any color in the hexadecimal code. Information and examples below.
+Set additional regular expressions that are highlighted in a different color when censored. Your can also optionally define any color in the hexadecimal code. Information and examples below.
 .TP
 \fB\-h\fP, \fB\--help\fP
 Show a help message containing the synopsis, a small description, information about the options of the tool and exit.
@@ -39,7 +39,7 @@ Sets the loggers verbosity. Specify multiple \fB\-v\fP options to increase verbo
 \fB\-V\fP, \fB\--version\fP
 Print the version and build time and exit.
 .SS HEXADECIMAL COLOR CODES
-PDF-Zensor can progress all types of hexadecimal color codes. These color codes can start with "#", "0x" and "0X". Both 3- and 6-digit hexadecimal numbers are supported. A 3-digit hexadecimal color code is the shorthand notation of a 6-digit hexadecimal color code if the hexadecimal digits belonging to the basic tone colors are all the same in pairs. For example, "0Xf02" is the same color as "0Xff0022".
+pdf-zensor can progress all types of hexadecimal color codes. These color codes can start with "#", "0x" and "0X". Both 3- and 6-digit hexadecimal numbers are supported. A 3-digit hexadecimal color code is the shorthand notation of a 6-digit hexadecimal color code if the hexadecimal digits belonging to the basic tone colors are all the same in pairs. For example, "0Xf02" is the same color as "0Xff0022".
 \fBPopular hexadecimal color codes are:\fR
 .TP
 \fI#f00\fR
