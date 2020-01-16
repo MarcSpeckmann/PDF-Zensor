@@ -1,2 +1,2 @@
 #!/bin/sh
-java -jar /usr/share/pdf-zensor/pdfzensor-jar-with-dependencies.jar
+java -jar /usr/share/pdf-zensor/pdfzensor-jar-with-dependencies.jar "*$"
