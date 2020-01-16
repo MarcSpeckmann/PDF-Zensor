@@ -15,12 +15,6 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
-			<!-- Process the control file to include the proper version number.
-			The control file in deb/control is a symlink. -->
-			<resource>
-				<directory>src/deb/unprocessed_control</directory>
-				<filtering>true</filtering>
-			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -46,7 +40,7 @@
 							<Multi-Release>true</Multi-Release>
 						</manifestEntries>
 					</archive>
-					<finalName>pdfzensor</finalName>
+					<finalName>pdf-zensor</finalName>
 				</configuration>
 				<executions>
 					<execution>
@@ -78,7 +72,7 @@
 						<configuration>
 							<dataSet>
 								<data>
-									<src>${project.build.directory}/pdfzensor-jar-with-dependencies.jar</src>
+									<src>${project.build.directory}/pdf-zensor-jar-with-dependencies.jar</src>
 									
 									<type>file</type>
 									<mapper>
