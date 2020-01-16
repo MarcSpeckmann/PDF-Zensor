@@ -46,7 +46,7 @@
 							<Multi-Release>true</Multi-Release>
 						</manifestEntries>
 					</archive>
-					<finalName>pdf-zensor</finalName>
+					<finalName>pdfzensor</finalName>
 				</configuration>
 				<executions>
 					<execution>
