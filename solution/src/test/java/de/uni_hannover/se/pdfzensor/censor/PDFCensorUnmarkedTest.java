@@ -27,16 +27,9 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	/** Acts as a super instance. */
 	private PDFCensor properCensor;
 	
-	/**
-	 * index to iterate over the censored textPosition
-	 */
-	private int currTextPosition;
-	
 	/** The number of total elements the bounds-pair list should contain after all combinations. */
 	private int combinedBoundingBoxesNr;
 	
-	/** The BoundingBoxes of the individual elements of the PDF-file (not combined). */
-	private Rectangle2D[] uncombinedBoundingBoxes;
 	
 	/**
 	 * Checks if the elements in the PDF-file equals the given elements and are added to the bounds-color-list
@@ -52,13 +45,11 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	@ParameterizedTest(name = "Run {index}: pdf: {0}, elements: {1}, finalExpectedElements {2}")
 	@ArgumentsSource(PDFCensorUnmarkedArgumentProvider.class)
 	/* Ignore SonarLint error because the constructor is for test cases only and in <code>dummyProcessor.process(doc)</code> */
-	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D[] uncombinedBoundingBoxes,
+	void testPDFCensor(@NotNull String input,
 					   int combinedBoundingBoxesNr) throws IOException {
 		
 		var dummySettings = new Settings(null, input, "-u");
 		this.properCensor = new PDFCensor(dummySettings);
-		this.currTextPosition = 0;
-		this.uncombinedBoundingBoxes = uncombinedBoundingBoxes;
 		this.combinedBoundingBoxesNr = combinedBoundingBoxesNr;
 		
 		final var dummyProcessor = new PDFProcessor(this);
@@ -72,7 +63,7 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	 */
 	private List<ImmutablePair<Rectangle2D, Color>> getBoundingBoxes() {
 		/* Ignore warning because we can not create a class with generic attributes */
-		return getPrivateField(PDFCensor.class, this.properCensor , "boundingBoxes");
+		return getPrivateField(PDFCensor.class, this.properCensor, "boundingBoxes");
 	}
 	
 	/**
@@ -140,13 +131,11 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 		var list = getBoundingBoxes();
 		Assertions.assertNotNull(list, "boundingBoxes should be initialized since the document has been started");
 		
-		/* checks if the the list of the bounds is being combined correctly */
-		//TODO: invalid for post-tokenizer
-		/*Assertions.assertEquals(combinedBoundingBoxesNr, list.size(),
-								"the number of the combined BoundingBoxes must equal the expected one");*/
-		
 		properCensor.endPage(doc, page, pageNum);
 		
+		/* checks if the the list of the bounds is being combined correctly */
+		Assertions.assertEquals(combinedBoundingBoxesNr, list.size(),
+								"the number of the combined BoundingBoxes must equal the expected one");
 		try {
 			/* checks whether the annotation has been deleted */
 			Assertions.assertTrue(page.getAnnotations().isEmpty(), "the Annotation were not deleted");
@@ -174,41 +163,9 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	public boolean shouldCensorText(final TextPosition pos) {
 		Objects.requireNonNull(properCensor);
 		
-		/* before the TextPosition has been processed */
-		var listBefore = getBoundingBoxes();
-		int sizeBefore = listBefore.size();
-		var lastBoundsBefore = (sizeBefore > 0) ? listBefore.get(sizeBefore - 1) : null;
-		
 		boolean actual = properCensor.shouldCensorText(pos);
 		Assertions.assertEquals(isNotMarked(pos), actual, "a textPosition is misidentified");
 		
-		/* after the TextPosition has been processed */
-		var listAfter = getBoundingBoxes();
-		int sizeAfter = listAfter.size();
-		var lastBoundsAfter = (sizeAfter > 0) ? listAfter.get(sizeAfter - 1) : null;
-		/* tests when a new Box is being added */
-		if (actual) {
-			//with the tokenizer it has not been censored yet.
-			/*Assertions.assertTrue(sizeAfter > 0,
-								  "the Bounding Boxes list must not be empty after a TextPosition has been censored");*/
-			
-			/* when the colors are different */
-			if ((lastBoundsBefore != null) && !lastBoundsBefore.getRight().equals(lastBoundsAfter.getRight())) {
-				Assertions.assertEquals(sizeBefore + 1, sizeAfter);
-			}
-			
-			/* checks if the added Box get combined correctly */
-			Rectangle2D expBounds = uncombinedBoundingBoxes[currTextPosition];
-			/* the last Box was extended*/
-			if (sizeBefore == sizeAfter && lastBoundsBefore != null) {
-				expBounds = uncombinedBoundingBoxes[currTextPosition]
-						.createUnion(lastBoundsBefore.getLeft());
-			}
-			//The bounding boxes have not been added yet with the tokenizer
-			/*Assertions.assertTrue(checkRectanglesEqual(expBounds, lastBoundsAfter.getLeft(), EPSILON),
-								  "a new Box should be added correctly");*/
-			currTextPosition++;
-		}
 		return actual;
 	}
 }

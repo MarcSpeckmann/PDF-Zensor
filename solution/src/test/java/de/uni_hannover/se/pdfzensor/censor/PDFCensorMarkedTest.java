@@ -27,24 +27,15 @@ class PDFCensorMarkedTest implements PDFHandler {
 	/** Acts as a super instance. */
 	private PDFCensor properCensor;
 	
-	/**
-	 * index to iterate over the textPosition that should be censored
-	 */
-	private int currTextPosition;
-	
 	/** The number of total elements the bounds-pair list should contain after all combinations. */
 	private int combinedBoundingBoxesNr;
 	
-	/** The BoundingBoxes of the individual elements of the PDF-file (not combined). */
-	private Rectangle2D[] uncombinedBoundingBoxes;
 	
 	/**
 	 * Checks if the elements in the PDF-file equals the given elements and are added to the bounds-color-list
 	 * correctly.
 	 *
 	 * @param file                    The input PDF-file to check.
-	 * @param uncombinedBoundingBoxes The rectangle of the TextPosition in the input PDF-file that has to be censored at
-	 *                                the end.
 	 * @param combinedBoundingBoxesNr The expected length of the bounds-pair list at the end of a page after all
 	 *                                combinations have been applied.
 	 * @throws IOException If the document could not be loaded.
@@ -52,13 +43,12 @@ class PDFCensorMarkedTest implements PDFHandler {
 	@ParameterizedTest(name = "Run {index}: pdf: {0}, elements: {1}, finalExpectedElements {2}")
 	@ArgumentsSource(PDFCensorMarkedArgumentProvider.class)
 	/* Ignore SonarLint error because the constructor is for test cases only and in <code>dummyProcessor.process(doc)</code> */
-	void testPDFCensor(@NotNull String file, @NotNull Rectangle2D[] uncombinedBoundingBoxes,
+	void testPDFCensor(@NotNull String file,
 					   int combinedBoundingBoxesNr) throws IOException {
 		
 		var dummySettings = new Settings(null, file, "-m");
 		this.properCensor = new PDFCensor(dummySettings);
-		this.currTextPosition = 0;
-		this.uncombinedBoundingBoxes = uncombinedBoundingBoxes;
+		
 		this.combinedBoundingBoxesNr = combinedBoundingBoxesNr;
 		
 		final var dummyProcessor = new PDFProcessor(this);
@@ -173,9 +163,6 @@ class PDFCensorMarkedTest implements PDFHandler {
 		
 		boolean actual = properCensor.shouldCensorText(pos);
 		Assertions.assertEquals(isMarked(pos), actual, "a textPosition is misidentified");
-		if (actual) {
-			currTextPosition++;
-		}
 		return actual;
 	}
 }
