@@ -60,7 +60,7 @@ class PDFProcessorTest {
 		}
 		
 		@Override
-		public boolean shouldCensorText(final TextPosition pos) {
+		public boolean shouldCensorText(PDPage page, final TextPosition pos) {
 			return false;
 		}
 	};

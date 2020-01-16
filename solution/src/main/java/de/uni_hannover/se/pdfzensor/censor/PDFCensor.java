@@ -243,13 +243,10 @@ public final class PDFCensor implements PDFHandler {
 		MetadataRemover.censorMetadata(doc);
 	}
 	
-	/**
-	 * @param pos the TextPosition to check
-	 * @return true if <code>pos</code> should be censored, false otherwise
-	 */
+	/** {@inheritDoc} */
 	@Override
-	public boolean shouldCensorText(TextPosition pos) {
-		var bounds = getTextPositionInfo(pos).filter(p -> removePredicate.test(p));
+	public boolean shouldCensorText(PDPage page, TextPosition pos) {
+		var bounds = getTextPositionInfo(page, pos).filter(p -> removePredicate.test(p));
 		bounds.ifPresentOrElse(b -> {
 			if (annotations.isLinked(b)) {
 				tokenizer.tryFlush();
@@ -322,7 +319,7 @@ public final class PDFCensor implements PDFHandler {
 	 * @param pos The TextPosition to transform into a bounds-color pair.
 	 * @return An optional containing either the bounds-color pair or nothing, if an error occurred.
 	 */
-	private Optional<Rectangle2D> getTextPositionInfo(@NotNull TextPosition pos) {
+	private Optional<Rectangle2D> getTextPositionInfo(PDPage page, @NotNull TextPosition pos) {
 		var result = Optional.<Rectangle2D>empty();
 		try {
 			var font = pos.getFont();
@@ -332,6 +329,7 @@ public final class PDFCensor implements PDFHandler {
 			
 			if (StringUtils.isNotBlank(s)) {
 				var transformed = PDFUtils.transformTextPosition(pos);
+				transformed = PDFUtils.mediaBoxCoordToCropBoxCoord(transformed, page);
 				result = Optional.of(transformed);
 			}
 		} catch (IOException e) {

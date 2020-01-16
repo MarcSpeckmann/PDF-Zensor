@@ -184,7 +184,7 @@ class PDFCensorTest implements PDFHandler {
 	}
 	
 	@Override
-	public boolean shouldCensorText(final TextPosition pos) {
+	public boolean shouldCensorText(PDPage page, final TextPosition pos) {
 		Objects.requireNonNull(properCensor);
 		Assertions.assertTrue(element < elements.length, "Not all elements were listed for comparison.");
 		
@@ -192,7 +192,7 @@ class PDFCensorTest implements PDFHandler {
 		var sizeBefore = listBefore.size();
 		var oldLast = (sizeBefore > 0) ? listBefore.get(sizeBefore - 1) : null;
 		
-		var actual = properCensor.shouldCensorText(pos);
+		var actual = properCensor.shouldCensorText(page, pos);
 		
 		var listAfter = Objects.requireNonNull(getBoundingBoxes(properCensor));
 		var sizeAfter = listAfter.size();
