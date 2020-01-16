@@ -36,10 +36,10 @@ Print version information and exit.
 Set the input PDF-file that should be censored. Required.
 .SH EXAMPLES
 .TP
-Censor the whole PDF-document:
+Censor the entire PDF-document:
 pdf-zensor "in.pdf"
 .TP
-Censor the whole PDF-document and specify an output PDF-document:
+Censor the entire PDF-document and specify an output PDF-document:
 pdf-zensor "in.pdf" -o "out.pdf"
 .TP
 Censor the marked parts of the PDF-document:
@@ -47,3 +47,6 @@ pdf-zensor -m "in.pdf"
 .TP
 Censor the unmarked parts of the PDF-document:
 pdf-zensor -u "in.pdf"
+.TP
+Censor the entire PDF document and mark all text phrases "hello world" in red.
+pdf-zensor "in.pdf" -e "hello world" "#f00"
