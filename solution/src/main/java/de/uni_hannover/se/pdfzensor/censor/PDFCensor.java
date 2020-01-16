@@ -292,20 +292,26 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * If the given bounds intersect with any bounds from the {@link #pictureBoundingBoxes} then nothing will happen.
-	 * Otherwise the given bounding-box and color will either be added to the {@link #boundingBoxes} list or extend the
-	 * last element of the list to also cover the bounds of the given pair (if the bounds are an extension of the
-	 * previous bounds and the color is the same).
+	 * The given bounding-box and color will be added to the {@link #boundingBoxes} list or extend the last element of
+	 * the list to also cover the bounds of the given pair (if the bounds are an extension of the previous bounds and
+	 * the color is the same).
+	 * <br>
+	 * If {@link Settings#getIntersectImages()} is {@code false} then no bounding-boxes intersecting the bounding-boxes
+	 * of censored images will be added to the list or extend the last element of the list. Otherwise the overlapping of
+	 * text censor bars and censored images is not considered and they may overlap.
 	 * <br>
 	 * Whether or not the previous bounds will be extended depends on the result of {@link #getExtended(Rectangle2D,
-	 * Rectangle2D)} when called with the two rectangles.
+	 * Rectangle2D)} when called with the two rectangles (and the previously mentioned factors).
 	 *
 	 * @param bb    The bounding-box that should be added to the list of censored bounding-boxes.
 	 * @param color The color in which the provided bounding-box should be censored.
 	 * @see #getExtended(Rectangle2D, Rectangle2D)
+	 * @see Settings#getIntersectImages()
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final Rectangle2D bb, final Color color) {
-		if (pictureBoundingBoxes.stream().anyMatch(Objects.requireNonNull(bb)::intersects)) return;
+		if (!settings.getIntersectImages() &&
+			pictureBoundingBoxes.stream().anyMatch(Objects.requireNonNull(bb)::intersects))
+			return;
 		if (!boundingBoxes.isEmpty()) {
 			final var last = boundingBoxes.get(boundingBoxes.size() - 1);
 			final var union = getExtended(last.getLeft(), bb);

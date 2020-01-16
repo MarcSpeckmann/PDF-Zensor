@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static de.uni_hannover.se.pdfzensor.config.Mode.*;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.CLArgumentProvider.expExpressions;
 import static de.uni_hannover.se.pdfzensor.testing.argumentproviders.ConfigProvider.*;
 
@@ -30,17 +29,19 @@ public class SettingsProvider implements ArgumentsProvider {
 	 * require further testing when combining configuration file and command-line arguments (tests in
 	 * <code>CLArgsTest</code> should suffice).
 	 *
-	 * @param out   The output file which should be converted into an argument.
-	 * @param lvl   The verbosity level which should be converted into an argument (zero equals {@link Level#WARN}).
-	 * @param mode  The mode which should be converted into an argument.
-	 * @param exp   The expressions as a string-string pair.
-	 * @param quiet The boolean specifying silencing the logging output.
+	 * @param out             The output file which should be converted into an argument.
+	 * @param lvl             The verbosity level which should be converted into an argument (zero equals {@link
+	 *                        Level#WARN}).
+	 * @param mode            The mode which should be converted into an argument.
+	 * @param exp             The expressions as a string-string pair.
+	 * @param quiet           The boolean specifying silencing the logging output.
+	 * @param intersectImages The boolean specifying if text censor bars may intersect censored images.
 	 * @return The given values converted into valid command-line arguments including an input.
 	 */
 	@NotNull
 	private static String[] createCLArguments(@Nullable String out, final int lvl, @Nullable Mode mode,
 											  @Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
-											  boolean quiet) {
+											  boolean quiet, boolean intersectImages) {
 		Objects.requireNonNull(exp);
 		var arguments = new ArrayList<String>();
 		
@@ -50,9 +51,9 @@ public class SettingsProvider implements ArgumentsProvider {
 			arguments.add(out);
 		}
 		
-		if (MARKED.equals(mode))
+		if (Mode.MARKED.equals(mode))
 			arguments.add("-m");
-		else if (UNMARKED.equals(mode))
+		else if (Mode.UNMARKED.equals(mode))
 			arguments.add("-u");
 		
 		if (lvl > 0)
@@ -64,6 +65,8 @@ public class SettingsProvider implements ArgumentsProvider {
 		}
 		if (quiet)
 			arguments.add("-q");
+		if (intersectImages)
+			arguments.add("-i");
 		
 		return arguments.toArray(new String[0]);
 	}
@@ -80,32 +83,39 @@ public class SettingsProvider implements ArgumentsProvider {
 		var list = new ArrayList<Arguments>();
 		for (var expList : expExpressions) {
 			for (boolean quiet : List.of(true, false)) {
-				list.add(Arguments.of(null, createCLArguments(null, -1, null, expList, quiet), "sample.pdf", null, null,
-									  null, new ArrayList<>(expList), null, quiet));
-				
-				// Mode set by CLArgs
-				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-									  createCLArguments(null, -1, MARKED, expList, quiet), "sample.pdf",
-									  "censoredFile.pdf", Level.DEBUG, MARKED, new ArrayList<>(expList), null,
-									  quiet));
-				// output overwritten by CLArgs
-				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-									  createCLArguments("clArgsOutput.pdf", -1, Mode.UNMARKED, expList, quiet),
-									  "sample.pdf", "clArgsOutput.pdf", Level.DEBUG, Mode.UNMARKED,
-									  new ArrayList<>(expList), null, quiet));
-				// verbosity overwritten by CLArgs
-				list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
-									  createCLArguments(null, 3, null, expList, quiet), "sample.pdf",
-									  "censoredFile.pdf", Level.TRACE, null, new ArrayList<>(expList), null, quiet));
-				// verbosity downscaled
-				list.add(Arguments
-								 .of("valid/high_verbosity.json", createCLArguments("out.pdf", 2, null, expList, quiet),
-									 "sample.pdf", "out.pdf", Level.DEBUG, Mode.ALL, new ArrayList<>(expList), null,
-									 quiet));
-				// nested output
-				list.add(Arguments.of("valid/mode_casesDiffer.json", createCLArguments(null, -1, null, expList, quiet),
-									  "sample.pdf", "nested" + File.separatorChar + "output.pdf", null, Mode.UNMARKED,
-									  new ArrayList<>(expList), null, quiet));
+				for (boolean intersect : List.of(true, false)) {
+					list.add(Arguments.of(null, createCLArguments(null, -1, null, expList, quiet, intersect),
+										  "sample.pdf", null, null, null, new ArrayList<>(expList), null, quiet,
+										  intersect));
+					// Mode set by CLArgs
+					list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
+										  createCLArguments(null, -1, Mode.MARKED, expList, quiet, intersect), "sample.pdf",
+										  "censoredFile.pdf", Level.DEBUG, Mode.MARKED, new ArrayList<>(expList), null,
+										  quiet, intersect));
+					// output overwritten by CLArgs
+					list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
+										  createCLArguments("clArgsOutput.pdf", -1, Mode.UNMARKED, expList, quiet,
+															intersect), "sample.pdf", "clArgsOutput.pdf", Level.DEBUG,
+										  Mode.UNMARKED, new ArrayList<>(expList), null, quiet, intersect));
+					// verbosity overwritten by CLArgs
+					list.add(Arguments.of("testVerbosityAsIntegerValidConfig.json",
+										  createCLArguments(null, 3, null, expList, quiet, intersect), "sample.pdf",
+										  "censoredFile.pdf", Level.TRACE, null, new ArrayList<>(expList), null, quiet,
+										  intersect));
+					// verbosity downscaled
+					list.add(Arguments.of("valid/high_verbosity.json",
+										  createCLArguments("out.pdf", 2, null, expList, quiet, intersect),
+										  "sample.pdf", "out.pdf", Level.DEBUG, Mode.ALL, new ArrayList<>(expList),
+										  null, quiet, intersect));
+					// nested output
+					list.add(Arguments.of("valid/mode_casesDiffer.json",
+										  createCLArguments(null, -1, null, expList, quiet, intersect), "sample.pdf",
+										  "nested" + File.separatorChar + "output.pdf", null, Mode.UNMARKED, new ArrayList<>(expList), null, quiet, true));
+					// intersect disabled, verbosity clamped to next valid level
+					list.add(Arguments.of("valid/negative_verbosity.json",
+										  createCLArguments("out.pdf", -1, null, expList, quiet, intersect), "sample.pdf",
+										  "out.pdf", Level.OFF, Mode.MARKED, new ArrayList<>(expList), null, quiet, intersect));
+				}
 			}
 			// default colors in config
 			for (var e : expectedColorsForConfig.entrySet()) {
@@ -113,18 +123,18 @@ public class SettingsProvider implements ArgumentsProvider {
 				var configList = expectedExpressionForConfig.get(e.getKey());
 				if (configList != null)
 					expExpressionsList.addAll(configList);
-				list.add(Arguments.of(e.getKey(),
-									  createCLArguments(null, -1, null, expList, false),
-									  "sample.pdf", null, null, null, expExpressionsList, e.getValue(), false));
+				list.add(Arguments
+								 .of(e.getKey(), createCLArguments(null, -1, null, expList, false, false), "sample.pdf",
+									 null, null, null, expExpressionsList, e.getValue(), false, false));
 			}
 			// expressions in config
 			for (var e : expectedExpressionForConfig.entrySet()) {
 				var expExpressionsList = new ArrayList<>(expList);
 				expExpressionsList.addAll(e.getValue());
-				list.add(Arguments.of(e.getKey(),
-									  createCLArguments(null, -1, null, expList, false),
-									  "sample.pdf", null, null, null, expExpressionsList,
-									  expectedColorsForConfig.get(e.getKey()), false));
+				list.add(Arguments
+								 .of(e.getKey(), createCLArguments(null, -1, null, expList, false, false), "sample.pdf",
+									 null, null, null, expExpressionsList, expectedColorsForConfig.get(e.getKey()),
+									 false, false));
 			}
 		}
 		

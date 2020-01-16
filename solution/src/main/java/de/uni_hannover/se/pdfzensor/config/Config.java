@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import static de.uni_hannover.se.pdfzensor.utils.Utils.fitToArray;
 
@@ -30,6 +31,8 @@ final class Config {
 	/** The censor mode. See {@link Mode} for more information. */
 	@Nullable
 	private final Mode mode;
+	/** Whether text censor bars may be drawn atop of censored images. */
+	private final boolean intersectImages;
 	/** An array of {@link Expression}s to use when censoring. */
 	@Nullable
 	private final Expression[] expressions;
@@ -42,17 +45,19 @@ final class Config {
 	
 	/** The default constructor creates an empty ConfigurationParser. That is: all values are set to null. */
 	private Config() {
-		this(null, null, null, null, null);
+		this(null, null, null, null, null, null);
 	}
 	
 	/**
 	 * Initializes a new in-memory configuration from the provided values.
 	 *
-	 * @param output        the file where the censored file should be stored. Null if not specified.
-	 * @param verbose       the level of logging verbosity (encoded as a String or int). Null if not specified.
-	 * @param mode          the mode to use when censoring as a string. Null if not specified.
-	 * @param expressions   the expressions specified in the configuration file.
-	 * @param defaultColors a string array containing hexadecimal color codes. Null if not specified.
+	 * @param output          the file where the censored file should be stored. Null if not specified.
+	 * @param verbose         the level of logging verbosity (encoded as a String or int). Null if not specified.
+	 * @param mode            the mode to use when censoring as a string. Null if not specified.
+	 * @param intersectImages the boolean denoting if text censor bars may overlap censored images. Null if not
+	 *                        specified.
+	 * @param expressions     the expressions specified in the configuration file.
+	 * @param defaultColors   a string array containing hexadecimal color codes. Null if not specified.
 	 * @see #objectToLevel(Object)
 	 * @see Mode#stringToMode(String)
 	 */
@@ -60,11 +65,13 @@ final class Config {
 	private Config(@Nullable @JsonProperty("output") final File output,
 				   @Nullable @JsonProperty("verbose") final Object verbose,
 				   @Nullable @JsonProperty("censor") final String mode,
+				   @Nullable @JsonProperty("intersectImages") final Boolean intersectImages,
 				   @Nullable @JsonProperty("expressions") final Expression[] expressions,
 				   @Nullable @JsonProperty("defaultColors") final String[] defaultColors) {
 		this.output = output;
 		this.verbose = objectToLevel(verbose);
 		this.mode = Mode.stringToMode(mode);
+		this.intersectImages = Optional.ofNullable(intersectImages).orElse(false);
 		this.expressions = expressions;
 		this.defaultColors = hexArrayToColorArray(defaultColors);
 	}
@@ -161,6 +168,17 @@ final class Config {
 	@Nullable
 	Mode getMode() {
 		return this.mode;
+	}
+	
+	/**
+	 * Returns the behavior when censor bars overlap with images as specified in the loaded config.
+	 *
+	 * @return The desired behavior for overlapping censor bars and images as specified in the loaded config. True if
+	 * overlapping is allowed, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean getIntersectImages() {
+		return this.intersectImages;
 	}
 	
 	/**

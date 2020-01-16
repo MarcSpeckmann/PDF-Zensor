@@ -115,6 +115,10 @@ final class CLArgs {
 	@Option(names = {"-q", "--quiet"}, arity = "0", description = {"Silence the logging."})
 	private boolean quiet = false;
 	
+	/** If censor bars of text should be drawn atop of images. */
+	@Option(names = {"-i", "--intersect-images"}, arity = "0", negatable = true, description = {"This will allow text censor bars to be drawn atop of censored images should they overlap."})
+	private boolean intersectImages = false;
+	
 	/**
 	 * CLArgs' default constructor should be hidden to the public as {@link #fromStringArray(String...)} should be used
 	 * to initialize a new instance.
@@ -201,6 +205,17 @@ final class CLArgs {
 		if (modes.marked) desiredMode = Mode.MARKED;
 		else if (modes.unmarked) desiredMode = Mode.UNMARKED;
 		return desiredMode;
+	}
+	
+	/**
+	 * Returns the behavior when censor bars overlap with images as parsed from the given command-line arguments.
+	 *
+	 * @return The desired behavior for overlapping censor bars and images as parsed from the given command-line
+	 * arguments. True if overlapping is allowed, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean getIntersectImages() {
+		return this.intersectImages;
 	}
 	
 	/**
