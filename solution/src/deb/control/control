@@ -5,4 +5,4 @@ Priority: low
 Architecture: all
 Description: [[description]]
 Maintainer: Fabian Pflug <pflug@chi.uni-hannover.de>
-Depends: default-jre | java11-runtime
+Depends: java11-runtime
