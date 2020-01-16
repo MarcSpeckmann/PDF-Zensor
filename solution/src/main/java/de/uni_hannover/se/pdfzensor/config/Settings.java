@@ -107,6 +107,7 @@ public final class Settings {
 		logger.debug("\tOutput-file: {}", output);
 		logger.debug("\tLogger verbosity: {}", verbose);
 		logger.debug("\tQuiet: {}", clArgs::getQuiet);
+		logger.debug("\tIntersect Images: {}", intersectImages);
 		logger.debug("\tCensor mode: {}", mode);
 		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.debug("\tExpressions");

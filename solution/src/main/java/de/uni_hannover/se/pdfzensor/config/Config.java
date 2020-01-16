@@ -109,6 +109,7 @@ final class Config {
 	 *     <li>output file: null</li>
 	 *     <li>verbosity level: {@link Level#WARN}</li>
 	 *     <li>censor mode: {@link Mode#ALL}</li>
+	 *     <li>intersect images: {@code false}</li>
 	 *     <li>expressions: [regex: "."; color: {@link Settings#DEFAULT_CENSOR_COLOR}]</li>
 	 *     <li>default colors: {@link Settings#DEFAULT_COLORS}</li>
 	 * </ul>
@@ -126,6 +127,7 @@ final class Config {
 		configNode.putNull("output")
 				  .put("verbose", "WARN")
 				  .put("censor", "ALL")
+				  .put("intersectImages", "false")
 				  .putArray("expressions").add(expressions);
 		final var defaultColors = configNode.putArray("defaultColors");
 		for (var color : Settings.DEFAULT_COLORS)
