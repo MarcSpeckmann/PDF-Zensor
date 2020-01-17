@@ -242,26 +242,36 @@ public class Tokenizer<T extends TokenDef, C> implements AutoCloseable, Flushabl
 		Validate.isTrue(data.length() == payload.size(),
 						String.format("Data length (%d) and payload size (%d) do not match for data: \"%s\"",
 									  data.length(), payload.size(), data));
-		outputStream.write(data.getBytes());
 		this.payload.addAll(payload);
+		outputStream.write(data.getBytes());
 	}
 	
 	/**
 	 * Sets a new handler to handle parsed tokens. Overwrites an existing one if set. Removes the handler if null was
-	 * passed. The handler has to take 3 arguments: a {@link String} containing the value of the matched token, a {@link
-	 * List<C>} containing the payload of each character of the token, and a nullable {@link T} that represents the
-	 * token-definition that was matched. It is guaranteed that the length of the String and the List is the same and
-	 * the order of the payload in the list corresponds to the character-order in the String. The token-definition is
-	 * null if no token could be matched.
+	 * passed. The handler has to take 3 arguments:
+	 * <ol>
+	 *     <li>a {@link String} containing the value of the matched token</li>
+	 *     <li>a {@link List} with elements of the type {@link C} containing the payload of each character of the token</li>
+	 *     <li>a {@link T} that represents the token-definition which was matched (may be null)</li>
+	 * </ol>
+	 * It is guaranteed that the length of the String and the List is the same and the order of the payload in the list
+	 * corresponds to the character-order in the String. The token-definition is null if no token could be matched.
 	 *
-	 * @param handler the new handler or null to just remove the old one
+	 * @param handler the new handler or null to remove the old one
+	 * @see #emptyHandle(String, List, TokenDef)
 	 */
 	public void setHandler(@Nullable TriConsumer<String, List<C>, @Nullable T> handler) {
 		this.handler = Optional.ofNullable(handler).orElse(this::emptyHandle);
 	}
 	
 	/**
-	 * A dummy-(/empty) handler. Should be used as a default value for {@link #handler} instead of null.
+	 * A dummy-(/empty) handler. Should be used as a default value for {@link #handler} instead of null. The arguments
+	 * are only to be conform to a proper handler as nothing is actually contained in this method.
+	 *
+	 * @param value   value of the matched token.
+	 * @param payload payload of each character of the token
+	 * @param token   the token-definition which was matched
+	 * @see #setHandler(TriConsumer)
 	 */
 	private void emptyHandle(String value, List<C> payload, @Nullable T token) {
 		/*Intentionally left blank*/

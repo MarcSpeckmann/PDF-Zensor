@@ -11,11 +11,13 @@ import picocli.CommandLine;
 import java.io.IOException;
 
 public class App {
+	public static final String ROOT_DIR = "";
+	
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
 	public static void main(String... args) {
 		try {
 			if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
-				final var settings = new Settings(null, args);
+				final var settings = new Settings(args);
 				final var censor = new PDFCensor(settings);
 				final var processor = new PDFProcessor(censor);
 				try (final var doc = PDDocument.load(settings.getInput())) {

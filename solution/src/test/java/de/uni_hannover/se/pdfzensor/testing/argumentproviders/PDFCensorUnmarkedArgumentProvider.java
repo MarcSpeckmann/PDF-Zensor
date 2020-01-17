@@ -12,10 +12,13 @@ import static de.uni_hannover.se.pdfzensor.testing.TestConstants.PDF_RESOURCE_PA
 import static de.uni_hannover.se.pdfzensor.testing.TestUtility.getResourcePath;
 
 /**
- * PDFCensorUnmarkedArgumentProvider can be used as a value-source for methods taking <code>{@code String,
- * Rectangle2D[], int}</code> for and argument. The string is the path to the pdf-file that should be read. The
- * Rectangle2D[] are the uncombined bounding boxes. It is later checked if they - joined - are approximately the same as
- * the actual, censored bounding-boxes. Lastly the int gives the amount of combined bounding-boxes that are expected.
+ * This class implements {@link ArgumentsProvider} and provides the arguments for the unit test of
+ * PDFCensorUnmarkedTest.
+ * <br>
+ * The types of the arguments are {@code String, Rectangle2D[], int}. The {@link String} is a path to a test pdf and the
+ * {@link Rectangle2D}-array contains the uncombined bounding-boxes. It is later checked if they - joined - are
+ * approximately the same as the actual, censored bounding-boxes. Lastly the {@link int} specifies the expected amount
+ * of remaining bounding-boxes, after they have been combined.
  */
 public final class PDFCensorUnmarkedArgumentProvider implements ArgumentsProvider {
 	

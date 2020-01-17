@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.images;
 
+import de.uni_hannover.se.pdfzensor.testing.PDFChecker;
 import de.uni_hannover.se.pdfzensor.testing.TestUtility;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.ImageReplacerArgumentProvider;
 import de.uni_hannover.se.pdfzensor.testing.argumentproviders.PDFProvider;
@@ -14,17 +15,21 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ImageReplacerTest {
 	
-	private static void assertNoXObjectsInPage(@NotNull PDPage page) {
-		var data = page.getResources().getXObjectNames();
-		var xObjCount = StreamSupport.stream(data.spliterator(), false).count();
-		assertEquals(0, xObjCount, "XObjects are still present");
+	/**
+	 * This function fails the current test if in rectList is no rectangle similar to rect.
+	 *
+	 * @param rect     A rectangle
+	 * @param rectList A list of rectangles
+	 */
+	static void assertContainsRect(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
+		boolean contained = rectList.stream().anyMatch(r -> TestUtility.checkRectanglesEqual(rect, r, 1));
+		assertTrue(contained, rect + " was not present in " + rectList);
 	}
 	
 	/**
@@ -41,17 +46,6 @@ public class ImageReplacerTest {
 		} catch (IOException e) {
 			fail(e);
 		}
-	}
-	
-	/**
-	 * This function fails the current test if in rectList is no rectangle similar to rect.
-	 *
-	 * @param rect     A rectangle
-	 * @param rectList A list of rectangles
-	 */
-	static void assertContainsRect(Rectangle2D rect, @NotNull List<Rectangle2D> rectList) {
-		boolean contained = rectList.stream().anyMatch(r -> TestUtility.checkRectanglesEqual(rect, r, 1));
-		assertTrue(contained, rect + " was not present in " + rectList);
 	}
 	
 	/**
@@ -77,11 +71,8 @@ public class ImageReplacerTest {
 	@ArgumentsSource(PDFProvider.class)
 	void testImageDataRemoval(File file) {
 		try (var doc = PDDocument.load(file)) {
-			var imgRepl = new ImageReplacer();
-			for (var page : doc.getPages()) {
-				imgRepl.replaceImages(doc, page);
-				assertNoXObjectsInPage(page);
-			}
+			ImageReplacer.removeImageData(doc);
+			PDFChecker.assertNoXObjects(doc);
 		} catch (IOException e) {
 			fail(e);
 		}

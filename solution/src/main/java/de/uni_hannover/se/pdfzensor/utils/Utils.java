@@ -1,8 +1,10 @@
 package de.uni_hannover.se.pdfzensor.utils;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.Functions;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSFloat;
 import org.apache.pdfbox.cos.COSNumber;
@@ -154,5 +156,33 @@ public final class Utils {
 			}
 		}
 		return array;
+	}
+	
+	/**
+	 * Tries to run the provided method. If an exception is thrown during that period, it is caught and logged at
+	 * WARN-level. If the thrown exception is an {@link InterruptedException}, the current thread is interrupted again
+	 * ({@link Thread#interrupt()}). If no exception was thrown, true is returned &mdash; false otherwise.
+	 *
+	 * @param method the runnable that should be run. May not be <code>null</code>.
+	 * @param logger the logger used to log any occurring exception. May not be <code>null</code>.
+	 * @param message the message to log the exception with. May be <code>null</code>.
+	 * @return true iff no exception was thrown.
+	 */
+	public static boolean tryCall(@NotNull Functions.FailableRunnable<? extends Exception> method,
+								  @NotNull Logger logger, @Nullable String message) {
+		Objects.requireNonNull(method);
+		Objects.requireNonNull(logger);
+		boolean success = false;
+		try {
+			method.run();
+			success = true;
+		} catch (Exception e) {
+			logger.warn(message, e);
+			if (e instanceof InterruptedException) {
+				logger.warn("Thread got interrupted");
+				Thread.currentThread().interrupt();
+			}
+		}
+		return success;
 	}
 }

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.apache.pdfbox.contentstream.operator.OperatorName.DRAW_OBJECT;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class PDFCensorTest implements PDFHandler {
 	/** Acts as a super instance. */
@@ -84,7 +84,7 @@ class PDFCensorTest implements PDFHandler {
 	@ArgumentsSource(PDFCensorBoundingBoxProvider.class)
 	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D.Double[] elements,
 					   int finalExpectedElements) throws IOException {
-		var dummySettings = new Settings(null, input);
+		var dummySettings = new Settings(input);
 		this.properCensor = new PDFCensor(dummySettings);
 		this.elements = elements;
 		this.element = 0;
@@ -117,7 +117,7 @@ class PDFCensorTest implements PDFHandler {
 			}
 		};
 		
-		var settings = new Settings(null, input);
+		var settings = new Settings(input);
 		var censor = new PDFCensor(settings);
 		
 		final var processor = new PDFProcessor(censor);
@@ -156,7 +156,6 @@ class PDFCensorTest implements PDFHandler {
 	public void endPage(final PDDocument doc, final PDPage page, final int pageNum) {
 		Objects.requireNonNull(properCensor);
 		Assertions.assertNotNull(getBoundingBoxes(properCensor));
-		
 		
 		properCensor.endPage(doc, page, pageNum);
 		// Checks if the expected number of elements have been combined
