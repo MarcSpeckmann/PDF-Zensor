@@ -40,17 +40,19 @@ class ConfigTest {
 	/**
 	 * Tests whether or not parsing the given configuration file results in the expected config.
 	 *
-	 * @param configFile  The config file which will be used in this test.
-	 * @param output      The expected output file.
-	 * @param verbosity   The expected logger verbosity.
-	 * @param mode        The expected censor mode.
-	 * @param expressions The expected expressions as a list of string-string pairs.
-	 * @param defColors   The expected default colors to assign to color-less expressions.
+	 * @param configFile      The config file which will be used in this test.
+	 * @param output          The expected output file.
+	 * @param verbosity       The expected logger verbosity.
+	 * @param mode            The expected censor mode.
+	 * @param intersectImages The expected intersecting image behavior.
+	 * @param expressions     The expected expressions as a list of string-string pairs.
+	 * @param defColors       The expected default colors to assign to color-less expressions.
 	 */
-	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, expressions: {4}, defColors: {5}")
+	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, intersectImages: {4}, expressions: {5}, defColors: {6}")
 	@ArgumentsSource(ConfigProvider.class)
 	void testValidConfigurations(@Nullable File configFile, @Nullable File output, @Nullable Level verbosity,
-								 @Nullable Mode mode, @Nullable ArrayList<ImmutablePair<String, String>> expressions,
+								 @Nullable Mode mode, boolean intersectImages,
+								 @Nullable ArrayList<ImmutablePair<String, String>> expressions,
 								 @Nullable Color[] defColors) {
 		var config = Config.fromFile(configFile);
 		
@@ -59,6 +61,8 @@ class ConfigTest {
 		assertEquals(verbosity, config.getVerbosity());
 		
 		assertEquals(mode, config.getMode());
+		
+		assertEquals(intersectImages, config.getIntersectImages());
 		
 		var actualExpressions = config.getExpressions();
 		if (expressions != null) {

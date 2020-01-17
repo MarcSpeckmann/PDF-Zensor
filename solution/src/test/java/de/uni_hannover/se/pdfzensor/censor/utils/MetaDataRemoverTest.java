@@ -24,9 +24,10 @@ class MetaDataRemoverTest {
 	}
 	
 	/**
-	 * Tests if all of the metadata have been censored correctly using a valid PDF.
+	 * Tests if all of the metadata has been censored correctly in a valid PDF.
 	 *
-	 * @throws IOException if an I/O-error occurs.
+	 * @param file The pdf file to test.
+	 * @throws IOException if an I/O error occurs.
 	 */
 	@ParameterizedTest
 	@ArgumentsSource(PDFProvider.class)

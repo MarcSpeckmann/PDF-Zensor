@@ -115,6 +115,10 @@ final class CLArgs {
 	@Option(names = {"-q", "--quiet"}, arity = "0", description = {"Silence the logging."})
 	private boolean quiet = false;
 	
+	/** If censor bars of text should be drawn atop of images. */
+	@Option(names = {"-i", "--intersect-images"}, arity = "0", negatable = true, description = {"This will allow text censor bars to be drawn atop of censored images should they overlap."})
+	private boolean intersectImages = false;
+	
 	/** A configuration file which should be used when censoring. */
 	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
 	@Option(names = {"-c", "--config"}, paramLabel = "\"config file\"", arity = "1",
@@ -211,6 +215,17 @@ final class CLArgs {
 	}
 	
 	/**
+	 * Returns the behavior when censor bars overlap with images as parsed from the given command-line arguments.
+	 *
+	 * @return The desired behavior for overlapping censor bars and images as parsed from the given command-line
+	 * arguments. True if overlapping is allowed, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean getIntersectImages() {
+		return this.intersectImages;
+	}
+	
+	/**
 	 * The array representation of the expressions list parsed from the given command-line arguments.
 	 *
 	 * @return An array containing all the expressions.
@@ -238,5 +253,7 @@ final class CLArgs {
 	 */
 	@Contract(pure = true)
 	@Nullable
-	File getConfigFile() { return this.configFile; }
+	File getConfigFile() {
+		return this.configFile;
+	}
 }

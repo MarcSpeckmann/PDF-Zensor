@@ -161,9 +161,10 @@ public class ImageReplacer extends PDFStreamEngine {
 	}
 	
 	/**
-	 * Draws the censor bars stored in {@link #rects} in the given
-	 * <code>document</code> on the given <code>page</code>.
+	 * Draws the censor bars stored in {@link #rects} in the given <code>document</code> on the given
+	 * <code>page</code>.
 	 *
+	 * @param pageContentStream The {@link PDPageContentStream} in which to write the censor box.
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
 	private void drawPictureCensorBox(@NotNull PDPageContentStream pageContentStream) throws IOException {

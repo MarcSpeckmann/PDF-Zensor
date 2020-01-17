@@ -69,6 +69,11 @@ public final class Settings {
 	 */
 	@NotNull
 	private final Expression[] expressions;
+	/**
+	 * True if text censor bars may be drawn atop of censored images, false otherwise (text will be removed but no
+	 * censor bar is drawn).
+	 */
+	private final boolean intersectImages;
 	
 	/**
 	 * Constructs the settings object from the configuration file and the commandline arguments.
@@ -89,6 +94,7 @@ public final class Settings {
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
 		final var defColors = ObjectUtils.firstNonNull(config.getDefaultColors(), DEFAULT_COLORS);
 		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), defColors);
+		intersectImages = clArgs.getIntersectImages() || config.getIntersectImages();
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
@@ -101,6 +107,7 @@ public final class Settings {
 		logger.debug("\tOutput-file: {}", output);
 		logger.debug("\tLogger verbosity: {}", verbose);
 		logger.debug("\tQuiet: {}", clArgs::getQuiet);
+		logger.debug("\tIntersect Images: {}", intersectImages);
 		logger.debug("\tCensor mode: {}", mode);
 		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.debug("\tExpressions");
@@ -154,6 +161,14 @@ public final class Settings {
 	@Contract(pure = true)
 	public Expression[] getExpressions() {
 		return ObjectUtils.cloneIfPossible(expressions);
+	}
+	
+	/**
+	 * @return True if text censor bars may overlap with censored images, false otherwise.
+	 */
+	@Contract(pure = true)
+	public boolean getIntersectImages() {
+		return intersectImages;
 	}
 	
 	/**

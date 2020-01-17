@@ -7,6 +7,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import static java.lang.Math.max;
+
 /**
  * Criteria which can be chosen to check if an object is marked.
  */
@@ -49,7 +51,7 @@ public enum MarkCriterion {
 	 * @return the rectangle's area.
 	 */
 	private static double areaOfRect(@NotNull Rectangle2D rect) {
-		return rect.getWidth() * rect.getHeight();
+		return max(0, rect.getWidth()) * max(0, rect.getHeight());
 	}
 	
 	/**

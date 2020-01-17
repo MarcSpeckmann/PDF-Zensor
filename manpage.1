@@ -30,6 +30,9 @@ The output file or path the censored file should be written to. The standard out
 \fB\-q\fP, \fB\--quiet\fP
 Silence the logging.
 .TP
+\fB\-i\fP, \fB\--intersect-images\fP
+Enable the drawing of text censor bars over censored imaged. This value is false by default, meaning censor bars, which would usually be drawn in place of text, are only drawn if they are not overlapping with a censored image. However, in some cases (e. g. scanned pdf-files) large portions of a page are images: not allowing censor bars and censored images to overlap would make it seem as if no text was present at all.
+.TP
 \fB\-u\fP, \fB\--censor-unmarked\fP
 This mode censors all elements of the PDF except those that have been previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge.
 .TP

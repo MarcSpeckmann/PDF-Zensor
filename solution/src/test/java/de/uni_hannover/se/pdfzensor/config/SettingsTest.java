@@ -35,22 +35,23 @@ class SettingsTest {
 	/**
 	 * Checks if the arguments are parsed into the corresponding expected values.
 	 *
-	 * @param args        The arguments from which the Settings constructed.
-	 * @param input       The input file.
-	 * @param output      The expected output file.
-	 * @param verbosity   The expected logger verbosity level.
-	 * @param mode        The expected censoring mode.
-	 * @param expressions The expected expressions as a list of string-string pairs as specified in the command-line
-	 *                    arguments (since there is no config).
-	 * @param quiet       The expected logger mode (whether or not it is expected to be silenced).
+	 * @param args            The arguments from which the Settings constructed.
+	 * @param input           The input file.
+	 * @param output          The expected output file.
+	 * @param verbosity       The expected logger verbosity level.
+	 * @param mode            The expected censoring mode.
+	 * @param expressions     The expected expressions as a list of string-string pairs as specified in the command-line
+	 *                        arguments (since there is no config).
+	 * @param quiet           The expected logger mode (whether or not it is expected to be silenced).
+	 * @param intersectImages The expected behavior for overlapping text censor bars and censored images.
 	 */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}, intersectImages: {7}")
 	@ArgumentsSource(CLArgumentProvider.class)
 	void testSettingsNoConfig(@NotNull String[] args, @NotNull File input, @Nullable File output,
 							  @Nullable Level verbosity,
 							  @Nullable Mode mode,
 							  @NotNull ArrayList<ImmutablePair<String, String>> expressions,
-							  boolean quiet) {
+							  boolean quiet, boolean intersectImages) {
 		Logging.deinit();
 		final var settings = new Settings(args);
 		
@@ -75,29 +76,31 @@ class SettingsTest {
 			assertEquals(e.getRegex(), actualExp[i].getRegex());
 			assertEquals(e.getColor(), actualExp[i].getColor());
 		}
+		assertEquals(intersectImages, settings.getIntersectImages());
 	}
 	
 	/**
 	 * Tests the correctness of the settings when a configuration file and command-line arguments are present.
 	 *
-	 * @param args        The command-line arguments.
-	 * @param input       The input file.
-	 * @param output      The output file.
-	 * @param verbosity   The verbosity level of the logger (not considering the quiet setting).
-	 * @param mode        The mode to use when censoring.
-	 * @param expressions The expressions which are expected to be parsed (exclusive the fallback Expression).
-	 * @param defColors   The default colors from which one will be added to an Expression without a color.
-	 * @param quiet       The boolean specifying if the logger should be silenced.
+	 * @param args            The command-line arguments.
+	 * @param input           The input file.
+	 * @param output          The output file.
+	 * @param verbosity       The verbosity level of the logger (not considering the quiet setting).
+	 * @param mode            The mode to use when censoring.
+	 * @param expressions     The expressions which are expected to be parsed (exclusive the fallback Expression).
+	 * @param defColors       The default colors from which one will be added to an Expression without a color.
+	 * @param quiet           The boolean specifying if the logger should be silenced.
+	 * @param intersectImages The boolean specifying if text censor bars may intersect censored images.
 	 */
 	@SuppressWarnings("unchecked")
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, defColors: {6}, quiet: {7}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, defColors: {6}, quiet: {7}, intersectImages: {8}")
 	@ArgumentsSource(SettingsProvider.class)
 	void testSettingsValidConfig(@NotNull final String[] args, @NotNull File input,
 								 @Nullable File output, @Nullable Level verbosity,
 								 @Nullable Mode mode,
 								 @NotNull ArrayList<ImmutablePair<String, String>> expressions,
 								 @Nullable Color[] defColors,
-								 boolean quiet) {
+								 boolean quiet, boolean intersectImages) {
 		Logging.deinit();
 		var settings = new Settings(args);
 		
@@ -118,6 +121,8 @@ class SettingsTest {
 		expressions.add(new ImmutablePair<>(".", colorToString(Settings.DEFAULT_CENSOR_COLOR)));
 		assertEqualExpressions(expressions.toArray(new ImmutablePair[0]), settings.getExpressions(),
 							   defColors != null ? defColors : settingsDefColors);
+		
+		assertEquals(intersectImages, settings.getIntersectImages());
 	}
 	
 	/** Dummy Unit-tests for function getLinkColor. */
