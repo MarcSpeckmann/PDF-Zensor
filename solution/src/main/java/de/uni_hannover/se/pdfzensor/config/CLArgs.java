@@ -116,8 +116,12 @@ final class CLArgs {
 	private boolean quiet = false;
 	
 	/** If censor bars of text should be drawn atop of images. */
-	@Option(names = {"-i", "--intersect-images"}, arity = "0", negatable = true, description = {"This will allow text censor bars to be drawn atop of censored images should they overlap."})
+	@Option(names = {"-i", "--intersect-images"}, arity = "0", description = {"This will allow text censor bars to be drawn atop of censored images should they overlap."})
 	private boolean intersectImages = false;
+	
+	/** Whether links should be distinguishable from normal text by their censor color or be considered normal text. */
+	@Option(names = {"-l", "--links"}, arity = "0", description = {"This will enable links to be colored in a certain color (different from the default censor color) and not be considered 'normal text'."})
+	private boolean distinguishLinks = false;
 	
 	/** A configuration file which should be used when censoring. */
 	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
@@ -223,6 +227,17 @@ final class CLArgs {
 	@Contract(pure = true)
 	boolean getIntersectImages() {
 		return this.intersectImages;
+	}
+	
+	/**
+	 * Returns whether links should be distinguishable from normal text by their censor color or be considered normal
+	 * text instead as parsed from the given command-line arguments.
+	 *
+	 * @return True if a distinction of links and normal text is desired, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean distinguishLinks() {
+		return this.distinguishLinks;
 	}
 	
 	/**

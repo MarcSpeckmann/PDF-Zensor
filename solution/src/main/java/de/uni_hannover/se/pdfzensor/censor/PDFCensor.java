@@ -260,7 +260,7 @@ public final class PDFCensor implements PDFHandler {
 	public boolean shouldCensorText(TextPosition pos) {
 		var bounds = getTextPositionInfo(pos).filter(p -> removePredicate.test(p));
 		bounds.ifPresentOrElse(b -> {
-			if (annotations.isLinked(b)) {
+			if (settings.distinguishLinks() && annotations.isLinked(b)) {
 				tokenizer.tryFlush();
 				addOrExtendBoundingBoxes(b, settings.getLinkColor());
 			} else {

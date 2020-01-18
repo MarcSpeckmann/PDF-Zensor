@@ -25,7 +25,7 @@ import static de.uni_hannover.se.pdfzensor.utils.Utils.*;
 /** An in-memory representation of a configuration-file. */
 final class Config {
 	/** The path to the default config file and its name. */
-	private static File DEFAULT_CONFIG_FILE = new File(App.ROOT_DIR + "defaultConfig.json");
+	private static final File DEFAULT_CONFIG_FILE = new File(App.ROOT_DIR + "defaultConfig.json");
 	/** A default output-path. Stores the folder censored PDF-files should be written to. */
 	@Nullable
 	private final File output;
@@ -37,6 +37,8 @@ final class Config {
 	private final Mode mode;
 	/** Whether text censor bars may be drawn atop of censored images. */
 	private final boolean intersectImages;
+	/** Whether links should be distinguishable from normal text by their censor color or be considered normal text. */
+	private final boolean distinguishLinks;
 	/** An array of {@link Expression}s to use when censoring. */
 	@Nullable
 	private final Expression[] expressions;
@@ -47,21 +49,26 @@ final class Config {
 	@Nullable
 	private final Color[] defaultColors;
 	
-	/** The default constructor creates an empty ConfigurationParser. That is: all values are set to null. */
+	/**
+	 * The default constructor creates an empty ConfigurationParser. That is: all values are set to null (or their
+	 * respective default value in case of primitive types).
+	 */
 	private Config() {
-		this(null, null, null, null, null, null);
+		this(null, null, null, null, null, null, null);
 	}
 	
 	/**
 	 * Initializes a new in-memory configuration from the provided values.
 	 *
-	 * @param output          the file where the censored file should be stored. Null if not specified.
-	 * @param verbose         the level of logging verbosity (encoded as a String or int). Null if not specified.
-	 * @param mode            the mode to use when censoring as a string. Null if not specified.
-	 * @param intersectImages the boolean denoting if text censor bars may overlap censored images. Null if not
-	 *                        specified.
-	 * @param expressions     the expressions specified in the configuration file.
-	 * @param defaultColors   a string array containing hexadecimal color codes. Null if not specified.
+	 * @param output           the file where the censored file should be stored. Null if not specified.
+	 * @param verbose          the level of logging verbosity (encoded as a String or int). Null if not specified.
+	 * @param mode             the mode to use when censoring as a string. Null if not specified.
+	 * @param intersectImages  the boolean denoting if text censor bars may overlap censored images. Null if not
+	 *                         specified.
+	 * @param distinguishLinks the boolean denoting if links should be distinguished or treated the same as normal text.
+	 *                         Null if not specified.
+	 * @param expressions      the expressions specified in the configuration file.
+	 * @param defaultColors    a string array containing hexadecimal color codes. Null if not specified.
 	 * @see #objectToLevel(Object)
 	 * @see Mode#stringToMode(String)
 	 */
@@ -70,12 +77,14 @@ final class Config {
 				   @Nullable @JsonProperty("verbose") final Object verbose,
 				   @Nullable @JsonProperty("censor") final String mode,
 				   @Nullable @JsonProperty("intersectImages") final Boolean intersectImages,
+				   @Nullable @JsonProperty("links") final Boolean distinguishLinks,
 				   @Nullable @JsonProperty("expressions") final Expression[] expressions,
 				   @Nullable @JsonProperty("defaultColors") final String[] defaultColors) {
 		this.output = output;
 		this.verbose = objectToLevel(verbose);
 		this.mode = Mode.stringToMode(mode);
 		this.intersectImages = Optional.ofNullable(intersectImages).orElse(false);
+		this.distinguishLinks = Optional.ofNullable(distinguishLinks).orElse(false);
 		this.expressions = expressions;
 		this.defaultColors = hexArrayToColorArray(defaultColors);
 	}
@@ -110,6 +119,7 @@ final class Config {
 	 *     <li>verbosity level: {@link Level#WARN}</li>
 	 *     <li>censor mode: {@link Mode#ALL}</li>
 	 *     <li>intersect images: {@code false}</li>
+	 *     <li>distinguish links: {@code false}</li>
 	 *     <li>expressions: [regex: "."; color: {@link Settings#DEFAULT_CENSOR_COLOR}]</li>
 	 *     <li>default colors: {@link Settings#DEFAULT_COLORS}</li>
 	 * </ul>
@@ -127,7 +137,8 @@ final class Config {
 		configNode.putNull("output")
 				  .put("verbose", "WARN")
 				  .put("censor", "ALL")
-				  .put("intersectImages", "false")
+				  .put("intersectImages", false)
+				  .put("links", false)
 				  .putArray("expressions").add(expressions);
 		final var defaultColors = configNode.putArray("defaultColors");
 		for (var color : Settings.DEFAULT_COLORS)
@@ -238,6 +249,17 @@ final class Config {
 	@Contract(pure = true)
 	boolean getIntersectImages() {
 		return this.intersectImages;
+	}
+	
+	/**
+	 * Returns whether links should be distinguishable from normal text by their censor color or be considered normal
+	 * text instead as specified in the loaded config.
+	 *
+	 * @return True if a distinction of links and normal text is desired, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean distinguishLinks() {
+		return this.distinguishLinks;
 	}
 	
 	/**
