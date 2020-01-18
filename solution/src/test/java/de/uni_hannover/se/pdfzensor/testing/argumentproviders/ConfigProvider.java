@@ -54,6 +54,7 @@ public class ConfigProvider implements ArgumentsProvider {
 	 * @param lvl             The expected logger verbosity.
 	 * @param mode            The expected censor mode.
 	 * @param intersectImages The expected intersecting image behavior.
+	 * @param links           The expected given setting for distinguishing links.
 	 * @param expressions     The expected expressions as a string-string pair list.
 	 * @param colors          The expected default colors.
 	 * @return An Argument containing the config file and the expected values.
@@ -61,12 +62,14 @@ public class ConfigProvider implements ArgumentsProvider {
 	private static Arguments createArgument(@Nullable String configName, @Nullable String out, @Nullable Level lvl,
 											@Nullable Mode mode,
 											@Nullable Boolean intersectImages,
+											@Nullable Boolean links,
 											@Nullable ArrayList<ImmutablePair<String, String>> expressions,
 											@Nullable Color[] colors) {
 		var config = Optional.ofNullable(configName).map(c -> getResource(CONFIG_PATH + c)).orElse(null);
 		var outFile = Optional.ofNullable(out).map(File::new).orElse(null);
-		var intersectImgs = Optional.ofNullable(intersectImages).orElse(false);
-		return Arguments.of(config, outFile, lvl, mode, intersectImgs, expressions, colors);
+		var intersectImg = Optional.ofNullable(intersectImages).orElse(false);
+		var distLinks = Optional.ofNullable(links).orElse(false);
+		return Arguments.of(config, outFile, lvl, mode, intersectImg, distLinks, expressions, colors);
 	}
 	
 	/**
@@ -80,28 +83,29 @@ public class ConfigProvider implements ArgumentsProvider {
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();
-		list.add(createArgument(null, null, null, null, null, null, null));
+		list.add(createArgument(null, null, null, null, null, null, null, null));
 		list.add(createArgument("testVerbosityAsIntegerValidConfig.json", "censoredFile.pdf",
-								Level.DEBUG, null, null, null, null));
+								Level.DEBUG, null, null, null, null, null));
 		list.add(createArgument("testVerbosityAsStringValidConfig.json", "censoredFile.pdf",
-								Level.DEBUG, null, null, null, null));
+								Level.DEBUG, null, null, null, null, null));
 		list.add(createArgument("valid/high_verbosity.json", "censoredFile.pdf",
-								Level.ALL, Mode.ALL, null, null, null));
+								Level.ALL, Mode.ALL, null, false, null, null));
 		list.add(createArgument("valid/mode_casesDiffer.json", "nested" + File.separatorChar + "output.pdf",
-								null, Mode.UNMARKED, true, null, null));
+								null, Mode.UNMARKED, true, null, null, null));
 		list.add(createArgument("valid/negative_verbosity.json", "censoredFile.pdf",
-								Level.OFF, Mode.MARKED, false, null, null));
+								Level.OFF, Mode.MARKED, false, true, null, null));
 		list.add(createArgument("valid/still_a_json.txt", "censoredFile.pdf",
-								Level.OFF, null, true, null, null));
+								Level.OFF, null, true, null, null, null));
 		list.add(createArgument("valid/unknown_mode.json", null,
-								null, null, null, null, null));
+								null, null, null, null, null, null));
 		list.add(createArgument("valid/unknown_verbosity.json", "censoredFile.pdf",
-								null, Mode.UNMARKED, null, null, null));
+								null, Mode.UNMARKED, null, null, null, null));
 		for (var col : expectedColorsForConfig.entrySet())
-			list.add(createArgument(col.getKey(), null, null, null, null, expectedExpressionForConfig.get(col.getKey()),
+			list.add(createArgument(col.getKey(), null, null, null, null, null,
+									expectedExpressionForConfig.get(col.getKey()),
 									col.getValue()));
 		for (var exp : expectedExpressionForConfig.entrySet())
-			list.add(createArgument(exp.getKey(), null, null, null, null, exp.getValue(),
+			list.add(createArgument(exp.getKey(), null, null, null, null, null, exp.getValue(),
 									expectedColorsForConfig.get(exp.getKey())));
 		
 		return list.stream();

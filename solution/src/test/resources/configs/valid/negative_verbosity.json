@@ -2,5 +2,6 @@
   "verbose": -3,
   "output":"censoredFile.pdf",
   "censor":"marked",
-  "intersectImages":"false"
+  "intersectImages":false,
+  "links":"true"
 }

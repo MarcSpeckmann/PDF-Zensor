@@ -37,7 +37,7 @@ final class Config {
 	private final Mode mode;
 	/** Whether text censor bars may be drawn atop of censored images. */
 	private final boolean intersectImages;
-	/** Whether links should be distinguishable from normal text by their censor color or be considered normal text. */
+	/** Whether links should be distinguished from normal text or be considered normal text. */
 	private final boolean distinguishLinks;
 	/** An array of {@link Expression}s to use when censoring. */
 	@Nullable
@@ -252,8 +252,7 @@ final class Config {
 	}
 	
 	/**
-	 * Returns whether links should be distinguishable from normal text by their censor color or be considered normal
-	 * text instead as specified in the loaded config.
+	 * Returns whether links should be distinguished from normal text as specified in the loaded config.
 	 *
 	 * @return True if a distinction of links and normal text is desired, false otherwise.
 	 */

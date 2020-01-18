@@ -60,10 +60,7 @@ public final class Settings {
 	/** The color with which to censor links if {@link #distinguishLinks} is true. */
 	@NotNull
 	private final Color linkColor;
-	/**
-	 * Whether links should be distinguishable from normal text by their censor color ({@link #DEFAULT_CENSOR_COLOR}) or
-	 * be considered normal text.
-	 */
+	/** Whether links should be distinguished from normal text or be considered normal text. */
 	private final boolean distinguishLinks;
 	/** The mode to use for censoring. See {@link Mode} for more information. */
 	@NotNull
@@ -115,7 +112,7 @@ public final class Settings {
 		logger.debug("\tQuiet: {}", clArgs::getQuiet);
 		logger.debug("\tIntersect Images: {}", intersectImages);
 		logger.debug("\tCensor mode: {}", mode);
-		logger.debug("\tDistinguish Links by color: {}", distinguishLinks);
+		logger.debug("\tDistinguish Links: {}", distinguishLinks);
 		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.debug("\tExpressions");
 		for (var exp : expressions)
@@ -153,7 +150,7 @@ public final class Settings {
 	}
 	
 	/**
-	 * @return True if links should be distinguishable from normal text, false otherwise. As specified in either the
+	 * @return True if links should be distinguished from normal text, false otherwise. As specified in either the
 	 * command-line arguments or config.
 	 */
 	@Contract(pure = true)

@@ -41,13 +41,14 @@ public class SettingsProvider implements ArgumentsProvider {
 	 * @param exp             The expressions as a string-string pair.
 	 * @param quiet           The boolean specifying silencing the logging output.
 	 * @param intersectImages The boolean specifying if text censor bars may intersect censored images.
+	 * @param links           The boolean specifying if links should be distinguished from 'normal text'.
 	 * @return The given values converted into valid command-line arguments including an input.
 	 */
 	@NotNull
 	private static String[] createCLArguments(@Nullable String config, @Nullable String out, final int lvl,
 											  @Nullable Mode mode,
 											  @Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
-											  boolean quiet, boolean intersectImages) {
+											  boolean quiet, boolean intersectImages, boolean links) {
 		Objects.requireNonNull(exp);
 		var arguments = new ArrayList<String>();
 		
@@ -79,6 +80,8 @@ public class SettingsProvider implements ArgumentsProvider {
 			arguments.add("-q");
 		if (intersectImages)
 			arguments.add("-i");
+		if (links)
+			arguments.add("-l");
 		
 		return arguments.toArray(new String[0]);
 	}
@@ -99,44 +102,49 @@ public class SettingsProvider implements ArgumentsProvider {
 		
 		var list = new ArrayList<Arguments>();
 		for (var expList : expExpressions) {
-			for (boolean quiet : List.of(true, false)) {
-				for (boolean intersect : List.of(true, false)) {
-					// no config set, expect default config
-					var expListCopy = new ArrayList<>(expList);
-					expListCopy.add(fallbackExpression);
-					list.add(Arguments.of(createCLArguments(null, null, -1, null, expList, quiet, intersect),
-										  "sample.pdf", null, Level.WARN, Mode.ALL, expListCopy, defaultColors, quiet,
-										  intersect));
-					
-					// Mode set by CLArgs
-					list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json", null, -1,
-															Mode.MARKED, expList, quiet, intersect), "sample.pdf",
-										  "censoredFile.pdf", Level.DEBUG, Mode.MARKED, new ArrayList<>(expList), null,
-										  quiet, intersect));
-					// output overwritten by CLArgs
-					list.add(Arguments
-									 .of(createCLArguments("testVerbosityAsIntegerValidConfig.json", "clArgsOutput.pdf",
-														   -1, Mode.UNMARKED, expList, quiet, intersect), "sample.pdf",
-										 "clArgsOutput.pdf", Level.DEBUG, Mode.UNMARKED, new ArrayList<>(expList), null,
-										 quiet, intersect));
-					// verbosity overwritten by CLArgs
-					list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json", null, 3, null,
-															expList, quiet, intersect), "sample.pdf",
-										  "censoredFile.pdf", Level.TRACE, null, new ArrayList<>(expList), null, quiet,
-										  intersect));
-					// verbosity downscaled
-					list.add(Arguments.of(createCLArguments("valid/high_verbosity.json", "out.pdf", 2, null, expList,
-															quiet, intersect), "sample.pdf", "out.pdf", Level.DEBUG,
-										  Mode.ALL, new ArrayList<>(expList), null, quiet, intersect));
-					// nested output
-					list.add(Arguments.of(createCLArguments("valid/mode_casesDiffer.json", null, -1, null, expList,
-															quiet, intersect), "sample.pdf",
-										  "nested" + File.separatorChar + "output.pdf", null, Mode.UNMARKED,
-										  new ArrayList<>(expList), null, quiet, true));
-					// intersect disabled, verbosity clamped to next valid level
-					list.add(Arguments.of(createCLArguments("valid/negative_verbosity.json", "out.pdf", -1, null,
-															expList, quiet, intersect), "sample.pdf", "out.pdf",
-										  Level.OFF, Mode.MARKED, new ArrayList<>(expList), null, quiet, intersect));
+			for (var quiet : List.of(true, false)) {
+				for (var intersect : List.of(true, false)) {
+					for (var links : List.of(true, false)) {
+						// no config set, expect default config
+						var expListCopy = new ArrayList<>(expList);
+						expListCopy.add(fallbackExpression);
+						list.add(Arguments.of(createCLArguments(null, null, -1, null, expList, quiet, intersect, links),
+											  "sample.pdf", null, Level.WARN, Mode.ALL, expListCopy, defaultColors,
+											  quiet, intersect, links));
+						
+						// Mode set by CLArgs
+						list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json", null, -1,
+																Mode.MARKED, expList, quiet, intersect, links),
+											  "sample.pdf", "censoredFile.pdf", Level.DEBUG, Mode.MARKED,
+											  new ArrayList<>(expList), null, quiet, intersect, links));
+						// output overwritten by CLArgs
+						list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json",
+																"clArgsOutput.pdf", -1, Mode.UNMARKED, expList, quiet,
+																intersect, links), "sample.pdf", "clArgsOutput.pdf",
+											  Level.DEBUG, Mode.UNMARKED, new ArrayList<>(expList), null, quiet,
+											  intersect, links));
+						// verbosity overwritten by CLArgs
+						list.add(Arguments.of(createCLArguments("testVerbosityAsIntegerValidConfig.json", null, 3, null,
+																expList, quiet, intersect, links), "sample.pdf",
+											  "censoredFile.pdf", Level.TRACE, null, new ArrayList<>(expList), null,
+											  quiet, intersect, links));
+						// verbosity downscaled
+						list.add(Arguments
+										 .of(createCLArguments("valid/high_verbosity.json", "out.pdf", 2, null, expList,
+															   quiet, intersect, links), "sample.pdf", "out.pdf",
+											 Level.DEBUG, Mode.ALL, new ArrayList<>(expList), null, quiet, intersect,
+											 links));
+						// nested output
+						list.add(Arguments.of(createCLArguments("valid/mode_casesDiffer.json", null, -1, null, expList,
+																quiet, intersect, links), "sample.pdf",
+											  "nested" + File.separatorChar + "output.pdf", null, Mode.UNMARKED,
+											  new ArrayList<>(expList), null, quiet, true, links));
+						// intersect disabled, verbosity clamped to next valid level
+						list.add(Arguments.of(createCLArguments("valid/negative_verbosity.json", "out.pdf", -1, null,
+																expList, quiet, intersect, links), "sample.pdf",
+											  "out.pdf", Level.OFF, Mode.MARKED, new ArrayList<>(expList), null, quiet,
+											  intersect, true));
+					}
 				}
 			}
 			// default colors in config
@@ -145,18 +153,17 @@ public class SettingsProvider implements ArgumentsProvider {
 				var configList = expectedExpressionForConfig.get(e.getKey());
 				if (configList != null)
 					expExpressionsList.addAll(configList);
-				list.add(Arguments
-								 .of(createCLArguments(e.getKey(), null, -1, null, expList, false, false), "sample.pdf",
-									 null, null, null, expExpressionsList, e.getValue(), false, false));
+				list.add(Arguments.of(createCLArguments(e.getKey(), null, -1, null, expList, false, false, false),
+									  "sample.pdf", null, null, null, expExpressionsList, e.getValue(), false, false,
+									  false));
 			}
 			// expressions in config
 			for (var e : expectedExpressionForConfig.entrySet()) {
 				var expExpressionsList = new ArrayList<>(expList);
 				expExpressionsList.addAll(e.getValue());
-				list.add(Arguments
-								 .of(createCLArguments(e.getKey(), null, -1, null, expList, false, false), "sample.pdf",
-									 null, null, null, expExpressionsList, expectedColorsForConfig.get(e.getKey()),
-									 false, false));
+				list.add(Arguments.of(createCLArguments(e.getKey(), null, -1, null, expList, false, false, false),
+									  "sample.pdf", null, null, null, expExpressionsList,
+									  expectedColorsForConfig.get(e.getKey()), false, false, false));
 			}
 		}
 		

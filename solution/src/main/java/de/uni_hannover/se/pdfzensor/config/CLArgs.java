@@ -119,7 +119,7 @@ final class CLArgs {
 	@Option(names = {"-i", "--intersect-images"}, arity = "0", description = {"This will allow text censor bars to be drawn atop of censored images should they overlap."})
 	private boolean intersectImages = false;
 	
-	/** Whether links should be distinguishable from normal text by their censor color or be considered normal text. */
+	/** Whether links should be distinguished from or be considered normal text. */
 	@Option(names = {"-l", "--links"}, arity = "0", description = {"This will enable links to be colored in a certain color (different from the default censor color) and not be considered 'normal text'."})
 	private boolean distinguishLinks = false;
 	
@@ -230,8 +230,8 @@ final class CLArgs {
 	}
 	
 	/**
-	 * Returns whether links should be distinguishable from normal text by their censor color or be considered normal
-	 * text instead as parsed from the given command-line arguments.
+	 * Returns whether links should be distinguished from or considered normal text as parsed from the command-line
+	 * arguments.
 	 *
 	 * @return True if a distinction of links and normal text is desired, false otherwise.
 	 */
