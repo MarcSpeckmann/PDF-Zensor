@@ -44,14 +44,15 @@ class SettingsTest {
 	 *                        arguments (since there is no config).
 	 * @param quiet           The expected logger mode (whether or not it is expected to be silenced).
 	 * @param intersectImages The expected behavior for overlapping text censor bars and censored images.
+	 * @param links           The expected setting for distinguishing links from normal text.
 	 */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}, intersectImages: {7}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}, intersectImages: {7}, links: {8}")
 	@ArgumentsSource(CLArgumentProvider.class)
 	void testSettingsNoConfig(@NotNull String[] args, @NotNull File input, @Nullable File output,
 							  @Nullable Level verbosity,
 							  @Nullable Mode mode,
 							  @NotNull ArrayList<ImmutablePair<String, String>> expressions,
-							  boolean quiet, boolean intersectImages) {
+							  boolean quiet, boolean intersectImages, boolean links) {
 		Logging.deinit();
 		final var settings = new Settings(args);
 		
@@ -77,6 +78,7 @@ class SettingsTest {
 			assertEquals(e.getColor(), actualExp[i].getColor());
 		}
 		assertEquals(intersectImages, settings.getIntersectImages());
+		assertEquals(links, settings.distinguishLinks());
 	}
 	
 	/**
@@ -91,16 +93,17 @@ class SettingsTest {
 	 * @param defColors       The default colors from which one will be added to an Expression without a color.
 	 * @param quiet           The boolean specifying if the logger should be silenced.
 	 * @param intersectImages The boolean specifying if text censor bars may intersect censored images.
+	 * @param links           The boolean specifying if links should be distinguished from normal text.
 	 */
 	@SuppressWarnings("unchecked")
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, defColors: {6}, quiet: {7}, intersectImages: {8}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, defColors: {6}, quiet: {7}, intersectImages: {8}, links: {9}")
 	@ArgumentsSource(SettingsProvider.class)
 	void testSettingsValidConfig(@NotNull final String[] args, @NotNull File input,
 								 @Nullable File output, @Nullable Level verbosity,
 								 @Nullable Mode mode,
 								 @NotNull ArrayList<ImmutablePair<String, String>> expressions,
 								 @Nullable Color[] defColors,
-								 boolean quiet, boolean intersectImages) {
+								 boolean quiet, boolean intersectImages, boolean links) {
 		Logging.deinit();
 		var settings = new Settings(args);
 		
@@ -123,6 +126,7 @@ class SettingsTest {
 							   defColors != null ? defColors : settingsDefColors);
 		
 		assertEquals(intersectImages, settings.getIntersectImages());
+		assertEquals(links, settings.distinguishLinks());
 	}
 	
 	/** Dummy Unit-tests for function getLinkColor. */

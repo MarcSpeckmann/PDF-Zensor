@@ -57,9 +57,11 @@ public final class Settings {
 	/** The path into which the censored pdf-file should be written. */
 	@NotNull
 	private final File output;
-	/** The color with which to censor links. */
+	/** The color with which to censor links if {@link #distinguishLinks} is true. */
 	@NotNull
 	private final Color linkColor;
+	/** Whether links should be distinguished from normal text or be considered normal text. */
+	private final boolean distinguishLinks;
 	/** The mode to use for censoring. See {@link Mode} for more information. */
 	@NotNull
 	private final Mode mode;
@@ -91,6 +93,7 @@ public final class Settings {
 		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
 													  input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
+		distinguishLinks = clArgs.distinguishLinks() || config.distinguishLinks();
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
 		final var defColors = ObjectUtils.firstNonNull(config.getDefaultColors(), DEFAULT_COLORS);
 		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), defColors);
@@ -109,6 +112,7 @@ public final class Settings {
 		logger.debug("\tQuiet: {}", clArgs::getQuiet);
 		logger.debug("\tIntersect Images: {}", intersectImages);
 		logger.debug("\tCensor mode: {}", mode);
+		logger.debug("\tDistinguish Links: {}", distinguishLinks);
 		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.debug("\tExpressions");
 		for (var exp : expressions)
@@ -137,12 +141,21 @@ public final class Settings {
 	}
 	
 	/**
-	 * @return The color links should be censored in as it was specified in the command-line arguments and config.
+	 * @return The color links should be censored in if {@link #distinguishLinks} is true.
 	 */
 	@NotNull
 	@Contract(pure = true)
 	public Color getLinkColor() {
 		return linkColor;
+	}
+	
+	/**
+	 * @return True if links should be distinguished from normal text, false otherwise. As specified in either the
+	 * command-line arguments or config.
+	 */
+	@Contract(pure = true)
+	public boolean distinguishLinks() {
+		return distinguishLinks;
 	}
 	
 	/**
