@@ -84,7 +84,7 @@ class PDFCensorTest implements PDFHandler {
 	@ArgumentsSource(PDFCensorBoundingBoxProvider.class)
 	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D.Double[] elements,
 					   int finalExpectedElements) throws IOException {
-		var dummySettings = new Settings(input);
+		var dummySettings = new Settings(input, "-l");
 		this.properCensor = new PDFCensor(dummySettings);
 		this.elements = elements;
 		this.element = 0;
