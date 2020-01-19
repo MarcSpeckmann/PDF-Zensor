@@ -17,6 +17,8 @@ import java.util.Objects;
 public class App {
 	private static Logger logger;
 
+
+
 	/**
 	 * Creates the {@link Settings}, {@link PDFCensor} and {@link PDFProcessor}.
 	 * @param args Arguments given by the user via CL-input.

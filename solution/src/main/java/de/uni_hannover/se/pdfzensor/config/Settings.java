@@ -159,14 +159,6 @@ public final class Settings {
 		return password;
 	}
 
-
-	/**
-	 * @param password The new password to be used for decryption.
-	 */
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	/**
 	 * @return The boolean noInteraction as set by default or by command-line arguments.
 	 */
