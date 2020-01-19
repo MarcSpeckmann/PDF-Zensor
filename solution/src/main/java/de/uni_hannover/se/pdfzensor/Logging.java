@@ -35,7 +35,7 @@ public final class Logging {
 	public static final Level[] VERBOSITY_LEVELS =
 			{Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE, Level.ALL};
 	/** The path to the log file and its name. */
-	private static final String LOG_FILE = "log.log";
+	private static final String LOG_FILE = App.ROOT_DIR + "log.log";
 	/** Log files with a file size (in KBs) meeting or exceeding this value will be overwritten. */
 	private static final int LOG_FILE_SIZE_KB = 1024;
 	/** Stores the context that is currently initialized. */

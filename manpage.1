@@ -1,0 +1,92 @@
+.TH "PDFZENSOR" "1" "0.815"
+.SH NAME
+pdf-zensor - a command line tool to censor PDF files
+.SH SYNOPSIS
+.B pdf-zensor
+[\fB\-m\fR | \fB\-u\fR] [\fB\-hqVv\fR] [\fB\-o\fR \fI"out"\fR] [\fB\-e\fR \fI"regex"\fR [\fI"hex_color"\fR]]... \fI"in.pdf"\fR
+.SH DESCRIPTION
+pdf-zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file. It can also partially censor PDF files and highlight certain text phrases. The individual colors for censoring different elements can be configured.
+.SS PARAMETERS
+.TP
+\fI"in.pdf"\fP
+Set the input PDF-file that should be censored. Required.
+.SS OPTIONS
+.TP
+\fB\-c\fP, \fB\--config\fP "\fI"config_file"\fR"
+Set the configuration file which should be used as a foundation when censoring the given pdf-file.
+.TP
+\fB\-e\fP, \fB\--expression\fP "regex" [\fI"hex_color"\fR]
+Set additional regular expressions that are highlighted in a different color when censored. Your can also optionally define any color in the hexadecimal code. Information and examples below.
+.TP
+\fB\-h\fP, \fB\--help\fP
+Show a help message containing the synopsis, a small description, information about the options of the tool and exit.
+.TP
+\fB\-m\fP, \fB\--censor-marked\fP
+This mode censors all areas of the PDF that were previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge.
+.TP
+\fB\-o\fP, \fB\--out\fP "out"
+The output file or path the censored file should be written to. The standard output file is the directory and name of the input file with "_cens" attached.
+.TP
+\fB\-q\fP, \fB\--quiet\fP
+Silence the logging.
+.TP
+\fB\-i\fP, \fB\--intersect-images\fP
+Enable the drawing of text censor bars over censored imaged. This value is false by default, meaning censor bars, which would usually be drawn in place of text, are only drawn if they are not overlapping with a censored image. However, in some cases (e. g. scanned pdf-files) large portions of a page are images: not allowing censor bars and censored images to overlap would make it seem as if no text was present at all.
+.TP
+\fB\-u\fP, \fB\--censor-unmarked\fP
+This mode censors all elements of the PDF except those that have been previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge.
+.TP
+\fB\-v\fP, \fB\--verbose\fP
+Sets the loggers verbosity. Specify multiple \fB\-v\fP options to increase verbosity.
+.TP
+\fB\-V\fP, \fB\--version\fP
+Print the version and build time and exit.
+.SS HEXADECIMAL COLOR CODES
+pdf-zensor can progress all types of hexadecimal color codes. These color codes can start with "#", "0x" and "0X". Both 3- and 6-digit hexadecimal numbers are supported. A 3-digit hexadecimal color code is the shorthand notation of a 6-digit hexadecimal color code if the hexadecimal digits belonging to the basic tone colors are all the same in pairs. For example, "0Xf02" is the same color as "0Xff0022".
+\fBPopular hexadecimal color codes are:\fR
+.TP
+\fI#f00\fR
+red
+.TP
+\fI#ff0\fR
+yellow
+.TP
+\fI#0f0\fR
+green
+.TP
+\fI#00f\fR
+blue
+.TP
+\fI0x808080\fR
+gray
+.TP
+\fI0X808000\fR
+olive
+.TP
+\fI#800080\fR
+purple
+.SH EXAMPLES
+.TP
+Censor the entire PDF-document:
+pdf-zensor "in.pdf"
+.TP
+Censor the entire PDF-document and specify an output PDF-document:
+pdf-zensor "in.pdf" -o "out.pdf"
+.TP
+Censor the marked parts of the PDF-document:
+pdf-zensor -m "in.pdf"
+.TP
+Censor the unmarked parts of the PDF-document:
+pdf-zensor -u "in.pdf"
+.TP
+Censor the entire PDF document and mark all text phrases "hello world" with a predefined color:
+pdf-zensor "in.pdf" -e "hello world"
+.TP
+Censor the entire PDF document and mark all text phrases "hello world" in red:
+pdf-zensor "in.pdf" -e "hello world" "#f00"
+.TP
+Censor the entire PDF document and mark all text phrases "hello world" with a predefined color and all numbers with olive:
+pdf-zensor "in.pdf" -e "hello world" -e "[0-9]" "0X808000"
+.TP
+Censor only the unmarked parts of the PDF document and save it in the output-file "out.pdf". Specifically censor all occurences of "hello world" and all digits with different predefined colors:
+pdf-zensor -u "in.pdf" -o "out.pdf" -e "hello world" -e "[0-9]"

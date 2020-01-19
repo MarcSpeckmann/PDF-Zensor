@@ -1,5 +1,7 @@
 {
   "verbose": -3,
   "output":"censoredFile.pdf",
-  "censor":"marked"
+  "censor":"marked",
+  "intersectImages":false,
+  "links":"true"
 }

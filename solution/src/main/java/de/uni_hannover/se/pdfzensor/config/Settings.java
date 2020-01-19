@@ -43,23 +43,25 @@ public final class Settings {
 	 * black and white should be present (for {@link #DEFAULT_CENSOR_COLOR} and white backgrounds).
 	 */
 	@NotNull
-	private static final Color[] DEFAULT_COLORS;
+	static final Color[] DEFAULT_COLORS;
 	
 	static {
 		final var defColorCodes = "#F3C300,#875692,#F38400,#A1CAF1,#BE0032,#C2B280,#848482,#008856,#E68FAC,#0067A5,#F99379,#604E97,#F6A600,#B3446C,#DCD300,#882D17,#8DB600,#654522,#E25822,#2B3D26";
 		DEFAULT_COLORS = stream(defColorCodes.split(",")).map(Utils::getColorOrNull).filter(Objects::nonNull)
 														 .toArray(Color[]::new);
 	}
-
+	
 	/** The path at which the pdf-file that should be censored is located. */
 	@NotNull
 	private final File input;
 	/** The path into which the censored pdf-file should be written. */
 	@NotNull
 	private final File output;
-	/** The color with which to censor links. */
+	/** The color with which to censor links if {@link #distinguishLinks} is true. */
 	@NotNull
 	private final Color linkColor;
+	/** Whether links should be distinguished from normal text or be considered normal text. */
+	private final boolean distinguishLinks;
 	/** The mode to use for censoring. See {@link Mode} for more information. */
 	@NotNull
 	private final Mode mode;
@@ -69,37 +71,48 @@ public final class Settings {
 	 */
 	@NotNull
 	private final Expression[] expressions;
+	/**
+	 * True if text censor bars may be drawn atop of censored images, false otherwise (text will be removed but no
+	 * censor bar is drawn).
+	 */
+	private final boolean intersectImages;
 	
 	/**
 	 * Constructs the settings object from the configuration file and the commandline arguments.
 	 *
-	 * @param configPath the path to the config file (SHOULD BE REMOVED LATER)
-	 * @param args       The commandline arguments.
+	 * @param args The commandline arguments.
 	 */
-	public Settings(@Nullable String configPath, @NotNull final String... args) {
+	public Settings(@NotNull final String... args) {
 		final var clArgs = CLArgs.fromStringArray(args);
-		final var config = getConfig(configPath);
+		final var configFile = ObjectUtils.firstNonNull(clArgs.getConfigFile(), Config.getDefaultConfigFile(false));
+		final var config = Config.fromFile(configFile);
 		final var verbose = ObjectUtils.firstNonNull(clArgs.getVerbosity(), config.getVerbosity(), Level.WARN);
 		Logging.init(clArgs.getQuiet() ? Level.OFF : verbose);
-		
 		
 		input = clArgs.getInput();
 		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
 													  input.getAbsoluteFile().getParentFile()));
 		linkColor = DEFAULT_LINK_COLOR;
+		distinguishLinks = clArgs.distinguishLinks() || config.distinguishLinks();
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
 		final var defColors = ObjectUtils.firstNonNull(config.getDefaultColors(), DEFAULT_COLORS);
 		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), defColors);
+		intersectImages = clArgs.getIntersectImages() || config.getIntersectImages();
 		
 		//Dump to log
 		final var logger = Logging.getLogger();
+		if (configFile == null)
+			logger.error("The default configuration file could not be created.");
 		logger.debug("Finished parsing the settings:");
 		logger.debug("\tInput-file: {}", input);
-		logger.debug("\tConfig-file: {}", configPath);
+		logger.debug("\tConfig-file: {}",
+					 () -> Optional.ofNullable(configFile).map(File::getAbsolutePath).orElse("none"));
 		logger.debug("\tOutput-file: {}", output);
 		logger.debug("\tLogger verbosity: {}", verbose);
-		logger.debug("\tQuiet: {}", clArgs.getQuiet());
+		logger.debug("\tQuiet: {}", clArgs::getQuiet);
+		logger.debug("\tIntersect Images: {}", intersectImages);
 		logger.debug("\tCensor mode: {}", mode);
+		logger.debug("\tDistinguish Links: {}", distinguishLinks);
 		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.debug("\tExpressions");
 		for (var exp : expressions)
@@ -107,18 +120,6 @@ public final class Settings {
 		logger.debug("\tDefault Colors");
 		for (var col : defColors)
 			logger.debug("\t\t{}", () -> colorToString(col));
-	}
-	
-	/**
-	 * Tries to load the configuration file from the provided path. If the path is <code>null</code> the empty
-	 * configuration (everything <code>null</code>) will be used.
-	 *
-	 * @param configPath The path to the configuration file.
-	 * @return The configuration file that was loaded from the specified path.
-	 */
-	@NotNull
-	private static Config getConfig(@Nullable String configPath) {
-		return Config.fromFile(Optional.ofNullable(configPath).map(File::new).orElse(null));
 	}
 	
 	/**
@@ -140,12 +141,21 @@ public final class Settings {
 	}
 	
 	/**
-	 * @return The color links should be censored in as it was specified in the command-line arguments and config.
+	 * @return The color links should be censored in if {@link #distinguishLinks} is true.
 	 */
 	@NotNull
 	@Contract(pure = true)
 	public Color getLinkColor() {
 		return linkColor;
+	}
+	
+	/**
+	 * @return True if links should be distinguished from normal text, false otherwise. As specified in either the
+	 * command-line arguments or config.
+	 */
+	@Contract(pure = true)
+	public boolean distinguishLinks() {
+		return distinguishLinks;
 	}
 	
 	/**
@@ -164,6 +174,14 @@ public final class Settings {
 	@Contract(pure = true)
 	public Expression[] getExpressions() {
 		return ObjectUtils.cloneIfPossible(expressions);
+	}
+	
+	/**
+	 * @return True if text censor bars may overlap with censored images, false otherwise.
+	 */
+	@Contract(pure = true)
+	public boolean getIntersectImages() {
+		return intersectImages;
 	}
 	
 	/**
