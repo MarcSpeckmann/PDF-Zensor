@@ -5,4 +5,4 @@ Priority: optional
 Architecture: all
 Description: [[description]]
 Maintainer: Fabian Pflug <pflug@chi.uni-hannover.de>
-Depends: java (>= 11)
+Recommends: openjdk-11-jre | openjdk-11-jdk
