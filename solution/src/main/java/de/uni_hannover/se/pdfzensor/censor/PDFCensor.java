@@ -30,10 +30,8 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -269,7 +267,7 @@ public final class PDFCensor implements PDFHandler {
 				try {
 					if (space.isPresent())
 						tokenizer.input(" ", List.of(space.get()));
-					tokenizer.input(pos.getUnicode(), List.of(b));
+					tokenizer.input(pos.getUnicode(), Collections.nCopies(pos.getUnicode().length(), b));
 				} catch (IOException e) {
 					LOGGER.warn(e);
 				}
