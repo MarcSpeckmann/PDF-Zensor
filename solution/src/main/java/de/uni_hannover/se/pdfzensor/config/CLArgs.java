@@ -47,7 +47,7 @@ final class CLArgs {
 	private File output = null;
 	
 	/** An optional password for decrypting encrypted PDFs. Null should be assigned if nothing else was specified. */
-	@Option(names = {"-p", "--password"}, paramLabel = "\"Password\"",
+	@Option(names = {"-p", "--password"}, arity = "1", paramLabel = "\"password\"",
 			description = {"The password used for decrypting an encrypted PDF."})
 	@Nullable
 	private String password = null;
@@ -98,13 +98,6 @@ final class CLArgs {
 	 * those from the stack which are consumed when creating the {@link Expression}.
 	 */
 	private static final class ExpressionOption implements IParameterConsumer {
-		@Parameters(arity = "1", paramLabel = "\"regex\"", hidden = true)
-		@Nullable
-		private static String regex = null; // not used, expressions are parsed by a custom consumer
-		@Parameters(arity = "0..1", paramLabel = "\"hex_color\"", hidden = true)
-		@Nullable
-		private static String hexColor = null; // not used, expressions are parsed by a custom consumer
-		
 		/**
 		 * The top of the stack always contains the regex when this method is called because this consumer follows
 		 * <code>-e</code> or <code>--expression</code> respectively.
@@ -161,8 +154,8 @@ final class CLArgs {
 	@NotNull
 	static CLArgs fromStringArray(@NotNull final String... args) {
 		Validate.notEmpty(args);
-		expressions.clear();
 		final var clArgs = new CLArgs();
+		expressions.clear();
 		final var cmd = new CommandLine(clArgs);
 		cmd.parseArgs(Validate.noNullElements(args));
 		clArgs.validate();

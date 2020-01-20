@@ -6,11 +6,13 @@ pdf-zensor - a command-line tool to censor PDF-files.
 .SH SYNOPSIS
 .B pdf-zensor
 .B [-m | -u]
-.B [-hilqVv]
+.B [-hilnqVv]
 .B [-c
 \fIconfig_file\fR
 .B ] [-o
 \fIout\fR
+.B ] [-p
+\fIpassword\fR
 .B ] [-e
 \fIregex\fR
 .B [
@@ -55,12 +57,18 @@ Enables the censor mode in which all areas of the PDF-file that were previously 
 .br
 Note that this option only applies to text.
 .TP
+.B -n, --no-interaction
+Disables all interaction with the user. The only blocked interaction is the prompt asking the user to provide a password to open an encrypted PDF-file.
+.TP
 .B -o, --out \fI"out"\fR
 Set the output file or path the censored file should be written to. The standard output file is the directory and name of the input file with "_cens" appended.
 .br
 Note that no directories are created when specifying an output directory instead of an output file.
 .br
 This option also allows the user to overwrite the input file by setting the output file to be the same as the input file.
+.TP
+.B -p, --password \fI"password"\fR
+Provides a password to open an encrypted PDF-file. Should the password be incorrect but required to open the file then the user may be prompted to provide the correct password. In case of no password being required this option will be ignored should it be specified anyway.
 .TP
 .B -q, --quiet
 Silence the logging output to the console. Logging to the log file remains unchanged.
