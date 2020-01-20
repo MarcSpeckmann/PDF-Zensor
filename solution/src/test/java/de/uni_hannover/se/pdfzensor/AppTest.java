@@ -11,13 +11,12 @@ class AppTest {
 	/** This method is testing valid and invalid pdf input files. */
 	@Test
 	void testInputFiles() {
-		assertThrows(NullPointerException.class, () -> main((String) null));
 		assertThrows(NullPointerException.class, () -> main((String[]) null));
-		
+		assertThrows(NullPointerException.class, () -> main((String) null));
+
 		assertExitCode(-1, () -> main("NotExisting.pdf"));
 		assertExitCode(-1, () -> main("pom.xml"));
 		assertExitCode(-1, () -> main(getResourcePath(CORRUPTED_PDF_RESOURCE_PATH + "sample(pdfVersionDeleted).pdf")));
-		assertExitCode(-1, () -> main(getResourcePath(CORRUPTED_PDF_RESOURCE_PATH + "EncryptedPDF.pdf")));
 		
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "sample.pdf")));
 		assertDoesNotThrow(() -> main(getResourcePath(PDF_RESOURCE_PATH + "sample.bla.pdf")));
