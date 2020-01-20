@@ -1,92 +1,237 @@
 .TH "PDFZENSOR" "1" "0.815"
+
 .SH NAME
-pdf-zensor - a command line tool to censor PDF files
+pdf-zensor - a command-line tool to censor PDF-files.
+
 .SH SYNOPSIS
 .B pdf-zensor
-[\fB\-m\fR | \fB\-u\fR] [\fB\-hqVv\fR] [\fB\-o\fR \fI"out"\fR] [\fB\-e\fR \fI"regex"\fR [\fI"hex_color"\fR]]... \fI"in.pdf"\fR
+.B [-m | -u]
+.B [-hilqVv]
+.B [-c
+\fIconfig_file\fR
+.B ] [-o
+\fIout\fR
+.B ] [-e
+\fIregex\fR
+.B [
+\fIhex_color\fR
+.B ]] ...
+\fIin.pdf\fR
+
 .SH DESCRIPTION
-pdf-zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file. It can also partially censor PDF files and highlight certain text phrases. The individual colors for censoring different elements can be configured.
-.SS PARAMETERS
+.B pdf-zensor
+can be used to censor PDF-files. As such it strips annotations and metadata as well as textual and graphical content from the PDF-file. It can also partially censor PDF-files and highlight certain text phrases.
+.PP
+The application comes with a set of predefined colors, however, individual colors for censoring different elements can be configured as well.
+
+.SH PARAMETERS
 .TP
-\fI"in.pdf"\fP
+\fI"in.pdf"\fR
 Set the input PDF-file that should be censored. Required.
-.SS OPTIONS
+
+.SH OPTIONS
 .TP
-\fB\-c\fP, \fB\--config\fP "\fI"config_file"\fR"
-Set the configuration file which should be used as a foundation when censoring the given pdf-file.
+.B -c, --config \fI"config_file"\fR
+Set a temporary configuration file which should be used as a foundation when censoring the given PDF-file. Further information on configuration files can be found below.
 .TP
-\fB\-e\fP, \fB\--expression\fP "regex" [\fI"hex_color"\fR]
-Set additional regular expressions that are highlighted in a different color when censored. Your can also optionally define any color in the hexadecimal code. Information and examples below.
+.B -e, --expression \fI"regex"\fR \fB[\fR\fI"hex_color"\fR\fB]\fR
+Set additional regular expressions that are highlighted in a different color when censored. Defining a specific hexadecimal color to use is optional.
+.br
+Should no specific color be given then a color from a list of default colors is used instead. Additional information and examples below.
 .TP
-\fB\-h\fP, \fB\--help\fP
+.B -h, --help
 Show a help message containing the synopsis, a small description, information about the options of the tool and exit.
 .TP
-\fB\-m\fP, \fB\--censor-marked\fP
-This mode censors all areas of the PDF that were previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge.
+.B -i, --intersect-images
+Enable the drawing of censor bars on top of censored images.
+.br
+This is disabled per default in which case both images and text are censored according to the other given options, however, a text's censor bar which would overlap with a censored image is instead not drawn as to not reveal any information about the content of a censored image.
 .TP
-\fB\-o\fP, \fB\--out\fP "out"
-The output file or path the censored file should be written to. The standard output file is the directory and name of the input file with "_cens" attached.
+.B -l, --links
+Enable links to be treated differently from normal text. This is disabled per default, meaning links are treated like normal text and not colored specifically. Enabling this option will color links differently from normal text so they are distinguishable.
 .TP
-\fB\-q\fP, \fB\--quiet\fP
-Silence the logging.
+.B -m, --censor-marked
+Enables the censor mode in which all areas of the PDF-file that were previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge are censored.
+.br
+Note that this option only applies to text.
 .TP
-\fB\-i\fP, \fB\--intersect-images\fP
-Enable the drawing of text censor bars over censored imaged. This value is false by default, meaning censor bars, which would usually be drawn in place of text, are only drawn if they are not overlapping with a censored image. However, in some cases (e. g. scanned pdf-files) large portions of a page are images: not allowing censor bars and censored images to overlap would make it seem as if no text was present at all.
+.B -o, --out \fI"out"\fR
+Set the output file or path the censored file should be written to. The standard output file is the directory and name of the input file with "_cens" appended.
+.br
+Note that no directories are created when specifying an output directory instead of an output file.
+.br
+This option also allows the user to overwrite the input file by setting the output file to be the same as the input file.
 .TP
-\fB\-u\fP, \fB\--censor-unmarked\fP
-This mode censors all elements of the PDF except those that have been previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge.
+.B -q, --quiet
+Silence the logging output to the console. Logging to the log file remains unchanged.
 .TP
-\fB\-v\fP, \fB\--verbose\fP
-Sets the loggers verbosity. Specify multiple \fB\-v\fP options to increase verbosity.
+.B -u, --censor-unmarked
+Enables the censor mode in which no areas that have been previously annotated (marked) with a program such as Adobe Acrobat or Microsoft Edge are censored.
+.br
+Note that this option only applies to text.
 .TP
-\fB\-V\fP, \fB\--version\fP
+.B -v, --verbose
+Increase the console logger's verbosity by specifying (multiple)
+.B -v
+options. The default verbosity level is WARN.
+.br
+Note that this option is overwritten by
+.B -q
+and also does not affect the verbosity of the log file.
+.TP
+.B -V, --version
 Print the version and build time and exit.
+
+.SH MISCELLANEOUS
 .SS HEXADECIMAL COLOR CODES
-pdf-zensor can progress all types of hexadecimal color codes. These color codes can start with "#", "0x" and "0X". Both 3- and 6-digit hexadecimal numbers are supported. A 3-digit hexadecimal color code is the shorthand notation of a 6-digit hexadecimal color code if the hexadecimal digits belonging to the basic tone colors are all the same in pairs. For example, "0Xf02" is the same color as "0Xff0022".
-\fBPopular hexadecimal color codes are:\fR
+.B pdf-zensor
+can progress different types of hexadecimal color codes. These color codes must start with "#", "0x" or "0X".
+.br
+Both 3 and 6-digit hexadecimal numbers are supported, where a 3-digit hexadecimal color code is the abbreviated form of a 6-digit hexadecimal color code: each digit of the 3-digit code represents two consecutive digits in the 6-digit code. For example, "0xf02" is equivalent to "0xff0022".
+.PP
+.B Popular hexadecimal color codes are:
+.RS
+.I #f00
+- red
+.br
+.I #ff0
+- yellow
+.br
+.I #0f0
+- green
+.br
+.I #00f
+- blue
+.br
+.I #808080
+- gray
+.br
+.I #808000
+- olive
+.br
+.I #800080
+- purple
+.RE
+.SS DEFAULT COLORS
+The default configuration contains 20 high contrast colors which will be used for expressions which were not assigned a specific color.
+
+.SH CONFIGURATION FILE
+Configuration files are JSON-files and need to follow the correct syntax to be parsed. Not all the options from the command-line are supported, however, other options are only available through configuration files.
+.SS DEFAULT CONFIGURATION
+The default configuration file is created upon the first launch of the program and will not be overwritten as long as it exists in the correct directory, meaning a user may change it as they see fit.
+.br
+For more information on the specific options see \fBOPTIONS\fR.
+.br
+It does contain each possible entry, even though not all of them are set. Possible key-value pairs are:
 .TP
-\fI#f00\fR
-red
+\fB"output" : null\fR
+Setting the output file or directory, same as in the command-line.
+Specifying
+.B null
+will use the default output name ("_cens" appended).
 .TP
-\fI#ff0\fR
-yellow
+\fB"verbose" : "WARN"\fR
+Set the verbosity of the console logger. Accepted values are
+.RS
+\fB"OFF"\fR, \fB"FATAL"\fR, \fB"ERROR"\fR, \fB"WARN"\fR, \fB"INFO"\fR, \fB"DEBUG"\fR, \fB"TRACE"\fR, \fB"ALL"\fR
+- Capitalization is not relevant.
+.br
+.I Integer
+- Numbers in the range of 0 and 7 correspond to \fIOFF\fR to \fIALL\fR. Values outside of the range are clamped.
+.RE
 .TP
-\fI#0f0\fR
-green
+\fB"censor" : "ALL"\fR
+Sets the censor mode. Accepted values are:
+.RS
+\fB"ALL"\fR, \fB"MARKED"\fR, \fB"UNMARKED"\fR
+- Capitalization is not relevant. Both
+.I MARKED
+and
+.I UNMARKED
+are the same as in the command-line, however,
+.I ALL
+is the default value in the command-line if neither of the other options is given and means that the areas to censor are not filtered by whether or not they were marked beforehand.
+.RE
 .TP
-\fI#00f\fR
-blue
+\fB"intersectImages" : false\fR
+Sets how intersecting text censor bars and censored images are treated. Accepted values are:
+.RS
+.B true, false, null
+- Capitalization is relevant.
+.RE
 .TP
-\fI0x808080\fR
-gray
+\fB"links" : false\fR
+Sets whether or not links should be treated differently from normal text. Accepted values are:
+.RS
+.B true, false, null
+- Capitalization is relevant.
+.RE
 .TP
-\fI0X808000\fR
-olive
+\fB"expressions" : [ {\fR
+.br
+.RS
+.RS
+\fB"regex" : ".",\fR
+.br
+\fB"color" : "#000000"\fR
+.br
+.RE
+.B }
+.br
+.RE
+.B ]
+.br
+.RS
+This is an array of objects, where each object must contain a regex key and value. Similarly to the command-line, the specification of a color is optional.
+.br
+The order in which the objects are given is relevant because earlier regexes take precedence over the following ones, therefore adding regexes to this array after \fB"."\fR will not have any effect.
+.br
+Note that additional expressions given in the command-line will have a higher precedence than even the first element of this array.
+.RE
 .TP
-\fI#800080\fR
-purple
+\fB"defaultColors" : [ "#F3C300", "#875692", "#F38400", "#A1CAF1", "#BE0032", "#C2B280", "#848482", "#008856", "#E68FAC", "#0067A5", "#F99379", "#604E97", "#F6A600", "#B3446C", "#DCD300", "#882D17", "#8DB600", "#654522", "#E25822", "#2B3D26" ]\fR
+This is an array of hexadecimal color codes which will be used for expressions which were not given a specific color. The order of the color codes is relevant because earlier color codes are used first when assigning colors to regexes.
+.br
+If there are more regexes that need a color assigned than there are colors in the default color array then they will simply be given the default censor color (black), making them indistinguishable from normal, unmatched text.
+.br
+This option is only available in the configuration file.
+
 .SH EXAMPLES
+Note that the default configuration is used as a foundations in these examples unless specifically changed.
+.PP
 .TP
-Censor the entire PDF-document:
-pdf-zensor "in.pdf"
+Censor the entire PDF-document with the default settings:
+.br
+.B pdf-zensor \fI"in.pdf"\fR
 .TP
 Censor the entire PDF-document and specify an output PDF-document:
-pdf-zensor "in.pdf" -o "out.pdf"
+.br
+.B pdf-zensor \fI"in.pdf"\fR \fB-o\fR \fI"out.pdf"\fR
 .TP
 Censor the marked parts of the PDF-document:
-pdf-zensor -m "in.pdf"
+.br
+.B pdf-zensor -m \fI"in.pdf"\fR
 .TP
 Censor the unmarked parts of the PDF-document:
-pdf-zensor -u "in.pdf"
+.br
+.B pdf-zensor -u \fI"in.pdf"\fR
 .TP
-Censor the entire PDF document and mark all text phrases "hello world" with a predefined color:
-pdf-zensor "in.pdf" -e "hello world"
+Censor the entire PDF-document and mark text matching "hello" with a predefined color:
+.br
+.B pdf-zensor \fI"in.pdf"\fR \fB-e\fR \fI"hello"\fR
 .TP
-Censor the entire PDF document and mark all text phrases "hello world" in red:
-pdf-zensor "in.pdf" -e "hello world" "#f00"
+Censor the entire PDF-document and mark text matching "hello" with red:
+.br
+.B pdf-zensor \fI"in.pdf"\fR \fB-e\fR \fI"hello"\fR \fI"#F00"\fR
 .TP
-Censor the entire PDF document and mark all text phrases "hello world" with a predefined color and all numbers with olive:
-pdf-zensor "in.pdf" -e "hello world" -e "[0-9]" "0X808000"
+Censor the entire PDF-document and mark text matching "hello world" with a predefined color and all digits in olive:
+.br
+.B pdf-zensor \fI"in.pdf"\fR \fB-e\fR \fI"hello world"\fR \fB-e\fR \fI"[0-9]"\fR \fI"0x808000"\fR
 .TP
-Censor only the unmarked parts of the PDF document and save it in the output-file "out.pdf". Specifically censor all occurences of "hello world" and all digits with different predefined colors:
-pdf-zensor -u "in.pdf" -o "out.pdf" -e "hello world" -e "[0-9]"
+Censor only the unmarked parts of the PDF-document and save it in the directory "out/". Also censor all occurrences of "hello world" and all digits with different predefined colors:
+.br
+.B pdf-zensor \fI"in.pdf"\fR \fB-e\fR \fI"out/"\fR \fB-e\fR \fI"hello world"\fR \fB-e\fR \fI"[0-9]"\fR
+.TP
+Censor the entire PDF-document using the settings from the configuration file "customConfig.json":
+.br
+.B pdf-zensor \fI"in.pdf"\fR \fB-c\fR \fI"customConfig.json"\fR
