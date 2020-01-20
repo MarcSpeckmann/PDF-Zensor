@@ -1,4 +1,5 @@
 {
 	"output":"nested/output.pdf",
-	"censor":"UnMarKeD"
+	"censor":"UnMarKeD",
+	"intersectImages":"true"
 }

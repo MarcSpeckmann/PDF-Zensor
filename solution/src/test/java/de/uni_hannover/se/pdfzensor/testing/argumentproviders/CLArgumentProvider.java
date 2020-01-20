@@ -64,19 +64,21 @@ public class CLArgumentProvider implements ArgumentsProvider {
 	 * This method creates an Argument which contains a input file, output file, verbosity level, mode and expressions
 	 * depending on the given method inputs.
 	 *
-	 * @param in    input file
-	 * @param out   output file
-	 * @param lvl   verbosity level (zero equals {@link Level#WARN})
-	 * @param mode  mode indicating which argument to set
-	 * @param exp   expressions as a string-string pair
-	 * @param quiet quiet logging
+	 * @param in              input file
+	 * @param out             output file
+	 * @param lvl             verbosity level (zero equals {@link Level#WARN})
+	 * @param mode            mode indicating which argument to set
+	 * @param exp             expressions as a string-string pair
+	 * @param quiet           quiet logging
+	 * @param intersectImages overlap text censor bars and censored images
+	 * @param links           distinguish links from normal text
 	 * @return a Argument of created commando line arguments and the method inputs
 	 */
 	@NotNull
 	private static Arguments createArgument(@NotNull String in, @Nullable String out, final int lvl,
 											@Nullable Mode mode,
 											@Nullable ArrayList<ImmutablePair<@NotNull String, @Nullable String>> exp,
-											boolean quiet) {
+											boolean quiet, boolean intersectImages, boolean links) {
 		var arguments = new ArrayList<String>();
 		arguments.add(in);
 		if (out != null) {
@@ -108,21 +110,26 @@ public class CLArgumentProvider implements ArgumentsProvider {
 		}
 		if (quiet)
 			arguments.add("-q");
+		if (intersectImages)
+			arguments.add("-i");
+		if (links)
+			arguments.add("-l");
 		// No tests without input file, because this case would be caught by the main.
 		var inFile = new File(in);
 		var outFile = Optional.ofNullable(out).map(File::new).orElse(null);
 		var expressions = Optional.ofNullable(exp).orElse(new ArrayList<>());
-		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile, verbosity, mode, expressions, quiet);
+		return Arguments.of(arguments.toArray(new String[0]), inFile, outFile, verbosity, mode, expressions, quiet,
+							intersectImages, links);
 	}
 	
 	/**
 	 * This method provides an argument stream for a parametrized test. {@link #createArgument(String, String, int,
-	 * Mode, ArrayList, boolean)} will be called with each possible combination of {@link #inputFiles}, {@link
-	 * #outputFiles}, {@link #verbosityLevels}, achievable {@link Mode} settings via the command line and quiet settings
-	 * but without expressions.
+	 * Mode, ArrayList, boolean, boolean, boolean)} will be called with each possible combination of {@link
+	 * #inputFiles}, {@link #outputFiles}, {@link #verbosityLevels}, achievable {@link Mode} settings via the command
+	 * line, quiet, intersectImages and links settings but without expressions.
 	 * <br>
 	 * {@link Mode} via the command line: {@link Mode#MARKED} for <code>-m</code>, {@link Mode#UNMARKED} for
-	 * <code>-u</code> or * <code>null</code> for neither (<code>-m</code> or <code>-u</code>).
+	 * <code>-u</code> or <code>null</code> for neither (<code>-m</code> or <code>-u</code>).
 	 * <br>
 	 * Note: The tests for expressions are only disconnected from the input-output-verbosity-mode tests to reduce
 	 * testing time. The argument consumer and correctness of parsing optional positional parameters is still tested
@@ -134,15 +141,17 @@ public class CLArgumentProvider implements ArgumentsProvider {
 	@Override
 	public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
 		var list = new ArrayList<Arguments>();
-		for (String in : inputFiles)
-			for (String out : outputFiles)
-				for (int lvl : verbosityLevels)
-					for (Mode mode : modeOptions)
-						for (boolean quiet : List.of(true, false))
-							list.add(createArgument(in, out, lvl, mode, null, quiet));
+		for (var in : inputFiles)
+			for (var out : outputFiles)
+				for (var lvl : verbosityLevels)
+					for (var mode : modeOptions)
+						for (var quiet : List.of(true, false))
+							for (var intersect : List.of(true, false))
+								for (var links : List.of(true, false))
+									list.add(createArgument(in, out, lvl, mode, null, quiet, intersect, links));
 		for (String in : inputFiles)
 			for (var expList : expExpressions)
-				list.add(createArgument(in, null, -1, null, new ArrayList<>(expList), false));
+				list.add(createArgument(in, null, -1, null, new ArrayList<>(expList), false, false, false));
 		return list.stream();
 	}
 }

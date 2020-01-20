@@ -8,6 +8,7 @@ import de.uni_hannover.se.pdfzensor.processor.PDFProcessor;
 import de.uni_hannover.se.pdfzensor.utils.FileLoadingUtil;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
+
 import java.io.IOException;
 import java.util.Objects;
 
@@ -15,23 +16,24 @@ import java.util.Objects;
  * The main application.
  */
 public class App {
+	public static final String ROOT_DIR = "";
+	
 	private static Logger logger;
-
-
-
+	
 	/**
 	 * Creates the {@link Settings}, {@link PDFCensor} and {@link PDFProcessor}.
+	 *
 	 * @param args Arguments given by the user via CL-input.
 	 */
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
 	public static void main(String... args) {
 		try {
 			if (!CLHelp.printStandardHelpOptionsIfRequested(args)) {
-				final var settings = new Settings(null, args);
+				final var settings = new Settings(args);
 				logger = Logging.getLogger();
 				final var censor = new PDFCensor(settings);
 				final var processor = new PDFProcessor(censor);
-				final var tries = settings.getNoInteraction()? 0:3;
+				final var tries = settings.getNoInteraction() ? 0 : 3;
 				try (final var doc = FileLoadingUtil.open(settings.getInput(), settings.getPassword(), tries)) {
 					processor.process(doc);
 					doc.save(settings.getOutput());

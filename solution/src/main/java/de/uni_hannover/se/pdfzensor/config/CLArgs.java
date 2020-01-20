@@ -45,18 +45,18 @@ final class CLArgs {
 			description = {"The output file or path the censored file should be written to."})
 	@Nullable
 	private File output = null;
-
+	
 	/** An optional password for decrypting encrypted PDFs. Null should be assigned if nothing else was specified. */
 	@Option(names = {"-p", "--password"}, paramLabel = "\"Password\"",
 			description = {"The password used for decrypting an encrypted PDF."})
 	@Nullable
 	private String password = null;
-
-	/** A boolean that, if set to true, will result in not asking for the missing or incorrect password for a encrypted PDF. */
-	@Option(names = {"-n", "--no-interaction"},
-			description = {"If this parameter is used, there will be no asking for missing or incorrect passwords."})
-	private Boolean noInteraction = false;
-
+	
+	/** A boolean that, if set to true, will result in not asking for password for a encrypted PDF. */
+	@Option(names = {"-n", "--no-interaction"}, arity = "0",
+			description = {"Disables user interaction.", "This means there will be no asking for missing or incorrect passwords."})
+	private boolean noInteraction = false;
+	
 	/**
 	 * The verbosity is given by how often -v was specified. If length is 0, verbosity is OFF. If null nothing was
 	 * specified in the command line arguments.
@@ -126,6 +126,21 @@ final class CLArgs {
 	@Option(names = {"-q", "--quiet"}, arity = "0", description = {"Silence the logging."})
 	private boolean quiet = false;
 	
+	/** If censor bars of text should be drawn atop of images. */
+	@Option(names = {"-i", "--intersect-images"}, arity = "0", description = {"This will allow text censor bars to be drawn atop of censored images should they overlap."})
+	private boolean intersectImages = false;
+	
+	/** Whether links should be distinguished from or be considered normal text. */
+	@Option(names = {"-l", "--links"}, arity = "0", description = {"This will enable links to be colored in a certain color (different from the default censor color) and not be considered 'normal text'."})
+	private boolean distinguishLinks = false;
+	
+	/** A configuration file which should be used when censoring. */
+	@SuppressWarnings("CanBeFinal") // it cannot be final as it will be set by picoCLI
+	@Option(names = {"-c", "--config"}, paramLabel = "\"config file\"", arity = "1",
+			description = {"Set the configuration file which should be used as a foundation when censoring the given pdf-file."})
+	@Nullable
+	private File configFile = null;
+	
 	/**
 	 * CLArgs' default constructor should be hidden to the public as {@link #fromStringArray(String...)} should be used
 	 * to initialize a new instance.
@@ -171,21 +186,21 @@ final class CLArgs {
 	 */
 	@Contract(pure = true)
 	@NotNull
-	final File getInput() {
+	File getInput() {
 		return Objects.requireNonNull(input);
 	}
 	
 	/**
-	 * Returns output file given by the user
+	 * Returns output file given by the user.
 	 *
 	 * @return The output file as it was specified by the user or null if none was specified.
 	 */
 	@Contract(pure = true)
 	@Nullable
-	final File getOutput() {
+	File getOutput() {
 		return output;
 	}
-
+	
 	/**
 	 * Returns password String given by the user
 	 *
@@ -196,18 +211,17 @@ final class CLArgs {
 	final String getPassword() {
 		return password;
 	}
-
+	
 	/**
 	 * Returns noInteraction boolean set by the user to true, or set to false by default.
 	 *
 	 * @return The boolean noInteraction.
 	 */
 	@Contract(pure = true)
-	@NotNull
-	final Boolean getNoInteraction() {
+	final boolean getNoInteraction() {
 		return noInteraction;
 	}
-
+	
 	/**
 	 * Returns verbosity level given by the user. Starts at {@link Level#WARN} for no given <code>-v</code>.
 	 *
@@ -237,6 +251,28 @@ final class CLArgs {
 	}
 	
 	/**
+	 * Returns the behavior when censor bars overlap with images as parsed from the given command-line arguments.
+	 *
+	 * @return The desired behavior for overlapping censor bars and images as parsed from the given command-line
+	 * arguments. True if overlapping is allowed, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean getIntersectImages() {
+		return this.intersectImages;
+	}
+	
+	/**
+	 * Returns whether links should be distinguished from or considered normal text as parsed from the command-line
+	 * arguments.
+	 *
+	 * @return True if a distinction of links and normal text is desired, false otherwise.
+	 */
+	@Contract(pure = true)
+	boolean distinguishLinks() {
+		return this.distinguishLinks;
+	}
+	
+	/**
 	 * The array representation of the expressions list parsed from the given command-line arguments.
 	 *
 	 * @return An array containing all the expressions.
@@ -255,5 +291,16 @@ final class CLArgs {
 	@Contract(pure = true)
 	boolean getQuiet() {
 		return this.quiet;
+	}
+	
+	/**
+	 * Returns the configuration file as specified by the parsed arguments.
+	 *
+	 * @return The configuration file as specified by the user or null if none was specified.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	File getConfigFile() {
+		return this.configFile;
 	}
 }

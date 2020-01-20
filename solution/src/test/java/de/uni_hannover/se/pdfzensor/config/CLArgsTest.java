@@ -29,19 +29,22 @@ class CLArgsTest {
 	/**
 	 * Checks if the arguments are parsed into the corresponding expected values.
 	 *
-	 * @param args        The command-line arguments to parse.
-	 * @param input       The expected input file as specified in args.
-	 * @param output      The expected output file as specified in args.
-	 * @param verbosity   The expected logger verbosity as specified in args.
-	 * @param mode        The expected censoring mode as specified in args.
-	 * @param expressions The expected expressions as a list of string-string pairs as specified in args.
-	 * @param quiet       The expected logger mode (whether or not it is expected to be silenced).
+	 * @param args            The command-line arguments to parse.
+	 * @param input           The expected input file as specified in args.
+	 * @param output          The expected output file as specified in args.
+	 * @param verbosity       The expected logger verbosity as specified in args.
+	 * @param mode            The expected censoring mode as specified in args.
+	 * @param expressions     The expected expressions as a list of string-string pairs as specified in args.
+	 * @param quiet           The expected logger mode (whether or not it is expected to be silenced) as specified in
+	 *                        args.
+	 * @param intersectImages The expected behavior for overlapping text censor bars and censored images as specified in
+	 *                        args.
 	 */
-	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}")
+	@ParameterizedTest(name = "Run {index}: args: {0} => in: {1}, out: {2}, verbosity: {3}, mode: {4}, expressions: {5}, quiet: {6}, intersectImages: {7}")
 	@ArgumentsSource(CLArgumentProvider.class)
 	void testArgsParser(@NotNull String[] args, @NotNull File input, @Nullable File output, @Nullable Level verbosity,
 						@Nullable Mode mode, @NotNull ArrayList<ImmutablePair<String, String>> expressions,
-						boolean quiet) {
+						boolean quiet, boolean intersectImages) {
 		var clArgs = CLArgs.fromStringArray(args);
 		assertEquals(input, clArgs.getInput());
 		assertEquals(output, clArgs.getOutput());
@@ -57,5 +60,6 @@ class CLArgsTest {
 			assertEquals(expectedExp.getColor(), actualExp.getColor());
 		}
 		assertEquals(quiet, clArgs.getQuiet());
+		assertEquals(intersectImages, clArgs.getIntersectImages());
 	}
 }

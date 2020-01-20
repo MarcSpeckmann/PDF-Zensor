@@ -40,17 +40,20 @@ class ConfigTest {
 	/**
 	 * Tests whether or not parsing the given configuration file results in the expected config.
 	 *
-	 * @param configFile  The config file which will be used in this test.
-	 * @param output      The expected output file.
-	 * @param verbosity   The expected logger verbosity.
-	 * @param mode        The expected censor mode.
-	 * @param expressions The expected expressions as a list of string-string pairs.
-	 * @param defColors   The expected default colors to assign to color-less expressions.
+	 * @param configFile      The config file which will be used in this test.
+	 * @param output          The expected output file.
+	 * @param verbosity       The expected logger verbosity.
+	 * @param mode            The expected censor mode.
+	 * @param intersectImages The expected intersecting image behavior.
+	 * @param links           The expected given setting for distinguishing links.
+	 * @param expressions     The expected expressions as a list of string-string pairs.
+	 * @param defColors       The expected default colors to assign to color-less expressions.
 	 */
-	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, expressions: {4}, defColors: {5}")
+	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, intersectImages: {4}, expressions: {5}, defColors: {6}")
 	@ArgumentsSource(ConfigProvider.class)
 	void testValidConfigurations(@Nullable File configFile, @Nullable File output, @Nullable Level verbosity,
-								 @Nullable Mode mode, @Nullable ArrayList<ImmutablePair<String, String>> expressions,
+								 @Nullable Mode mode, boolean intersectImages, boolean links,
+								 @Nullable ArrayList<ImmutablePair<String, String>> expressions,
 								 @Nullable Color[] defColors) {
 		var config = Config.fromFile(configFile);
 		
@@ -59,6 +62,10 @@ class ConfigTest {
 		assertEquals(verbosity, config.getVerbosity());
 		
 		assertEquals(mode, config.getMode());
+		
+		assertEquals(intersectImages, config.getIntersectImages());
+		
+		assertEquals(links, config.distinguishLinks());
 		
 		var actualExpressions = config.getExpressions();
 		if (expressions != null) {
@@ -84,5 +91,32 @@ class ConfigTest {
 		} else {
 			assertNull(actualDefColors);
 		}
+	}
+	
+	/**
+	 * Refreshes the existing default configuration file and tests if its content is parsed (and was therefore written)
+	 * as expected.
+	 */
+	@Test
+	void testGetDefaultConfigFile() {
+		var defaultConfig = Config.getDefaultConfigFile(true);
+		assertNotNull(defaultConfig);
+		final var content = Config.fromFile(defaultConfig);
+		assertNull(content.getOutput());
+		assertEquals(Level.WARN, content.getVerbosity());
+		assertEquals(Mode.ALL, content.getMode());
+		assertFalse(content.getIntersectImages());
+		assertFalse(content.distinguishLinks());
+		assertEquals(Mode.ALL, content.getMode());
+		final var actualExp = content.getExpressions();
+		assertNotNull(actualExp);
+		assertEquals(1, actualExp.length);
+		assertEquals(".", actualExp[0].getRegex());
+		assertEquals(Settings.DEFAULT_CENSOR_COLOR, actualExp[0].getColor());
+		final var actualColors = content.getDefaultColors();
+		assertNotNull(actualColors);
+		assertEquals(Settings.DEFAULT_COLORS.length, actualColors.length);
+		for (var i = 0; i < actualColors.length; i++)
+			assertEquals(Settings.DEFAULT_COLORS[i], actualColors[i]);
 	}
 }

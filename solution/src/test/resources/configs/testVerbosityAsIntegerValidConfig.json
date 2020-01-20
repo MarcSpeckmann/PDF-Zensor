@@ -1,4 +1,5 @@
 {
 	"verbose": 5,
-	"output":"censoredFile.pdf"
+	"output":"censoredFile.pdf",
+    "links":null
 }

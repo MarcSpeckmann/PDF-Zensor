@@ -1,5 +1,7 @@
 {
 	"verbose": 10,
 	"output":"censoredFile.pdf",
-	"censor":"all"
+	"censor":"all",
+	"intersectImages":"null",
+    "links":false
 }
