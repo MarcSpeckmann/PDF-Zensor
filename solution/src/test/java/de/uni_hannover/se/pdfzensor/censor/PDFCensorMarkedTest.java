@@ -55,7 +55,7 @@ class PDFCensorMarkedTest implements PDFHandler {
 	void testPDFCensor(@NotNull String file, @NotNull Rectangle2D[] uncombinedBoundingBoxes,
 					   int combinedBoundingBoxesNr) throws IOException {
 		
-		var dummySettings = new Settings(null, file, "-m");
+		var dummySettings = new Settings(file, "-m");
 		this.properCensor = new PDFCensor(dummySettings);
 		this.currTextPosition = 0;
 		this.uncombinedBoundingBoxes = uncombinedBoundingBoxes;

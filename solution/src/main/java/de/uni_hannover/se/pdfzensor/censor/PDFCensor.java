@@ -153,27 +153,33 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * Calculates the rectangle between the two rectangle and returns it if it is considered to be representing a
-	 * space-character. The gap is considered to be a space-character if its respective height (for horizontal fonts) or
-	 * width (for vertical fonts) is in a range of {@link #THIN_SPACE_WIDTH} to {@link #MAX_GAP}. Any gap that is
-	 * smaller or longer than these is considered to not be representing a space-character and thus <code>null</code> is
-	 * returned.
+	 * Calculates the rectangle between two given rectangles and returns an {@link Optional} containing that rectangle
+	 * if it is considered a space-character or an empty optional if it is not.
+	 * <br>
+	 * For a rectangle to be considered a space-character its respective height (for horizontal fonts) or width (for
+	 * vertical fonts) must be in the range of {@link #THIN_SPACE_WIDTH} to {@link #MAX_GAP}. Furthermore, the height of
+	 * a horizontal or width of a vertical space-character may be no larger than the height or width of their enclosing
+	 * rectangles.
 	 *
-	 * @param r1   the first rectangle of the two between which a space may be. May be <code>null</code>.
-	 * @param r2   the second rectangle of the two between which a space may be. May be <code>null</code>.
-	 * @param font the font of which the space would be part.
-	 * @return The gap between r1 and r2 if there may be a blank-character between them <code>null</code> otherwise.
-	 * <code>null</code> may also be returned if r1 or r2 are <code>null</code>.
+	 * @param r1   The first of the two enclosing rectangles. May be <code>null</code>.
+	 * @param r2   The second of the two enclosing rectangles. May be <code>null</code>.
+	 * @param font The font of which the space would be a part of.
+	 * @return The {@link Optional} containing the rectangle between r1 and r2 if it is a space-character. If it is not
+	 * or either r1 or r2 were <code>null</code> then an empty {@link Optional} is returned instead.
 	 */
 	private static Optional<Rectangle2D> getBlankBetween(Rectangle2D r1, Rectangle2D r2, PDFont font) {
 		if (!ObjectUtils.allNotNull(r1, r2))
 			return Optional.empty();
 		var gap = RectUtils.getRectBetween(r1, r2);
-		//size of the gap in Em (relative to the fonts height/width depending on the font's alignment)
-		double size = gap.getWidth() / r1.getHeight();
-		if (font.isVertical())
-			size = gap.getHeight() / r1.getWidth();
-		var isSpace = Range.between(THIN_SPACE_WIDTH, (double) MAX_GAP).contains(size);
+		var tolerance = 1 + DEVIATION_TOLERANCE;
+		// size of the gap in Em (relative to the fonts height/width depending on the font's alignment)
+		double size = gap.getWidth() / ((r1.getHeight() + r2.getHeight()) / 2);
+		boolean ratioFits = gap.getHeight() < tolerance * Math.max(r1.getHeight(), r2.getHeight());
+		if (font.isVertical()) {
+			size = gap.getHeight() / ((r1.getWidth() + r2.getWidth()) / 2);
+			ratioFits = gap.getWidth() < tolerance * Math.max(r1.getWidth(), r2.getWidth());
+		}
+		final var isSpace = ratioFits && Range.between(THIN_SPACE_WIDTH, (double) MAX_GAP).contains(size);
 		return Optional.of(gap).filter(b -> isSpace);
 	}
 	
@@ -241,6 +247,9 @@ public final class PDFCensor implements PDFHandler {
 		boundingBoxes = null;
 		pictureBoundingBoxes = null;
 		MetadataRemover.censorMetadata(doc);
+		ImageReplacer.removeImageData(doc);
+		doc.getDocumentCatalog().setDocumentOutline(null);
+		doc.getDocumentCatalog().setPageLabels(null);
 	}
 	
 	/** {@inheritDoc} */
@@ -287,20 +296,26 @@ public final class PDFCensor implements PDFHandler {
 	}
 	
 	/**
-	 * If the given bounds intersect with any bounds from the {@link #pictureBoundingBoxes} then nothing will happen.
-	 * Otherwise the given bounding-box and color will either be added to the {@link #boundingBoxes} list or extend the
-	 * last element of the list to also cover the bounds of the given pair (if the bounds are an extension of the
-	 * previous bounds and the color is the same).
+	 * The given bounding-box and color will be added to the {@link #boundingBoxes} list or extend the last element of
+	 * the list to also cover the bounds of the given pair (if the bounds are an extension of the previous bounds and
+	 * the color is the same).
+	 * <br>
+	 * If {@link Settings#getIntersectImages()} is {@code false} then no bounding-boxes intersecting the bounding-boxes
+	 * of censored images will be added to the list or extend the last element of the list. Otherwise the overlapping of
+	 * text censor bars and censored images is not considered and they may overlap.
 	 * <br>
 	 * Whether or not the previous bounds will be extended depends on the result of {@link #getExtended(Rectangle2D,
-	 * Rectangle2D)} when called with the two rectangles.
+	 * Rectangle2D)} when called with the two rectangles (and the previously mentioned factors).
 	 *
 	 * @param bb    The bounding-box that should be added to the list of censored bounding-boxes.
 	 * @param color The color in which the provided bounding-box should be censored.
 	 * @see #getExtended(Rectangle2D, Rectangle2D)
+	 * @see Settings#getIntersectImages()
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final Rectangle2D bb, final Color color) {
-		if (pictureBoundingBoxes.stream().anyMatch(Objects.requireNonNull(bb)::intersects)) return;
+		if (!settings.getIntersectImages() &&
+			pictureBoundingBoxes.stream().anyMatch(Objects.requireNonNull(bb)::intersects))
+			return;
 		if (!boundingBoxes.isEmpty()) {
 			final var last = boundingBoxes.get(boundingBoxes.size() - 1);
 			final var union = getExtended(last.getLeft(), bb);
