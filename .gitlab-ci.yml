@@ -1,8 +1,15 @@
 image: maven:latest
 
+cache:
+    paths:
+        - maven.repository/
+
+variables:
+    MAVEN_OPTS: "--batch-mode -Dmaven.repo.local=maven.repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
+
 stages:
     - build
-    - test 
+    - test
     - deploy
 
 build:
@@ -16,7 +23,7 @@ test:
     script:
         - echo "Testing"
         - mvn test -f solution/pom.xml
-    
+
 deploy:
     stage: deploy
     environment: Deployment
@@ -24,7 +31,7 @@ deploy:
         - echo "Deploy"
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml
         - mvn javadoc:javadoc -f solution/pom.xml
-    artifacts: 
+    artifacts:
         paths:
             - solution/target/site
             - "solution/target/*.jar"
