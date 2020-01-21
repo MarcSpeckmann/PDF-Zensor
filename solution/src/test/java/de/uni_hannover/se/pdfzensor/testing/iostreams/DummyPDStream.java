@@ -1,5 +1,6 @@
 package de.uni_hannover.se.pdfzensor.testing.iostreams;
 
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.cos.COSStream;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +34,7 @@ public class DummyPDStream extends PDStream {
 	@NotNull
 	@SuppressWarnings("ReturnPrivateMutableField")
 	@Override
-	public OutputStream createOutputStream() {
+	public OutputStream createOutputStream(COSName filter) {
 		//For testing we only need one stream and thus don't need to create a new one in here
 		return os;
 	}
