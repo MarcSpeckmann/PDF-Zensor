@@ -183,7 +183,7 @@ public class TextProcessor extends PDFStreamProcessor {
 	 */
 	@Override
 	protected void processTextPosition(final TextPosition text) {
-		shouldBeCensored.add(handler.shouldCensorText(text));
+		shouldBeCensored.add(handler.shouldCensorText(getCurrentPage(), text));
 		super.processTextPosition(text);
 	}
 	

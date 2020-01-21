@@ -159,10 +159,15 @@ class PDFCensorUnmarkedTest implements PDFHandler {
 	
 	/** {@inheritDoc} This is extended by various tests. */
 	@Override
-	public boolean shouldCensorText(final TextPosition pos) {
+	public boolean shouldCensorText(PDPage page, final TextPosition pos) {
 		Objects.requireNonNull(properCensor);
 		
-		boolean actual = properCensor.shouldCensorText(pos);
+		/* before the TextPosition has been processed */
+		var listBefore = getBoundingBoxes();
+		int sizeBefore = listBefore.size();
+		var lastBoundsBefore = (sizeBefore > 0) ? listBefore.get(sizeBefore - 1) : null;
+		
+		boolean actual = properCensor.shouldCensorText(page, pos);
 		Assertions.assertEquals(isNotMarked(pos), actual, "a textPosition is misidentified");
 		
 		return actual;

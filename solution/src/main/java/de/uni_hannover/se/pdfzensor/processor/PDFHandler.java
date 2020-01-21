@@ -45,5 +45,5 @@ public interface PDFHandler {
 	 * @param pos the TextPosition to check.
 	 * @return True if {@code pos} should be censored, false otherwise.
 	 */
-	boolean shouldCensorText(TextPosition pos);
+	boolean shouldCensorText(PDPage page, TextPosition pos);
 }

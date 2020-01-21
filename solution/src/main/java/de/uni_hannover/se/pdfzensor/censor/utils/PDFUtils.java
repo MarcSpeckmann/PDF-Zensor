@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import org.apache.fontbox.util.BoundingBox;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType3Font;
@@ -60,5 +61,11 @@ public final class PDFUtils {
 		Rectangle2D r = new Rectangle2D.Double(0, 0, totalWidth, bb.getHeight() + bb.getLowerLeftY());
 		Shape s = at.createTransformedShape(r);
 		return s.getBounds2D();
+	}
+	
+	public static Rectangle2D mediaBoxCoordToCropBoxCoord(@NotNull Rectangle2D rect, PDPage page) {
+		var cropBox = page.getCropBox();
+		return new Rectangle2D.Double(rect.getX() + cropBox.getLowerLeftX(), rect.getY() + cropBox.getLowerLeftY(),
+									  rect.getWidth(), rect.getHeight());
 	}
 }
