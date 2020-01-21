@@ -145,13 +145,9 @@ final class Config {
 		for (var color : Settings.DEFAULT_COLORS)
 			defaultColors.add(colorToString(color));
 		try {
-			File file = new File(App.ROOT_DIR);
-			if (!file.exists()) {
-				boolean bool = file.mkdir();
-				if (!bool) {
-					System.err.println("Can not create pdf-zensor folder.");
-				}
-			}
+			var file = new File(App.ROOT_DIR);
+			if (!file.exists() && !file.mkdirs())
+				return false;
 			new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(DEFAULT_CONFIG_FILE, configNode);
 			return true;
 		} catch (IOException e) {
