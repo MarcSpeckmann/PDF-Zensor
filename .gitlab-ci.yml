@@ -1,12 +1,5 @@
 image: maven:latest
 
-cache:
-    paths:
-        - maven.repository/
-
-variables:
-    MAVEN_OPTS: "--batch-mode -Dmaven.repo.local=maven.repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
-
 stages:
     - build
     - test

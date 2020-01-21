@@ -11,7 +11,7 @@ import picocli.CommandLine;
 import java.io.IOException;
 
 public class App {
-	public static final String ROOT_DIR = "";
+	public static final String ROOT_DIR = "~/.pdf-zensor/";
 	
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
 	public static void main(String... args) {
