@@ -127,6 +127,7 @@ final class Config {
 	 * @return true if the file was successfully written, false otherwise.
 	 * @see Expression
 	 */
+	@SuppressWarnings("squid:S106")// we explicitly want to print to stderr here instead of logging
 	private static boolean createDefaultConfigFile() {
 		Objects.requireNonNull(DEFAULT_CONFIG_FILE, "The file to write the default configuration to may not be null.");
 		final var factory = JsonNodeFactory.instance;
