@@ -32,6 +32,13 @@ $ wget https://git.se.uni-hannover.de/swp1920/pdfzensor-2/-/jobs/artifacts/63-de
 $ sudo apt install ./pdfzensor_0.815_all.deb
 ```
 
+alternative:
+
+```sh
+$ alias pdf-zensor='java -cp "pdfzensor-jar-with-dependencies.jar" de.uni_hannover.se.pdfzensor.App
+```
+to create a temporary alias "pdf-zensor" which is valid for the current shell session.
+
 ### Development
 
 Want to contribute? Great!
