@@ -57,6 +57,13 @@ public final class Settings {
 	/** The path into which the censored pdf-file should be written. */
 	@NotNull
 	private final File output;
+	/** A password to decrypt an encrypted PDF. Might be null. */
+	private String password;
+	/**
+	 * A boolean to turn off interaction (e.g. asking for missing passwords and asking for correct passwords if
+	 * incorrect have been given).
+	 */
+	private final boolean noInteraction;
 	/** The color with which to censor links if {@link #distinguishLinks} is true. */
 	@NotNull
 	private final Color linkColor;
@@ -92,6 +99,8 @@ public final class Settings {
 		input = clArgs.getInput();
 		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
 													  input.getAbsoluteFile().getParentFile()));
+		password = clArgs.getPassword();
+		noInteraction = clArgs.getNoInteraction();
 		linkColor = DEFAULT_LINK_COLOR;
 		distinguishLinks = clArgs.distinguishLinks() || config.distinguishLinks();
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
@@ -138,6 +147,22 @@ public final class Settings {
 	@Contract(pure = true)
 	public File getOutput() {
 		return output;
+	}
+	
+	/**
+	 * @return The password String as it was specified in the command-line arguments.
+	 */
+	@Contract(pure = true)
+	public String getPassword() {
+		return password;
+	}
+	
+	/**
+	 * @return The boolean noInteraction as set by default or by command-line arguments.
+	 */
+	@Contract(pure = true)
+	public boolean getNoInteraction() {
+		return noInteraction;
 	}
 	
 	/**

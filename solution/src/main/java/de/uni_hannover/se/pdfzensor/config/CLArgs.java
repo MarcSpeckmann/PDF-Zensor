@@ -46,6 +46,17 @@ final class CLArgs {
 	@Nullable
 	private File output = null;
 	
+	/** An optional password for decrypting encrypted PDFs. Null should be assigned if nothing else was specified. */
+	@Option(names = {"-p", "--password"}, arity = "1", paramLabel = "\"password\"",
+			description = {"The password used for decrypting an encrypted PDF."})
+	@Nullable
+	private String password = null;
+	
+	/** A boolean that, if set to true, will result in not asking for password for a encrypted PDF. */
+	@Option(names = {"-n", "--no-interaction"}, arity = "0",
+			description = {"Disables user interaction.", "This means there will be no asking for missing or incorrect passwords."})
+	private boolean noInteraction = false;
+	
 	/**
 	 * The verbosity is given by how often -v was specified. If length is 0, verbosity is OFF. If null nothing was
 	 * specified in the command line arguments.
@@ -87,13 +98,6 @@ final class CLArgs {
 	 * those from the stack which are consumed when creating the {@link Expression}.
 	 */
 	private static final class ExpressionOption implements IParameterConsumer {
-		@Parameters(arity = "1", paramLabel = "\"regex\"", hidden = true)
-		@Nullable
-		private static String regex = null; // not used, expressions are parsed by a custom consumer
-		@Parameters(arity = "0..1", paramLabel = "\"hex_color\"", hidden = true)
-		@Nullable
-		private static String hexColor = null; // not used, expressions are parsed by a custom consumer
-		
 		/**
 		 * The top of the stack always contains the regex when this method is called because this consumer follows
 		 * <code>-e</code> or <code>--expression</code> respectively.
@@ -150,8 +154,8 @@ final class CLArgs {
 	@NotNull
 	static CLArgs fromStringArray(@NotNull final String... args) {
 		Validate.notEmpty(args);
-		expressions.clear();
 		final var clArgs = new CLArgs();
+		expressions.clear();
 		final var cmd = new CommandLine(clArgs);
 		cmd.parseArgs(Validate.noNullElements(args));
 		clArgs.validate();
@@ -188,6 +192,27 @@ final class CLArgs {
 	@Nullable
 	File getOutput() {
 		return output;
+	}
+	
+	/**
+	 * Returns password String given by the user
+	 *
+	 * @return The password String as it was specified by the user or null if none was specified.
+	 */
+	@Contract(pure = true)
+	@Nullable
+	final String getPassword() {
+		return password;
+	}
+	
+	/**
+	 * Returns noInteraction boolean set by the user to true, or set to false by default.
+	 *
+	 * @return The boolean noInteraction.
+	 */
+	@Contract(pure = true)
+	final boolean getNoInteraction() {
+		return noInteraction;
 	}
 	
 	/**
