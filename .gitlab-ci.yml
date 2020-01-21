@@ -30,7 +30,7 @@ deploy:
             - "solution/target/*.jar"
             - "solution/target/*.deb"
         expire_in: 1 week
-    #only:
-    #    - master
+    only:
+        - master
 
 
