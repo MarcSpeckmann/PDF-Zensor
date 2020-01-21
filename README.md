@@ -47,6 +47,8 @@ Write a message!
 ### Todos
 
  - 🐞 (Feature): Clipping von Bildern und Dergleichen gemäß dem aktuellen GraphicsContext
+ - 🐞 (Feature): Wasserzeichen entfernen
+ - 🐞 (Feature): Chinesische o.ä. Schriftzeichen korrekt zensieren
  - 🐞 Zensur von rotiertem Text ist ggf komisch (da wir Text nach globalen Koordinaten mergen und nicht nach lokalen)
  - 🐞 Tokenizer kann nicht über die Seitengrenze Tokens finden
  - 🐞 Annotations::getRect gibt ein falsches(?) Rectangle zurück. Umgangen durch HighlightAnnotation::getQuads
