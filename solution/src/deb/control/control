@@ -1,0 +1,8 @@
+Package: [[name]]
+Version: [[version]]
+Section: utils
+Priority: optional
+Architecture: all
+Description: [[description]]
+Maintainer: Fabian Pflug <pflug@chi.uni-hannover.de>
+Recommends: openjdk-11-jre | openjdk-11-jdk

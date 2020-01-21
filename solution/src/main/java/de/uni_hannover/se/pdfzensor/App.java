@@ -23,7 +23,7 @@ import java.util.Objects;
  * The main application.
  */
 public class App {
-	public static final String ROOT_DIR = "";
+	public static final String ROOT_DIR = System.getProperty("user.home") + "/.pdf-zensor/";
 	
 	private static Logger logger;
 	

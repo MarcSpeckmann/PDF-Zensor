@@ -5,8 +5,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<groupId>de.uni_hannover.se</groupId>
-	<artifactId>pdfzensor</artifactId>
+	<artifactId>pdf-zensor</artifactId>
 	<version>0.815</version>
+	<description>PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file.</description>
 	
 	<build>
 		<resources>
@@ -39,7 +40,7 @@
 							<Multi-Release>true</Multi-Release>
 						</manifestEntries>
 					</archive>
-					<finalName>pdfzensor</finalName>
+					<finalName>pdf-zensor</finalName>
 				</configuration>
 				<executions>
 					<execution>
@@ -57,6 +58,52 @@
 			<plugin>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>2.22.2</version>
+			</plugin>
+			<plugin>
+				<artifactId>jdeb</artifactId>
+				<groupId>org.vafer</groupId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jdeb</goal>
+						</goals>
+						<configuration>
+							<dataSet>
+								<data>
+									<src>${project.build.directory}/pdf-zensor-jar-with-dependencies.jar</src>
+									
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/usr/share/pdf-zensor</prefix>
+									</mapper>
+								</data>
+								
+								<data>
+									<src>src/deb/pdf-zensor</src>
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/usr/bin</prefix>
+										<filemode>775</filemode>
+									</mapper>
+								</data>
+								
+								<data>
+									<src>src/deb/pdf-zensor.1.gz</src>
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/usr/share/man/man1</prefix>
+									</mapper>
+								</data>
+								
+							</dataSet>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -148,3 +195,4 @@
 
 
 </project>
+
