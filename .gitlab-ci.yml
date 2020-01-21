@@ -22,7 +22,7 @@ deploy:
     environment: Deployment
     script:
         - echo "Deploy"
-        - mvn release:update-versions
+        - mvn release:update-versions -f solution/pom.xml
         - mvn -Dmaven.test.skip=true package -f solution/pom.xml
         - mvn javadoc:javadoc -f solution/pom.xml
     artifacts: 
