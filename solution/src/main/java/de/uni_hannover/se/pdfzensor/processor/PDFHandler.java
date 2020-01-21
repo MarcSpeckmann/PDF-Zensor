@@ -42,7 +42,8 @@ public interface PDFHandler {
 	 * This callback is called by {@link TextProcessor} for each encountered Glyph to check if it should be censored or
 	 * not.
 	 *
-	 * @param pos the TextPosition to check.
+	 * @param page The page on which <code>pos</code> can be found.
+	 * @param pos  The TextPosition to check.
 	 * @return True if {@code pos} should be censored, false otherwise.
 	 */
 	boolean shouldCensorText(PDPage page, TextPosition pos);
