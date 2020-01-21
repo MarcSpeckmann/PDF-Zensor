@@ -36,7 +36,7 @@ import static org.apache.pdfbox.contentstream.operator.OperatorName.*;
  * and similar methods to the API outside of this package by forwarding these events to a {@link PDFHandler}. For the
  * other is it responsible for copying all read operators into {@link PDFStreamProcessor}'s builtin output-stream. The
  * latter has as only exception the Show-Text-Operators (TJ and Tj) as they should only be copied if the callback to
- * {@link PDFHandler#shouldCensorText(TextPosition)} had returned false.
+ * {@link PDFHandler#shouldCensorText(PDPage, TextPosition)} had returned false.
  */
 public class TextProcessor extends PDFStreamProcessor {
 	/** A {@link Logger}-instance that should be used by this class' member methods to log their state and errors. */
