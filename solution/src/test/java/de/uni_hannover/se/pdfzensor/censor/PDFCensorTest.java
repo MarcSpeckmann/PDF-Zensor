@@ -84,7 +84,7 @@ class PDFCensorTest implements PDFHandler {
 	@ArgumentsSource(PDFCensorBoundingBoxProvider.class)
 	void testPDFCensor(@NotNull String input, @NotNull Rectangle2D.Double[] elements,
 					   int finalExpectedElements) throws IOException {
-		var dummySettings = new Settings(input);
+		var dummySettings = new Settings(input, "-l");
 		this.properCensor = new PDFCensor(dummySettings);
 		this.elements = elements;
 		this.element = 0;
@@ -156,14 +156,10 @@ class PDFCensorTest implements PDFHandler {
 	public void endPage(final PDDocument doc, final PDPage page, final int pageNum) {
 		Objects.requireNonNull(properCensor);
 		Assertions.assertNotNull(getBoundingBoxes(properCensor));
-		// Checks if the expected number of elements have been combined
-		// (requires colors to be added because differently colored elements should not be combined)
-		
-		//TODO: adjust to the tokenized censoring
-		//This test would not and should not necessarily work with the tokenized censoring
-		//Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
 		
 		properCensor.endPage(doc, page, pageNum);
+		// Checks if the expected number of elements have been combined
+		Assertions.assertEquals(finalExpectedElements, Objects.requireNonNull(getBoundingBoxes(properCensor)).size());
 		try {
 			Assertions.assertTrue(page.getAnnotations().isEmpty());
 		} catch (IOException e) {
@@ -193,27 +189,7 @@ class PDFCensorTest implements PDFHandler {
 		
 		var actual = properCensor.shouldCensorText(page, pos);
 		
-		var listAfter = Objects.requireNonNull(getBoundingBoxes(properCensor));
-		var sizeAfter = listAfter.size();
-		
-		//TODO: this part has to be rewritten and adjusted to the now tokenized censoring
-		//This assertion is not true anymore since with the tokenizer censor-bars are not added directly.
-		//Assertions.assertTrue(sizeAfter > 0);
-		//var newLast = listAfter.get(sizeAfter - 1);
-		
-		//TODO: this too
-		//Assertions.assertTrue(sizeAfter > 0);
-		//var newLast = listAfter.get(sizeAfter - 1);
-		
-		// Colors differ, expect element to be added instead of combined.
-		//if (oldLast != null && !oldLast.getRight().equals(newLast.getRight()))
-		//	Assertions.assertEquals(sizeBefore + 1, sizeAfter);
-		
-		//var expBounds = elements[element];
-		//if (sizeBefore == sizeAfter) // element was extended
-		//	expBounds = (Rectangle2D.Double) elements[element].createUnion(oldLast.getLeft());
-		//Assertions.assertTrue(checkRectanglesEqual(expBounds, newLast.getLeft()));
-		
+		Assertions.assertTrue(actual);
 		element++;
 		return actual;
 	}

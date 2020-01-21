@@ -57,9 +57,18 @@ public final class Settings {
 	/** The path into which the censored pdf-file should be written. */
 	@NotNull
 	private final File output;
-	/** The color with which to censor links. */
+	/** A password to decrypt an encrypted PDF. Might be null. */
+	private String password;
+	/**
+	 * A boolean to turn off interaction (e.g. asking for missing passwords and asking for correct passwords if
+	 * incorrect have been given).
+	 */
+	private final boolean noInteraction;
+	/** The color with which to censor links if {@link #distinguishLinks} is true. */
 	@NotNull
 	private final Color linkColor;
+	/** Whether links should be distinguished from normal text or be considered normal text. */
+	private final boolean distinguishLinks;
 	/** The mode to use for censoring. See {@link Mode} for more information. */
 	@NotNull
 	private final Mode mode;
@@ -90,7 +99,10 @@ public final class Settings {
 		input = clArgs.getInput();
 		output = checkOutput(ObjectUtils.firstNonNull(clArgs.getOutput(), config.getOutput(),
 													  input.getAbsoluteFile().getParentFile()));
+		password = clArgs.getPassword();
+		noInteraction = clArgs.getNoInteraction();
 		linkColor = DEFAULT_LINK_COLOR;
+		distinguishLinks = clArgs.distinguishLinks() || config.distinguishLinks();
 		mode = ObjectUtils.firstNonNull(clArgs.getMode(), config.getMode(), Mode.ALL);
 		final var defColors = ObjectUtils.firstNonNull(config.getDefaultColors(), DEFAULT_COLORS);
 		expressions = combineExpressions(clArgs.getExpressions(), config.getExpressions(), defColors);
@@ -109,6 +121,7 @@ public final class Settings {
 		logger.debug("\tQuiet: {}", clArgs::getQuiet);
 		logger.debug("\tIntersect Images: {}", intersectImages);
 		logger.debug("\tCensor mode: {}", mode);
+		logger.debug("\tDistinguish Links: {}", distinguishLinks);
 		logger.debug("\tLink-Color: {}", () -> colorToString(linkColor));
 		logger.debug("\tExpressions");
 		for (var exp : expressions)
@@ -137,12 +150,37 @@ public final class Settings {
 	}
 	
 	/**
-	 * @return The color links should be censored in as it was specified in the command-line arguments and config.
+	 * @return The password String as it was specified in the command-line arguments.
+	 */
+	@Contract(pure = true)
+	public String getPassword() {
+		return password;
+	}
+	
+	/**
+	 * @return The boolean noInteraction as set by default or by command-line arguments.
+	 */
+	@Contract(pure = true)
+	public boolean getNoInteraction() {
+		return noInteraction;
+	}
+	
+	/**
+	 * @return The color links should be censored in if {@link #distinguishLinks} is true.
 	 */
 	@NotNull
 	@Contract(pure = true)
 	public Color getLinkColor() {
 		return linkColor;
+	}
+	
+	/**
+	 * @return True if links should be distinguished from normal text, false otherwise. As specified in either the
+	 * command-line arguments or config.
+	 */
+	@Contract(pure = true)
+	public boolean distinguishLinks() {
+		return distinguishLinks;
 	}
 	
 	/**

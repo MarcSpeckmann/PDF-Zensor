@@ -1,6 +1,7 @@
 package de.uni_hannover.se.pdfzensor.censor.utils;
 
 
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +89,7 @@ public class DoubleBufferedStream implements AutoCloseable {
 	public void close() throws IOException {
 		is.close();
 		os.close();
-		try (var s = stream.createOutputStream()) {
+		try (var s = stream.createOutputStream(COSName.FLATE_DECODE)) {
 			s.write(os.toByteArray());
 		}
 	}

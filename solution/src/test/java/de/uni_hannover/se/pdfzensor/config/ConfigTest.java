@@ -45,13 +45,14 @@ class ConfigTest {
 	 * @param verbosity       The expected logger verbosity.
 	 * @param mode            The expected censor mode.
 	 * @param intersectImages The expected intersecting image behavior.
+	 * @param links           The expected given setting for distinguishing links.
 	 * @param expressions     The expected expressions as a list of string-string pairs.
 	 * @param defColors       The expected default colors to assign to color-less expressions.
 	 */
 	@ParameterizedTest(name = "Run {index}: config: {0} => output: {1}, verbosity: {2}, mode: {3}, intersectImages: {4}, expressions: {5}, defColors: {6}")
 	@ArgumentsSource(ConfigProvider.class)
 	void testValidConfigurations(@Nullable File configFile, @Nullable File output, @Nullable Level verbosity,
-								 @Nullable Mode mode, boolean intersectImages,
+								 @Nullable Mode mode, boolean intersectImages, boolean links,
 								 @Nullable ArrayList<ImmutablePair<String, String>> expressions,
 								 @Nullable Color[] defColors) {
 		var config = Config.fromFile(configFile);
@@ -63,6 +64,8 @@ class ConfigTest {
 		assertEquals(mode, config.getMode());
 		
 		assertEquals(intersectImages, config.getIntersectImages());
+		
+		assertEquals(links, config.distinguishLinks());
 		
 		var actualExpressions = config.getExpressions();
 		if (expressions != null) {
@@ -101,6 +104,9 @@ class ConfigTest {
 		final var content = Config.fromFile(defaultConfig);
 		assertNull(content.getOutput());
 		assertEquals(Level.WARN, content.getVerbosity());
+		assertEquals(Mode.ALL, content.getMode());
+		assertFalse(content.getIntersectImages());
+		assertFalse(content.distinguishLinks());
 		assertEquals(Mode.ALL, content.getMode());
 		final var actualExp = content.getExpressions();
 		assertNotNull(actualExp);
