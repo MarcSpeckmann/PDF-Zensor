@@ -75,24 +75,17 @@ public final class PDFCensor implements PDFHandler {
 	 * Expression}. The payload of each character is the {@link Rectangle2D} representing its bounds on the page.
 	 */
 	private final Tokenizer<Expression, Rectangle2D> tokenizer;
-	
-	/** The list of bounds-color pairs which will be censored. */
-	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
-	
-	/** The list of picture bounding boxes that should be censored.. */
-	private List<Rectangle2D> pictureBoundingBoxes;
-	
-	/** The predicate to use when checking bounds of {@link TextPosition}s. */
-	private Predicate<Rectangle2D> removePredicate;
-	
-	/** A new annotations instance in this {@link PDFCensor}-instance. */
-	private Annotations annotations = new Annotations();
-	
 	private final ImageReplacer imageReplacer = new ImageReplacer();
-	
 	/** Stores the settings provided in the constructor. */
 	private final Settings settings;
-	
+	/** The list of bounds-color pairs which will be censored. */
+	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
+	/** The list of picture bounding boxes that should be censored.. */
+	private List<Rectangle2D> pictureBoundingBoxes;
+	/** The predicate to use when checking bounds of {@link TextPosition}s. */
+	private Predicate<Rectangle2D> removePredicate;
+	/** A new annotations instance in this {@link PDFCensor}-instance. */
+	private Annotations annotations = new Annotations();
 	/**
 	 * Stores the bounds of the last glyph to allow for detection of space-characters. May be null if there was no
 	 * previous glyph after which a space could have followed.
@@ -225,6 +218,7 @@ public final class PDFCensor implements PDFHandler {
 			tokenizer.flush();
 			
 			drawCensorBars(doc, page);
+			drawCensorImages(doc, page);
 			page.setAnnotations(null);
 		} catch (IOException e) {
 			LOGGER.error("There was an error writing the page contents of page {}.", pageNum, e);
@@ -379,4 +373,31 @@ public final class PDFCensor implements PDFHandler {
 			}
 		}
 	}
+	
+	/**
+	 * Draws the default image at the bounds stored in {@link #pictureBoundingBoxes}.
+	 *
+	 * @param doc  the document which is being worked on.
+	 * @param page the PDPage (current pdf page) that is being worked on.
+	 * @throws IOException If there was an I/O error writing the contents of the page.
+	 */
+	private void drawCensorImages(PDDocument doc, PDPage page) throws IOException {
+		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true,
+															 true)) {
+			pageContentStream.setStrokingColor(Color.DARK_GRAY);
+			pageContentStream.setLineWidth(2);
+			
+			for (var rect : this.pictureBoundingBoxes) {
+				pageContentStream.addRect((float) rect.getMinX(), (float) rect.getMinY(), (float) rect.getWidth(),
+										  (float) rect.getHeight());
+				pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMaxY());
+				pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMinY());
+				pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMinY());
+				pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMaxY());
+				pageContentStream.stroke();
+			}
+		}
+	}
+	
+	
 }
