@@ -48,6 +48,7 @@ Write a message!
 ### Todos
 
  - (Feature): Clipping von Bildern und Dergleichen gemäß dem aktuellen GraphicsContext
+ - (Feature): Inline Zeichnungen korrekt zensieren
  - (Feature): Wasserzeichen entfernen
  - (Feature): Chinesische o.ä. Schriftzeichen korrekt zensieren
  - (Feature): Regex funktioniert Seitenübergreifend
@@ -60,7 +61,7 @@ Write a message!
 License
 ----
 
-GNU PGLv3
+GNU GPLv3
 
 
 **Free Software, Hell Yeah!**
