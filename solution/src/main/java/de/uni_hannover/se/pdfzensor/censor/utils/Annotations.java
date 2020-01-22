@@ -173,7 +173,7 @@ public final class Annotations {
 	 * @return true if the given rect intersects at least one rect of {@link #links}, false otherwise
 	 */
 	public boolean isLinked(@NotNull Rectangle2D rect) {
-		return isLinked(rect, MarkCriterion.INTERSECT);
+		return isLinked(rect, MarkCriterion.CONTAIN_70);
 	}
 	
 	/**
