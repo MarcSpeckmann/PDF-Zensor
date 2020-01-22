@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -315,9 +316,6 @@ public final class PDFCensor implements PDFHandler {
 	 * @see Settings#getIntersectImages()
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final Rectangle2D bb, final Color color) {
-		if (!settings.getIntersectImages() &&
-			pictureBoundingBoxes.stream().anyMatch(Objects.requireNonNull(bb)::intersects))
-			return;
 		if (!boundingBoxes.isEmpty()) {
 			final var last = boundingBoxes.get(boundingBoxes.size() - 1);
 			final var union = getExtended(last.getLeft(), bb);
@@ -364,13 +362,19 @@ public final class PDFCensor implements PDFHandler {
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
 	private void drawCensorBars(PDDocument doc, PDPage page) throws IOException {
+		//Calculate the stencil-area that is the area of the page minus the area of each picture.
+		//This stencil will be used later if settings.getIntersectImages() is present to not draw censor-boxes over images
+		Area stencil = new Area(PDFUtils.pdRectToRect2D(page.getMediaBox()));
+		pictureBoundingBoxes.stream().map(Area::new).forEach(stencil::subtract);
+		
 		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true,
 															 true)) {
 			for (var pair : boundingBoxes) {
 				pageContentStream.setNonStrokingColor(pair.getRight());
-				var r = pair.getLeft();
-				pageContentStream.addRect((float) r.getX(), (float) r.getY(), (float) r.getWidth(),
-										  (float) r.getHeight());
+				var r = new Area(pair.getLeft());
+				if (!settings.getIntersectImages())
+					r.intersect(stencil);
+				PDFUtils.drawArea(pageContentStream, r);
 				pageContentStream.fill();
 			}
 		}

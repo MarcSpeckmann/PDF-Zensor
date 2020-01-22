@@ -2,6 +2,7 @@ package de.uni_hannover.se.pdfzensor.censor.utils;
 
 import org.apache.fontbox.util.BoundingBox;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType3Font;
@@ -11,9 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.Objects;
+
+import static java.awt.geom.PathIterator.*;
 
 /** PDFUtils is a specialized utility-class to provide short helper-functions centered around PDF-files. */
 public final class PDFUtils {
@@ -67,5 +71,33 @@ public final class PDFUtils {
 		var cropBox = page.getCropBox();
 		return new Rectangle2D.Double(rect.getX() + cropBox.getLowerLeftX(), rect.getY() + cropBox.getLowerLeftY(),
 									  rect.getWidth(), rect.getHeight());
+	}
+	
+	/**
+	 * Appends the provided area to the path currently open in the content-stream. To render the area a succeeding call
+	 * to {@link PDPageContentStream#fill()} or the like is necessary.
+	 *
+	 * @param contentStream the content-stream to write the data into.
+	 * @param area          the area that should be drawn to the provided content-stream.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public static void drawArea(@NotNull PDPageContentStream contentStream, @NotNull Area area) throws IOException {
+		final var pit = area.getPathIterator(null);
+		final float[] coord = new float[6];
+		while (!pit.isDone()) {
+			int type = pit.currentSegment(coord);
+			if (type == SEG_MOVETO)
+				contentStream.moveTo(coord[0], coord[1]);
+			else if (type == SEG_LINETO)
+				contentStream.lineTo(coord[0], coord[1]);
+			else if (type == SEG_CLOSE)
+				contentStream.closePath();
+			else if (type == SEG_QUADTO)
+				contentStream.curveTo1(coord[0], coord[1], coord[2], coord[3]);
+			else if (type == SEG_CUBICTO)
+				contentStream.curveTo(coord[0], coord[1], coord[2], coord[3], coord[4], coord[5]);
+			else throw new UnsupportedOperationException();
+			pit.next();
+		}
 	}
 }
