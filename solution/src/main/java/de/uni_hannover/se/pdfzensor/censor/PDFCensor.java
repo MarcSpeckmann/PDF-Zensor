@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -74,24 +75,17 @@ public final class PDFCensor implements PDFHandler {
 	 * Expression}. The payload of each character is the {@link Rectangle2D} representing its bounds on the page.
 	 */
 	private final Tokenizer<Expression, Rectangle2D> tokenizer;
-	
-	/** The list of bounds-color pairs which will be censored. */
-	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
-	
-	/** The list of picture bounding boxes that should be censored.. */
-	private List<Rectangle2D> pictureBoundingBoxes;
-	
-	/** The predicate to use when checking bounds of {@link TextPosition}s. */
-	private Predicate<Rectangle2D> removePredicate;
-	
-	/** A new annotations instance in this {@link PDFCensor}-instance. */
-	private Annotations annotations = new Annotations();
-	
 	private final ImageReplacer imageReplacer = new ImageReplacer();
-	
 	/** Stores the settings provided in the constructor. */
 	private final Settings settings;
-	
+	/** The list of bounds-color pairs which will be censored. */
+	private List<ImmutablePair<Rectangle2D, Color>> boundingBoxes;
+	/** The list of picture bounding boxes that should be censored.. */
+	private List<Rectangle2D> pictureBoundingBoxes;
+	/** The predicate to use when checking bounds of {@link TextPosition}s. */
+	private Predicate<Rectangle2D> removePredicate;
+	/** A new annotations instance in this {@link PDFCensor}-instance. */
+	private Annotations annotations = new Annotations();
 	/**
 	 * Stores the bounds of the last glyph to allow for detection of space-characters. May be null if there was no
 	 * previous glyph after which a space could have followed.
@@ -224,6 +218,7 @@ public final class PDFCensor implements PDFHandler {
 			tokenizer.flush();
 			
 			drawCensorBars(doc, page);
+			drawCensorImages(doc, page);
 			page.setAnnotations(null);
 		} catch (IOException e) {
 			LOGGER.error("There was an error writing the page contents of page {}.", pageNum, e);
@@ -315,9 +310,6 @@ public final class PDFCensor implements PDFHandler {
 	 * @see Settings#getIntersectImages()
 	 */
 	private void addOrExtendBoundingBoxes(@NotNull final Rectangle2D bb, final Color color) {
-		if (!settings.getIntersectImages() &&
-			pictureBoundingBoxes.stream().anyMatch(Objects.requireNonNull(bb)::intersects))
-			return;
 		if (!boundingBoxes.isEmpty()) {
 			final var last = boundingBoxes.get(boundingBoxes.size() - 1);
 			final var union = getExtended(last.getLeft(), bb);
@@ -364,15 +356,48 @@ public final class PDFCensor implements PDFHandler {
 	 * @throws IOException If there was an I/O error writing the contents of the page.
 	 */
 	private void drawCensorBars(PDDocument doc, PDPage page) throws IOException {
+		//Calculate the stencil-area that is the area of the page minus the area of each picture.
+		//This stencil will be used later if settings.getIntersectImages() is present to not draw censor-boxes over images
+		Area stencil = new Area(PDFUtils.pdRectToRect2D(page.getMediaBox()));
+		pictureBoundingBoxes.stream().map(Area::new).forEach(stencil::subtract);
+		
 		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true,
 															 true)) {
 			for (var pair : boundingBoxes) {
 				pageContentStream.setNonStrokingColor(pair.getRight());
-				var r = pair.getLeft();
-				pageContentStream.addRect((float) r.getX(), (float) r.getY(), (float) r.getWidth(),
-										  (float) r.getHeight());
+				var r = new Area(pair.getLeft());
+				if (!settings.getIntersectImages())
+					r.intersect(stencil);
+				PDFUtils.drawArea(pageContentStream, r);
 				pageContentStream.fill();
 			}
 		}
 	}
+	
+	/**
+	 * Draws the default image at the bounds stored in {@link #pictureBoundingBoxes}.
+	 *
+	 * @param doc  the document which is being worked on.
+	 * @param page the PDPage (current pdf page) that is being worked on.
+	 * @throws IOException If there was an I/O error writing the contents of the page.
+	 */
+	private void drawCensorImages(PDDocument doc, PDPage page) throws IOException {
+		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true,
+															 true)) {
+			pageContentStream.setStrokingColor(Color.DARK_GRAY);
+			pageContentStream.setLineWidth(2);
+			
+			for (var rect : this.pictureBoundingBoxes) {
+				pageContentStream.addRect((float) rect.getMinX(), (float) rect.getMinY(), (float) rect.getWidth(),
+										  (float) rect.getHeight());
+				pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMaxY());
+				pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMinY());
+				pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMinY());
+				pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMaxY());
+				pageContentStream.stroke();
+			}
+		}
+	}
+	
+	
 }

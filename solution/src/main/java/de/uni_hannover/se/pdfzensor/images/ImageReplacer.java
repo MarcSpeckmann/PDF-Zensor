@@ -11,14 +11,12 @@ import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,13 +99,6 @@ public class ImageReplacer extends PDFStreamEngine {
 					doc::getNumberOfPages);
 		
 		this.processPage(page);
-		
-		try (var pageContentStream = new PDPageContentStream(doc, page, PDPageContentStream.AppendMode.APPEND, true,
-															 true)) {
-			pageContentStream.setStrokingColor(Color.DARK_GRAY);
-			pageContentStream.setLineWidth(2);
-			drawPictureCensorBox(pageContentStream);
-		}
 		return this.rects;
 		
 	}
@@ -159,25 +150,4 @@ public class ImageReplacer extends PDFStreamEngine {
 					transformed.getX(), transformed.getY(), transformed.getWidth(), transformed.getHeight());
 		return transformed;
 	}
-	
-	/**
-	 * Draws the censor bars stored in {@link #rects} in the given <code>document</code> on the given
-	 * <code>page</code>.
-	 *
-	 * @param pageContentStream The {@link PDPageContentStream} in which to write the censor box.
-	 * @throws IOException If there was an I/O error writing the contents of the page.
-	 */
-	private void drawPictureCensorBox(@NotNull PDPageContentStream pageContentStream) throws IOException {
-		Objects.requireNonNull(pageContentStream);
-		for (var rect : this.rects) {
-			pageContentStream.addRect((float) rect.getMinX(), (float) rect.getMinY(), (float) rect.getWidth(),
-									  (float) rect.getHeight());
-			pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMaxY());
-			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMinY());
-			pageContentStream.moveTo((float) rect.getMaxX(), (float) rect.getMinY());
-			pageContentStream.lineTo((float) rect.getMinX(), (float) rect.getMaxY());
-			pageContentStream.stroke();
-		}
-	}
-	
 }
