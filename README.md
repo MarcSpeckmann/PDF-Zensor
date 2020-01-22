@@ -50,6 +50,8 @@ Write a message!
  - (Feature): Clipping von Bildern und Dergleichen gemäß dem aktuellen GraphicsContext
  - (Feature): Wasserzeichen entfernen
  - (Feature): Chinesische o.ä. Schriftzeichen korrekt zensieren
+ - (Feature): Regex funktioniert Seitenübergreifend
+ - (Feature): Zeilenumbrüche erkennen
  - 🐞 Zensur von rotiertem Text ist ggf komisch (da wir Text nach globalen Koordinaten mergen und nicht nach lokalen)
  - 🐞 Tokenizer kann nicht über die Seitengrenze Tokens finden
  - 🐞 Annotations::getRect gibt ein falsches(?) Rectangle zurück. Umgangen durch HighlightAnnotation::getQuads
