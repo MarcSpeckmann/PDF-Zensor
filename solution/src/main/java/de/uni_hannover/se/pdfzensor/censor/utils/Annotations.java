@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public final class Annotations {
 	 * @see #cachePage(PDPage)
 	 */
 	@NotNull
-	private List<Rectangle2D> highlights;
+	private List<Area> highlights;
 	
 	/**
 	 * Contains cached links after caching a PDF page.
@@ -44,7 +45,7 @@ public final class Annotations {
 	 * @see #cachePage(PDPage)
 	 */
 	@NotNull
-	private List<Rectangle2D> links;
+	private List<Area> links;
 	
 	/** Initializes a new Annotations-instance and creates new, empty {@link #highlights} and {@link #links} lists. */
 	public Annotations() {
@@ -59,19 +60,24 @@ public final class Annotations {
 	 * @return bounding box rectangle
 	 */
 	@NotNull
-	private static Rectangle2D getAnnotationRect(@NotNull PDAnnotation annotation) {
-		var rectangle = pdRectToRect2D(annotation.getRectangle());
+	private static Area getAnnotationRect(@NotNull PDAnnotation annotation) {
+		var area = new Area(pdRectToRect2D(annotation.getRectangle()));
 		if (annotation instanceof PDAnnotationTextMarkup) {
 			final var quads = ((PDAnnotationTextMarkup) annotation).getQuadPoints();
 			var path = new Path2D.Float();
-			int i = 0;
-			while (i < quads.length) {
-				path.moveTo(quads[i++], quads[i++]);
-				path.lineTo(quads[i++], quads[i++]);
+			//See "QuadPoints" in the PDF Specification (p. 506 of the 3rd Edition)
+			for (int i = 0; i < quads.length; i+=8) {
+				path.moveTo(quads[i], quads[i+1]);
+				path.lineTo(quads[i+2], quads[i+3]);
+				//This should be swapped as the quad points should be in counter-clockwise order according to the
+				//specification. For our test-files that does not hold true though.
+				path.lineTo(quads[i+6], quads[i+7]);
+				path.lineTo(quads[i+4], quads[i+5]);
+				path.closePath();
 			}
-			rectangle = path.getBounds2D();
+			area = new Area(path);
 		}
-		return rectangle;
+		return area;
 	}
 	
 	/**
@@ -162,7 +168,7 @@ public final class Annotations {
 	public boolean isMarked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria) {
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
-		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
+		Predicate<Area> predicate = criteria.getPredicate(rect);
 		return highlights.stream().anyMatch(predicate);
 	}
 	
@@ -187,7 +193,7 @@ public final class Annotations {
 	public boolean isLinked(@NotNull Rectangle2D rect, @NotNull MarkCriterion criteria) {
 		Objects.requireNonNull(rect);
 		Objects.requireNonNull(criteria);
-		Predicate<Rectangle2D> predicate = criteria.getPredicate(rect);
+		Predicate<Area> predicate = criteria.getPredicate(rect);
 		return links.stream().anyMatch(predicate);
 	}
 }
