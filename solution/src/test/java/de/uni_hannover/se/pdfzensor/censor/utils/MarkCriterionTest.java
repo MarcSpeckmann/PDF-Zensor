@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,8 +72,8 @@ class MarkCriterionTest {
 		var predIntersect = MarkCriterion.INTERSECT.getPredicate(rect);
 		var predContain = MarkCriterion.CONTAIN.getPredicate(rect);
 		assertEquals(expected[0],
-					 predIntersect.test(input));  //checks if output Criteria is {@link Rectangle2D#intersects}
+					 predIntersect.test(new Area(input)));  //checks if output Criteria is {@link Rectangle2D#intersects}
 		assertEquals(expected[1],
-					 predContain.test(input));    //checks if output Criteria is {@link Rectangle2D#contains}
+					 predContain.test(new Area(input)));    //checks if output Criteria is {@link Rectangle2D#contains}
 	}
 }

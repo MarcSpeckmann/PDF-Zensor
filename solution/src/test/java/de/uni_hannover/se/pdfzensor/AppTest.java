@@ -11,8 +11,8 @@ class AppTest {
 	/** This method is testing valid and invalid pdf input files. */
 	@Test
 	void testInputFiles() {
-		assertThrows(NullPointerException.class, () -> main((String[]) null));
-		assertThrows(NullPointerException.class, () -> main((String) null));
+		assertExitCode(-1, () -> main((String[]) null));
+		assertExitCode(-1, () -> main((String) null));
 
 		assertExitCode(-1, () -> main("NotExisting.pdf"));
 		assertExitCode(-1, () -> main("pom.xml"));

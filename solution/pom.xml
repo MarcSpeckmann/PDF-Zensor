@@ -6,7 +6,7 @@
 	
 	<groupId>de.uni_hannover.se</groupId>
 	<artifactId>pdf-zensor</artifactId>
-	<version>0.815</version>
+	<version>1.0</version>
 	<description>PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file.</description>
 	
 	<build>

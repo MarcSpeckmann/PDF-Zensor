@@ -32,11 +32,11 @@ public class App {
 	 * prompted to provide the correct password. If he is unable to do so within <code>tries</code> attempts an {@link
 	 * AuthenticationException} is thrown otherwise the opened {@link PDDocument} is returned.
 	 *
-	 * @param file the file to open.
+	 * @param file     the file to open.
 	 * @param password the password that should be used for the initial try. May be <code>null</code>.
-	 * @param tries the maximum amount of prompts given to the user for providing the correct password.
+	 * @param tries    the maximum amount of prompts given to the user for providing the correct password.
 	 * @return the opened pdf-file.
-	 * @throws IOException if an I/O error occurs.
+	 * @throws IOException             if an I/O error occurs.
 	 * @throws AuthenticationException if the user failed to authenticate within <code>tries</code> attempts.
 	 */
 	@SuppressWarnings("squid:S106")// we explicitly want to print to stdout here instead of logging
@@ -83,11 +83,11 @@ public class App {
 			}
 		} catch (CommandLine.ParameterException ex) {
 			CLErrorMessageHandler handler = new CLErrorMessageHandler();
-			Objects.requireNonNullElseGet(logger, Logging::getLogger).error(ex);
+			Objects.requireNonNullElseGet(logger, Logging::getLogger).error("An error occurred", ex);
 			System.exit(handler.handleParseException(ex, args));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println(e.getMessage());
-			Objects.requireNonNullElseGet(logger, Logging::getLogger).error(e);
+			Objects.requireNonNullElseGet(logger, Logging::getLogger).error("An error occurred", e);
 			System.exit(-1);
 		}
 	}
