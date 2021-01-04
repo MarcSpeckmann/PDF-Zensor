@@ -1,7 +1,5 @@
 # PDF-Zensor
 
-[![Build Status](https://git.se.uni-hannover.de/swp1920/pdfzensor-2/badges/master/pipeline.svg)](https://git.se.uni-hannover.de/swp1920/pdfzensor-2/tree/master)
-
 PDF-Zensor can be used to censor PDF-files. As such it strips annotations and metadata as  well  as  textual
 and  graphical  content from the PDF-file. It can also partially censor PDF-files and highlight certain text
 phrases.
@@ -26,7 +24,6 @@ And of course PDF-Zensor itself is open source.
 PDFZensor requires Java >= 11
 
 Install the PDF-Zensor(work in Progress)
-- Not working because repo is not public
 
 ```sh
 $ wget https://git.se.uni-hannover.de/swp1920/pdfzensor-2/-/jobs/artifacts/63-deploy/raw/solution/target/pdfzensor_0.815_all.deb?job=deploy
@@ -47,16 +44,16 @@ Write a message!
 
 ### Todos
 
- - (Feature): Clipping von Bildern und Dergleichen gemäß dem aktuellen GraphicsContext
- - (Feature): Inline Zeichnungen korrekt zensieren
- - (Feature): Wasserzeichen entfernen
- - (Feature): Chinesische o.ä. Schriftzeichen korrekt zensieren
- - (Feature): Regex funktioniert Seitenübergreifend
- - (Feature): Zeilenumbrüche erkennen
- - 🐞 Zensur von rotiertem Text ist ggf komisch (da wir Text nach globalen Koordinaten mergen und nicht nach lokalen)
- - 🐞 Tokenizer kann nicht über die Seitengrenze Tokens finden
- - 🐞 Annotations::getRect gibt ein falsches(?) Rectangle zurück. Umgangen durch HighlightAnnotation::getQuads
- - 🐞 EOFException anstatt einer FileFormatException wenn keine gültige PDF eingegeben wurde [Fehler in PDFBox]
+ - (Feature): Clipping of images and the like according to the current GraphicsContext
+ - (Feature): Correctly censor inline drawings
+ - (Feature): Remove watermark
+ - (Feature): Correctly censor Chinese characters or similar
+ - (Feature): Regex works across pages
+ - (Feature): Detect line breaks
+ - 🐞 ZCensoring of rotated text can be strange (since we merge text according to global coordinates and not according to local)
+ - 🐞 Tokenizer cannot find tokens across the page boundary
+ - 🐞 Annotations::getRect returns a wrong (?) Rectangle. Avoided by HighlightAnnotation::getQuads
+ - 🐞 EOFException instead of a FileFormatException if no valid PDF was entered [error in PDFBox]
 
 License
 ----

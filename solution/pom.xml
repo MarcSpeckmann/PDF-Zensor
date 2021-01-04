@@ -8,7 +8,15 @@
 	<artifactId>pdf-zensor</artifactId>
 	<version>1.0</version>
 	<description>PDF-Zensor can be used to censor PDF-documents. As such it strips annotations and metadata as well as textual and graphical content from the pdf file.</description>
-	
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub XxHalbfettxX Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/XxHalbfettxX/pdf-zensor</url>
+		</repository>
+	</distributionManagement>
+
 	<build>
 		<resources>
 			<resource>
