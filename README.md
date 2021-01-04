@@ -24,17 +24,16 @@ And of course PDF-Zensor itself is open source.
 
 PDFZensor requires Java >= 11
 
-Install the PDF-Zensor(work in Progress)
+Install the PDF-Zensor:
+
+1. Go to packages on the right side of this page.
+2. Choose the asset you need.
+3. Use the usual way to install/use the respective format.
+
+If you downlaoded the jar you can use the command:
 
 ```sh
-$ wget https://git.se.uni-hannover.de/swp1920/pdfzensor-2/-/jobs/artifacts/63-deploy/raw/solution/target/pdfzensor_0.815_all.deb?job=deploy
-$ sudo apt install ./pdfzensor_0.815_all.deb
-```
-
-alternative:
-
-```sh
-$ alias pdf-zensor='java -cp "pdfzensor-jar-with-dependencies.jar" de.uni_hannover.se.pdfzensor.App
+$ alias pdf-zensor='java -cp "pdf-zensor-1.0-jar-with-dependencies.jar" de.uni_hannover.se.pdfzensor.App'
 ```
 to create a temporary alias "pdf-zensor" which is valid for the current shell session.
 
