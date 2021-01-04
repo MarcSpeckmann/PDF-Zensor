@@ -1,4 +1,5 @@
 # PDF-Zensor
+![Tests](https://github.com/actions/pdf-zensor/workflows/maven.yml/badge.svg)
 
 PDF-Zensor can be used to censor PDF-files. As such it strips annotations and metadata as  well  as  textual
 and  graphical  content from the PDF-file. It can also partially censor PDF-files and highlight certain text
